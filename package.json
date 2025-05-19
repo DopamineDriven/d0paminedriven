@@ -25,7 +25,6 @@
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@d0paminedriven/turbogen": "latest",
     "@types/node": "latest",
     "dotenv": "latest",
     "eslint": "latest",

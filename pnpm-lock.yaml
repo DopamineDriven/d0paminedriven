@@ -20,9 +20,6 @@ importers:
       '@d0paminedriven/tsconfig':
         specifier: workspace:*
         version: link:tooling/typescript
-      '@d0paminedriven/turbogen':
-        specifier: latest
-        version: 3.3.0(@types/node@22.15.19)
       '@types/node':
         specifier: latest
         version: 22.15.19
@@ -333,6 +330,260 @@ importers:
       '@microsoft/api-extractor':
         specifier: ^7.52.8
         version: 7.52.8(@types/node@22.15.19)
+      '@types/node':
+        specifier: ^22.15.19
+        version: 22.15.19
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      dotenv-cli:
+        specifier: ^8.0.0
+        version: 8.0.0
+      dotenv-expand:
+        specifier: ^12.0.2
+        version: 12.0.2
+      eslint:
+        specifier: latest
+        version: 9.27.0(jiti@2.4.2)
+      jiti:
+        specifier: ^2.4.2
+        version: 2.4.2
+      prettier:
+        specifier: latest
+        version: 3.5.3
+      terser:
+        specifier: ^5.39.2
+        version: 5.39.2
+      tslib:
+        specifier: latest
+        version: 2.8.1
+      tsup:
+        specifier: latest
+        version: 8.5.0(@microsoft/api-extractor@7.52.8(@types/node@22.15.19))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)
+      tsx:
+        specifier: latest
+        version: 4.19.4
+      typescript:
+        specifier: latest
+        version: 5.8.3
+      typescript-eslint:
+        specifier: latest
+        version: 8.32.1(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
+
+  packages/motion:
+    dependencies:
+      '@swc/helpers':
+        specifier: ^0.5.17
+        version: 0.5.17
+      lodash.throttle:
+        specifier: ^4.1.1
+        version: 4.1.1
+    devDependencies:
+      '@d0paminedriven/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@d0paminedriven/fs':
+        specifier: ^4.1.0
+        version: 4.1.0
+      '@d0paminedriven/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@d0paminedriven/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@microsoft/api-extractor':
+        specifier: ^7.52.8
+        version: 7.52.8(@types/node@22.15.19)
+      '@swc/core':
+        specifier: ^1.11.24
+        version: 1.11.24(@swc/helpers@0.5.17)
+      '@types/lodash.throttle':
+        specifier: ^4.1.9
+        version: 4.1.9
+      '@types/node':
+        specifier: ^22.15.19
+        version: 22.15.19
+      '@types/react':
+        specifier: ^19.1.4
+        version: 19.1.4
+      '@types/react-dom':
+        specifier: ^19.1.5
+        version: 19.1.5(@types/react@19.1.4)
+      autoprefixer:
+        specifier: ^10.4.21
+        version: 10.4.21(postcss@8.5.3)
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      eslint:
+        specifier: latest
+        version: 9.27.0(jiti@2.4.2)
+      jiti:
+        specifier: ^2.4.2
+        version: 2.4.2
+      motion:
+        specifier: ^12.12.1
+        version: 12.12.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      motion-dom:
+        specifier: ^12.12.1
+        version: 12.12.1
+      motion-plus:
+        specifier: ^0.1.9
+        version: 0.1.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      motion-utils:
+        specifier: ^12.12.1
+        version: 12.12.1
+      postcss:
+        specifier: ^8.5.3
+        version: 8.5.3
+      prettier:
+        specifier: latest
+        version: 3.5.3
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+      terser:
+        specifier: ^5.39.2
+        version: 5.39.2
+      tslib:
+        specifier: latest
+        version: 2.8.1
+      tsup:
+        specifier: latest
+        version: 8.5.0(@microsoft/api-extractor@7.52.8(@types/node@22.15.19))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)
+      tsx:
+        specifier: latest
+        version: 4.19.4
+      typescript:
+        specifier: latest
+        version: 5.8.3
+
+  packages/redis-utils:
+    devDependencies:
+      '@d0paminedriven/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@d0paminedriven/jest-presets':
+        specifier: workspace:*
+        version: link:../../tooling/jest-presets
+      '@d0paminedriven/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@d0paminedriven/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@microsoft/api-extractor':
+        specifier: ^7.52.8
+        version: 7.52.8(@types/node@22.15.19)
+      '@swc/core':
+        specifier: ^1.11.24
+        version: 1.11.24(@swc/helpers@0.5.17)
+      '@swc/wasm':
+        specifier: ^1.11.24
+        version: 1.11.24
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/node':
+        specifier: ^22.15.19
+        version: 22.15.19
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      dotenv-cli:
+        specifier: ^8.0.0
+        version: 8.0.0
+      dotenv-expand:
+        specifier: ^12.0.2
+        version: 12.0.2
+      eslint:
+        specifier: latest
+        version: 9.27.0(jiti@2.4.2)
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.15.19)
+      jiti:
+        specifier: ^2.4.2
+        version: 2.4.2
+      prettier:
+        specifier: latest
+        version: 3.5.3
+      redis:
+        specifier: ^5.0.1
+        version: 5.0.1
+      terser:
+        specifier: ^5.39.2
+        version: 5.39.2
+      ts-jest:
+        specifier: ^29.3.4
+        version: 29.3.4(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(jest@29.7.0(@types/node@22.15.19))(typescript@5.8.3)
+      tslib:
+        specifier: latest
+        version: 2.8.1
+      tsup:
+        specifier: latest
+        version: 8.5.0(@microsoft/api-extractor@7.52.8(@types/node@22.15.19))(@swc/core@1.11.24(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.4)(typescript@5.8.3)
+      tsx:
+        specifier: latest
+        version: 4.19.4
+      typescript:
+        specifier: latest
+        version: 5.8.3
+      typescript-eslint:
+        specifier: latest
+        version: 8.32.1(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
+
+  packages/turbogen:
+    dependencies:
+      '@d0paminedriven/fs':
+        specifier: ^4.1.0
+        version: 4.1.0
+      '@inquirer/core':
+        specifier: ^10.1.11
+        version: 10.1.11(@types/node@22.15.19)
+      '@inquirer/prompts':
+        specifier: ^7.5.1
+        version: 7.5.1(@types/node@22.15.19)
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      gradient-string:
+        specifier: ^3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@d0paminedriven/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@d0paminedriven/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@d0paminedriven/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@inquirer/type':
+        specifier: ^3.0.6
+        version: 3.0.6(@types/node@22.15.19)
+      '@microsoft/api-extractor':
+        specifier: ^7.52.8
+        version: 7.52.8(@types/node@22.15.19)
+      '@swc/core':
+        specifier: ^1.11.24
+        version: 1.11.24(@swc/helpers@0.5.17)
+      '@swc/wasm':
+        specifier: ^1.11.24
+        version: 1.11.24
+      '@types/gradient-string':
+        specifier: ^1.1.6
+        version: 1.1.6
       '@types/node':
         specifier: ^22.15.19
         version: 22.15.19
@@ -741,10 +992,6 @@ packages:
 
   '@d0paminedriven/fs@4.1.0':
     resolution: {integrity: sha512-/k0QYLytaYKak54f5T3LYrxUbKx0dHBli9aApyI0KRBxCneb6GsO/gC/u9wVlgdnwJMKuR667J23g8y1D+7s1Q==}
-
-  '@d0paminedriven/turbogen@3.3.0':
-    resolution: {integrity: sha512-5D9MShGFuNhm9Y4e5OZyB7L0k90UFQSXsf6MtXMdpLUJtW9Gi1SLXbOVUOG8yUH5okeCFQ8kRPRNoP/QkFIBzg==}
-    hasBin: true
 
   '@edge-runtime/cookies@6.0.0':
     resolution: {integrity: sha512-VVO/8AwC2qVbygLb2IOkX1zWFx2yWIHzFv4D602CTnoRffd/+cdcXqpSydKaedFrk7a1dRYXbWwjzfV/gwZ2Gw==}
@@ -1446,6 +1693,34 @@ packages:
       '@types/react':
         optional: true
 
+  '@redis/bloom@5.0.1':
+    resolution: {integrity: sha512-F7L+rnuJvq/upKaVoEgsf8VT7g5pLQYWRqSUOV3uO4vpVtARzSKJ7CLyJjVsQS+wZVCGxsLMh8DwAIDcny1B+g==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      '@redis/client': ^5.0.1
+
+  '@redis/client@5.0.1':
+    resolution: {integrity: sha512-k0EJvlMGEyBqUD3orKe0UMZ66fPtfwqPIr+ZSd853sXj2EyhNtPXSx+J6sENXJNgAlEBhvD+57Dwt0qTisKB0A==}
+    engines: {node: '>= 18'}
+
+  '@redis/json@5.0.1':
+    resolution: {integrity: sha512-t94HOTk5myfhvaHZzlUzk2hoUvH2jsjftcnMgJWuHL/pzjAJQoZDCUJzjkoXIUjWXuyJixTguaaDyOZWwqH2Kg==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      '@redis/client': ^5.0.1
+
+  '@redis/search@5.0.1':
+    resolution: {integrity: sha512-wipK6ZptY7K68B7YLVhP5I/wYCDUU+mDJMyJiUcQLuOs7/eKOBc8lTXKUSssor8QnzZSPy4A5ulcC5PZY22Zgw==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      '@redis/client': ^5.0.1
+
+  '@redis/time-series@5.0.1':
+    resolution: {integrity: sha512-k6PgbrakhnohsEWEAdQZYt3e5vSKoIzpKvgQt8//lnWLrTZx+c3ed2sj0+pKIF4FvnSeuXLo4bBWcH0Z7Urg1A==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      '@redis/client': ^5.0.1
+
   '@rollup/rollup-android-arm-eabi@4.41.0':
     resolution: {integrity: sha512-KxN+zCjOYHGwCl4UCtSfZ6jrq/qi88JDUtiEFk8LELEHq2Egfc/FgW+jItZiOLRuQfb/3xJSgFuNPC9jzggX+A==}
     cpu: [arm]
@@ -1789,6 +2064,9 @@ packages:
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
 
+  '@types/gradient-string@1.1.6':
+    resolution: {integrity: sha512-LkaYxluY4G5wR1M4AKQUal2q61Di1yVVCw42ImFTuaIoQVgmV0WP1xUaLB8zwb47mp82vWTpePI9JmrjEnJ7nQ==}
+
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
 
@@ -1798,6 +2076,9 @@ packages:
   '@types/istanbul-reports@3.0.4':
     resolution: {integrity: sha512-pk2B1NWalF9toCRu6gjBzR69syFjP4Od8WRAX+0mmf9lAjCRicLOWc+ZrxZHx/0XRjotgkF9t6iaMJ+aXcOdZQ==}
 
+  '@types/jest@29.5.14':
+    resolution: {integrity: sha512-ZN+4sdnLUbo8EVvVc2ao0GFW6oVrQRPn4K2lglySj7APvSrgzxHiNNK99us4WDMi57xxA2yggblIAMNhXOotLQ==}
+
   '@types/jsdom@20.0.1':
     resolution: {integrity: sha512-d0r18sZPmMQr1eG35u12FZfhIXNrnsPU/g5wvRKCUf/tOGilKKwYMYGqh33BNR6ba+2gkHw1EUiHoN3mn7E5IQ==}
 
@@ -1806,6 +2087,12 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+
+  '@types/lodash.throttle@4.1.9':
+    resolution: {integrity: sha512-PCPVfpfueguWZQB7pJQK890F2scYKoDUL3iM522AptHWn7d5NQmeS/LTEHIcLr5PaTzl3dK2Z0xSUHHTHwaL5g==}
+
+  '@types/lodash@4.17.16':
+    resolution: {integrity: sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==}
 
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
@@ -2356,6 +2643,10 @@ packages:
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
+
+  cluster-key-slot@1.1.2:
+    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
+    engines: {node: '>=0.10.0'}
 
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
@@ -3621,6 +3912,9 @@ packages:
   lodash.startcase@4.4.0:
     resolution: {integrity: sha512-+WKqsK294HMSc2jEbNgpHpd0JfIBhp7rEV4aqXWqFr6AlXov+SlcgB1Fv01y2kGe3Gc8nMW7VA0SrGuSkRfIEg==}
 
+  lodash.throttle@4.1.1:
+    resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
+
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
@@ -3718,6 +4012,31 @@ packages:
 
   motion-dom@12.12.1:
     resolution: {integrity: sha512-GXq/uUbZBEiFFE+K1Z/sxdPdadMdfJ/jmBALDfIuHGi0NmtealLOfH9FqT+6aNPgVx8ilq0DtYmyQlo6Uj9LKQ==}
+
+  motion-plus-dom@0.1.7:
+    resolution: {integrity: sha512-VhKHcQCiv+s9y0hjRskV+/UVaHYR5O8zaSou8qRwkEl5RtMyxbgfKs4/uzt6aRDToFW+DiZuxBgsvCd9WWbfXw==}
+
+  motion-plus-react@0.1.9:
+    resolution: {integrity: sha512-8tMtmGyq4kVatLL2PXO7s3PNmzw/r3V5TqQ51JhPJVaYZKKT8iFSes6jZRZSOt0hBUfqe5mK46fr/MKL5qqd1Q==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  motion-plus@0.1.9:
+    resolution: {integrity: sha512-mUFOUJy+kd4xIahp4NYbJVKLYYDRG8MlC2DuOESFmFCbnfUyq+wsN3zOVduBvPAbukgBc1Yx9Pnx8lc/0locSg==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   motion-utils@12.12.1:
     resolution: {integrity: sha512-f9qiqUHm7hWSLlNW8gS9pisnsN7CRFRD58vNjptKdsqFLpkVnX00TNeD6Q0d27V9KzT7ySFyK1TZ/DShfVOv6w==}
@@ -4132,6 +4451,10 @@ packages:
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
+
+  redis@5.0.1:
+    resolution: {integrity: sha512-J8nqUjrfSq0E8NQkcHDZ4HdEQk5RMYjP3jZq02PE+ERiRxolbDNxPaTT4xh6tdrme+lJ86Goje9yMt9uzh23hQ==}
+    engines: {node: '>= 18'}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -5259,16 +5582,6 @@ snapshots:
       dotenv: 16.5.0
       sharp: 0.34.1
 
-  '@d0paminedriven/turbogen@3.3.0(@types/node@22.15.19)':
-    dependencies:
-      '@d0paminedriven/fs': 4.1.0
-      '@inquirer/core': 10.1.11(@types/node@22.15.19)
-      '@inquirer/prompts': 7.5.1(@types/node@22.15.19)
-      dotenv: 16.5.0
-      gradient-string: 3.0.0
-    transitivePeerDependencies:
-      - '@types/node'
-
   '@edge-runtime/cookies@6.0.0': {}
 
   '@edge-runtime/primitives@6.0.0': {}
@@ -5963,6 +6276,26 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.1.4
 
+  '@redis/bloom@5.0.1(@redis/client@5.0.1)':
+    dependencies:
+      '@redis/client': 5.0.1
+
+  '@redis/client@5.0.1':
+    dependencies:
+      cluster-key-slot: 1.1.2
+
+  '@redis/json@5.0.1(@redis/client@5.0.1)':
+    dependencies:
+      '@redis/client': 5.0.1
+
+  '@redis/search@5.0.1(@redis/client@5.0.1)':
+    dependencies:
+      '@redis/client': 5.0.1
+
+  '@redis/time-series@5.0.1(@redis/client@5.0.1)':
+    dependencies:
+      '@redis/client': 5.0.1
+
   '@rollup/rollup-android-arm-eabi@4.41.0':
     optional: true
 
@@ -6252,6 +6585,10 @@ snapshots:
     dependencies:
       '@types/node': 22.15.19
 
+  '@types/gradient-string@1.1.6':
+    dependencies:
+      '@types/tinycolor2': 1.4.6
+
   '@types/istanbul-lib-coverage@2.0.6': {}
 
   '@types/istanbul-lib-report@3.0.3':
@@ -6262,6 +6599,11 @@ snapshots:
     dependencies:
       '@types/istanbul-lib-report': 3.0.3
 
+  '@types/jest@29.5.14':
+    dependencies:
+      expect: 29.7.0
+      pretty-format: 29.7.0
+
   '@types/jsdom@20.0.1':
     dependencies:
       '@types/node': 22.15.19
@@ -6271,6 +6613,12 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
+
+  '@types/lodash.throttle@4.1.9':
+    dependencies:
+      '@types/lodash': 4.17.16
+
+  '@types/lodash@4.17.16': {}
 
   '@types/node@12.20.55': {}
 
@@ -6869,6 +7217,8 @@ snapshots:
       wrap-ansi: 7.0.0
 
   clsx@2.1.1: {}
+
+  cluster-key-slot@1.1.2: {}
 
   co@4.6.0: {}
 
@@ -8517,6 +8867,8 @@ snapshots:
 
   lodash.startcase@4.4.0: {}
 
+  lodash.throttle@4.1.1: {}
+
   lodash@4.17.21: {}
 
   loose-envify@1.4.0:
@@ -8606,6 +8958,37 @@ snapshots:
   motion-dom@12.12.1:
     dependencies:
       motion-utils: 12.12.1
+
+  motion-plus-dom@0.1.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      motion: 12.12.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      motion-dom: 12.12.1
+      motion-utils: 12.12.1
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+      - react
+      - react-dom
+
+  motion-plus-react@0.1.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      motion: 12.12.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      motion-plus-dom: 0.1.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      motion-utils: 12.12.1
+    optionalDependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+
+  motion-plus@0.1.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      motion-plus-dom: 0.1.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      motion-plus-react: 0.1.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+    optionalDependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
 
   motion-utils@12.12.1: {}
 
@@ -8931,6 +9314,14 @@ snapshots:
       strip-bom: 3.0.0
 
   readdirp@4.1.2: {}
+
+  redis@5.0.1:
+    dependencies:
+      '@redis/bloom': 5.0.1(@redis/client@5.0.1)
+      '@redis/client': 5.0.1
+      '@redis/json': 5.0.1(@redis/client@5.0.1)
+      '@redis/search': 5.0.1(@redis/client@5.0.1)
+      '@redis/time-series': 5.0.1(@redis/client@5.0.1)
 
   reflect.getprototypeof@1.0.10:
     dependencies:
