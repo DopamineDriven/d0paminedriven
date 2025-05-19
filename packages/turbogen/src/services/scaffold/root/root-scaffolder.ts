@@ -368,9 +368,9 @@ max_line_length = 40
   private get pnpmWorkspaceYamlTemplate() {
     // prettier-ignore
     return `packages:
-  - "apps/*"
-  - "packages/*"
-  - "tooling/*"` as const;
+  - apps/*
+  - packages/*
+  - tooling/*` as const;
   }
 
   private get gitignoreTemplate() {
