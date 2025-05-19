@@ -1,0 +1,15 @@
+{
+  "extends": "@d0paminedriven/tsconfig/node-pkg.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "outDir": "dist",
+    "emitDeclarationOnly": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist"]
+}

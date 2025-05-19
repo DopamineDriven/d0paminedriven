@@ -1,0 +1,44 @@
+{
+  "name": "@d0paminedriven/root",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977",
+  "scripts": {
+    "build:web": "turbo build --filter=@d0paminedriven/web",
+    "changeset": "changeset",
+    "clean": "git clean -xdf node_modules",
+    "dev": "turbo dev --parallel --continue",
+    "format": "prettier --write \"**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx}\" --ignore-unknown --cache",
+    "lint": "turbo lint",
+    "prepare": "husky",
+    "typecheck": "turbo typecheck",
+    "clean:house": "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
+    "generate:base64": "openssl rand -base64 64",
+    "generate:hex": "openssl rand -hex 64",
+    "npm:registry": "npm set registry https://registry.npmjs.org",
+    "run:web": "turbo dev --filter=@d0paminedriven/web",
+    "latest:pnpm": "corepack use pnpm@latest",
+    "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
+  },
+  "devDependencies": {
+    "@changesets/cli": "latest",
+    "@d0paminedriven/eslint-config": "workspace:*",
+    "@d0paminedriven/prettier-config": "workspace:*",
+    "@d0paminedriven/tsconfig": "workspace:*",
+    "@d0paminedriven/turbogen": "latest",
+    "@types/node": "latest",
+    "dotenv": "latest",
+    "eslint": "latest",
+    "husky": "latest",
+    "prettier": "latest",
+    "tsx": "latest",
+    "turbo": "latest",
+    "typescript": "latest"
+  },
+  "prettier": "@d0paminedriven/prettier-config",
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10",
+    "pnpm": ">=9"
+  }
+}
