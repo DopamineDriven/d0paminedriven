@@ -12,7 +12,33 @@ export class EslintScaffolder extends ConfigHandler {
   private get workspace() {
     return this.baseProps.workspace;
   }
+  private get localDeps() {
+    return [
+      `@${this.workspace}/prettier-config`,
+      `@${this.workspace}/tsconfig`
+    ] as const;
+  }
+  private get devDeps() {
+    return ["eslint", "prettier", "typescript"] as const;
+  }
 
+  private get deps() {
+    return [
+      "@eslint/compat",
+      "@eslint/js",
+      "@next/eslint-plugin-next",
+      "eslint-config-turbo",
+      "eslint-plugin-import",
+      "eslint-plugin-jsx-a11y",
+      "eslint-plugin-react",
+      "eslint-plugin-react-compiler",
+      "eslint-plugin-react-hooks",
+      "eslint-plugin-turbo",
+      "jiti",
+      "typescript-eslint"
+    ] as const;
+  }
+  
   private get baseScaffold() {
     // prettier-ignore
     return `/// <reference types="./types.d.ts" />
@@ -139,49 +165,6 @@ export default [
 ` as const;
   }
 
-  private get pkgJsonScaffold() {
-    // prettier-ignore
-    return `{
-  "name": "@${this.workspace}/eslint-config",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "exports": {
-    "./base": "./base.mjs",
-    "./next": "./next.mjs",
-    "./react": "./react.mjs"
-  },
-  "license": "MIT",
-  "scripts": {
-    "clean": "git clean -xdf .cache .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@eslint/compat": "^1.2.9",
-    "@eslint/js": "^9.26.0",
-    "@next/eslint-plugin-next": "latest",
-    "eslint-config-turbo": "latest",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-compiler": "^19.1.0-rc.2",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-turbo": "latest",
-    "jiti": "^2.4.2",
-    "typescript-eslint": "latest"
-  },
-  "devDependencies": {
-    "@${this.workspace}/prettier-config": "workspace:*",
-    "@${this.workspace}/tsconfig": "workspace:*",
-    "eslint": "latest",
-    "prettier": "latest",
-    "typescript": "latest"
-  },
-  "prettier": "@${this.workspace}/prettier-config"
-}` as const;
-  }
-
   private get tsconfigScaffold() {
     // prettier-ignore
     return `{
@@ -279,11 +262,20 @@ declare module "eslint-plugin-turbo" {
     return this.withWs(target, template);
   }
 
-  public exeEslint() {
+  public async exeEslint() {
+    const pkgJson = await this.resolveAllDepsEslint(
+      this.deps,
+      this.devDeps,
+      this.localDeps,
+      this.workspace
+    );
     return Promise.all([
       this.writeTarget("tooling/eslint/base.mjs", this.baseScaffold),
       this.writeTarget("tooling/eslint/next.mjs", this.nextScaffold),
-      this.writeTarget("tooling/eslint/package.json", this.pkgJsonScaffold),
+      this.writeTarget(
+        "tooling/eslint/package.json",
+        JSON.stringify(pkgJson, null, 2)
+      ),
       this.writeTarget("tooling/eslint/react.mjs", this.reactScaffold),
       this.writeTarget("tooling/eslint/tsconfig.json", this.tsconfigScaffold),
       this.writeTarget("tooling/eslint/types.d.ts", this.dtsScaffold)

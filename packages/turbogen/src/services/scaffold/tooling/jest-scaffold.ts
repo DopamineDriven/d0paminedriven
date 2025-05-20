@@ -64,36 +64,23 @@ module.exports = {
 ` as const;
   }
 
-  private get pkgJsonTemplate() {
-    // prettier-ignore
-    return `{
-  "name": "@${this.workspace}/jest-presets",
-  "version": "1.0.0",
-  "private": true,
-  "license": "MIT",
-  "files": [
-    "browser/jest-preset.js",
-    "node/jest-preset.js"
-  ],
-  "scripts": {
-    "clean": "git clean -xdf node_modules"
-  },
-  "peerDependencies": {
-    "jest": ">=29"
-  },
-  "dependencies": {
-    "ts-jest": "latest"
-  },
-  "devDependencies": {
-    "@${this.workspace}/prettier-config": "workspace:*",
-    "@${this.workspace}/tsconfig": "workspace:*",
-    "jest-environment-jsdom": "latest",
-    "prettier": "latest",
-    "typescript": "latest"
-  },
-  "prettier": "@${this.workspace}/prettier-config"
-}
-` as const;
+  private get deps() {
+    return ["ts-jest"] as const;
+  }
+
+  private get devDeps() {
+    return ["jest-environment-jsdom", "prettier", "typescript"] as const;
+  }
+
+  private get peerDeps() {
+    return ["jest"] as const;
+  }
+
+  private get localDeps() {
+    return [
+      `@${this.workspace}/prettier-config`,
+      `@${this.workspace}/tsconfig`
+    ] as const;
   }
 
   private get tsconfigTemplate() {
@@ -122,9 +109,9 @@ module.exports = {
     } as const;
   }
 
-  private jestPresetsTarget<
-    const V extends keyof typeof this.getPaths
-  >(target: V) {
+  private jestPresetsTarget<const V extends keyof typeof this.getPaths>(
+    target: V
+  ) {
     return this.getPaths[target];
   }
 
@@ -135,7 +122,14 @@ module.exports = {
     return this.withWs(target, template);
   }
 
-  public exeJestPresets() {
+  public async exeJestPresets() {
+    const pkgJson = await this.resolveAllDepsJest(
+      this.deps,
+      this.devDeps,
+      this.peerDeps,
+      this.localDeps,
+      this.workspace
+    );
     return Promise.all([
       this.writeTarget(
         "tooling/jest-presets/browser/jest-preset.js",
@@ -147,7 +141,7 @@ module.exports = {
       ),
       this.writeTarget(
         "tooling/jest-presets/package.json",
-        this.pkgJsonTemplate
+        JSON.stringify(pkgJson, null, 2)
       ),
       this.writeTarget(
         "tooling/jest-presets/tsconfig.json",

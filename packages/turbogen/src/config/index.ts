@@ -157,4 +157,207 @@ auto-install-peers=true
       devDependencies: Object.fromEntries([...localEntries, ...devEntries])
     };
   }
+
+  public async resolveAllDepsRoot(
+    devPackages: readonly string[],
+    localDeps: readonly string[],
+    workspace = "placeholder",
+    packageManager = "pnpm",
+    repo?: string
+  ) {
+    const devEntries = await Promise.all(
+      devPackages.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+    if (repo) {
+      return {
+        repository: repo,
+        name: `@${workspace}/root`,
+        license: "MIT",
+        private: true,
+        packageManager: `${packageManager}`,
+        scripts: {
+          "build:web": `turbo build --filter=@${workspace}/web`,
+          changeset: "changeset",
+          clean: "git clean -xdf node_modules",
+          dev: "turbo dev --parallel --continue",
+          format: `prettier --write "**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx}" --ignore-unknown --cache`,
+          lint: "turbo lint",
+          prepare: "husky",
+          typecheck: "turbo typecheck",
+          "clean:house":
+            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
+          "generate:base64": "openssl rand -base64 64",
+          "generate:hex": "openssl rand -hex 64",
+          "npm:registry": "npm set registry https://registry.npmjs.org",
+          "run:web": `turbo dev --filter=@${workspace}/web`,
+          "latest:pnpm": "corepack use pnpm@latest",
+          "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
+        },
+        devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+        prettier: `@${workspace}/prettier-config`,
+        engines: {
+          node: ">=22",
+          npm: ">=10",
+          pnpm: ">=9"
+        }
+      };
+    } else {
+      return {
+        name: `@${workspace}/root`,
+        license: "MIT",
+        private: true,
+        packageManager: `${packageManager}`,
+        scripts: {
+          "build:web": `turbo build --filter=@${workspace}/web`,
+          changeset: "changeset",
+          clean: "git clean -xdf node_modules",
+          dev: "turbo dev --parallel --continue",
+          format: `prettier --write "**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx}" --ignore-unknown --cache`,
+          lint: "turbo lint",
+          prepare: "husky",
+          typecheck: "turbo typecheck",
+          "clean:house":
+            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
+          "generate:base64": "openssl rand -base64 64",
+          "generate:hex": "openssl rand -hex 64",
+          "npm:registry": "npm set registry https://registry.npmjs.org",
+          "run:web": `turbo dev --filter=@${workspace}/web`,
+          "latest:pnpm": "corepack use pnpm@latest",
+          "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
+        },
+        devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+        prettier: `@${workspace}/prettier-config`,
+        engines: {
+          node: ">=22",
+          npm: ">=10",
+          pnpm: ">=9"
+        }
+      };
+    }
+  }
+
+  public async resolveAllDepsEslint(
+    deps: readonly string[],
+    devDeps: readonly string[],
+    localDeps: readonly string[],
+    workspace = "placeholder"
+  ) {
+    const entries = await Promise.all(
+      deps.map(async pkg => {
+        const version = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${version}`] as const;
+      })
+    );
+    const devEntries = await Promise.all(
+      devDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+    return {
+      name: `@${workspace}/eslint-config`,
+      private: true,
+      version: "0.1.0",
+      type: "module",
+      exports: {
+        "./base": "./base.mjs",
+        "./next": "./next.mjs",
+        "./react": "./react.mjs"
+      },
+      license: "MIT",
+      scripts: {
+        clean: "git clean -xdf .cache .turbo node_modules",
+        format: "prettier --check . --ignore-path ../../.gitignore",
+        typecheck: "tsc --noEmit"
+      },
+      dependencies: Object.fromEntries(entries),
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+      prettier: `@${workspace}/prettier-config`
+    };
+  }
+
+  public async resolveAllDepsJest(
+    deps: readonly string[],
+    devDeps: readonly string[],
+    peerDeps: readonly string[],
+    localDeps: readonly string[],
+    workspace = "placeholder"
+  ) {
+    const entries = await Promise.all(
+      deps.map(async pkg => {
+        const version = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${version}`] as const;
+      })
+    );
+    const devEntries = await Promise.all(
+      devDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const peerEntries = await Promise.all(
+      peerDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `>=${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+    return {
+      name: `@${workspace}/jest-presets`,
+      version: "1.0.0",
+      private: true,
+      license: "MIT",
+      files: ["browser/jest-preset.js", "node/jest-preset.js"],
+      scripts: {
+        clean: "git clean -xdf node_modules"
+      },
+      peerDependencies: Object.fromEntries(peerEntries),
+      dependencies: Object.fromEntries(entries),
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+      prettier: `@${workspace}/prettier-config`
+    };
+  }
+
+  public async resolveAllDepsPrettier(
+    deps: readonly string[],
+    devDeps: readonly string[],
+    localDeps: readonly string[],
+    workspace = "placeholder"
+  ) {
+    const entries = await Promise.all(
+      deps.map(async pkg => {
+        const version = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${version}`] as const;
+      })
+    );
+    const devEntries = await Promise.all(
+      devDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+    return {
+      name: `@${workspace}/prettier-config`,
+      private: true,
+      version: "0.1.0",
+      type: "module",
+      exports: {
+        ".": "./index.mjs"
+      },
+      scripts: {
+        clean: "git clean -xdf .turbo node_modules",
+        format: "prettier --check . --ignore-path ../../.gitignore",
+        typecheck: "tsc --noEmit"
+      },
+      dependencies: Object.fromEntries(entries),
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+      prettier: `@${workspace}/prettier-config`
+    };
+  }
 }
