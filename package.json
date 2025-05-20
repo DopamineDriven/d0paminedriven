@@ -28,15 +28,15 @@
     "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
   },
   "devDependencies": {
-    "@changesets/cli": "latest",
+    "@changesets/cli": "^2.29.4",
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@types/node": "latest",
-    "dotenv": "latest",
-    "eslint": "latest",
-    "husky": "latest",
-    "prettier": "latest",
+    "@types/node": "^22.15.19",
+    "dotenv": "^16.5.0",
+    "eslint": "^9.27.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3",
     "tsx": "latest",
     "turbo": "latest",
     "typescript": "latest"

@@ -1,5 +1,5 @@
 import { Fs } from "@d0paminedriven/fs";
-import type { ToPascalCase } from "@/types/index.ts";
+import type { NpmLatest, ToPascalCase } from "@/types/index.ts";
 
 export class ConfigHandler extends Fs {
   constructor(public override cwd: string) {
@@ -105,5 +105,56 @@ auto-install-peers=true
       "https://raw.githubusercontent.com/DopamineDriven/portfolio-2025/refs/heads/master/apps/web/public/fonts/CalSans-Regular.woff2",
       "apps/web/public/fonts/CalSans-Regular"
     );
+  }
+
+  public async fetchLatestVersion<const T extends string>(target: T) {
+    const url = `https://registry.npmjs.org/${encodeURIComponent(target)}/latest`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(
+        `failed to fetch ${target}: ${res.status} ${res.statusText}`
+      );
+    }
+    const data = (await res.json()) as NpmLatest;
+    return data;
+  }
+
+  public async resolveAllDeps(
+    packages: readonly string[],
+    devPackages: readonly string[],
+    localDeps: readonly string[],
+    workspace = "placeholder",
+    port = "3000"
+  ) {
+    const entries = await Promise.all(
+      packages.map(async pkg => {
+        const version = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${version}`] as const;
+      })
+    );
+    const devEntries = await Promise.all(
+      devPackages.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+    return {
+      name: `@${workspace}/web`,
+      private: true,
+      version: "1.0.0",
+      type: "module",
+      license: "MIT",
+      prettier: `@${workspace}/prettier-config`,
+      scripts: {
+        dev: `next dev -p ${port} --turbo`,
+        build: "next build",
+        format: `prettier --write "**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx,graphql,gql}" --ignore-unknown --cache`,
+        start: "next start",
+        lint: "eslint"
+      },
+      dependencies: Object.fromEntries(entries),
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries])
+    };
   }
 }

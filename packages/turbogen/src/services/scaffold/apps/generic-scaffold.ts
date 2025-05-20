@@ -440,6 +440,60 @@ export default {
 }` as const;
   }
 
+  private get deps() {
+    return [
+      "@radix-ui/react-slot",
+      "class-variance-authority",
+      "clsx",
+      "lucide-react",
+      "motion",
+      "next",
+      "next-themes",
+      "react",
+      "react-dom",
+      "tailwind-merge",
+      "tw-animate-css"
+    ] as const;
+  }
+
+  private get devDeps() {
+    return [
+      "@edge-runtime/cookies",
+      "@edge-runtime/types",
+      "@playwright/test",
+      "@tailwindcss/postcss",
+      "@types/node",
+      "@types/react",
+      "@types/react-dom",
+      "@vercel/functions",
+      "autoprefixer",
+      "csstype",
+      "dotenv",
+      "eslint",
+      "eslint-config-next",
+      "motion-dom",
+      "motion-utils",
+      "postcss",
+      "prettier",
+      "sharp",
+      "tailwindcss",
+      "tailwindcss-motion",
+      "tslib",
+      "tsx",
+      "typescript",
+      "urlpattern-polyfill",
+      "webpack"
+    ] as const;
+  }
+
+  private get localDeps() {
+    return [
+      `@${this.workspace}/eslint-config`,
+      `@${this.workspace}/prettier-config`,
+      `@${this.workspace}/tsconfig`
+    ] as const;
+  }
+
   private get pkgJsonTemplate() {
     // prettier-ignore
     return `{
@@ -1523,11 +1577,21 @@ pnpm dev\`}</code>
     return this.withWs(target, template);
   }
 
-  public exeWebApp() {
+  public async exeWebApp() {
+    const pkgJson = await this.resolveAllDeps(
+      this.deps,
+      this.devDeps,
+      this.localDeps,
+      this.workspace,
+      this.port
+    );
     return Promise.all([
       this.writeTarget("apps/web/turbo.json", this.turboJson),
       this.writeTarget("apps/web/next.config.ts", this.nextConfigTemplate),
-      this.writeTarget("apps/web/package.json", this.pkgJsonTemplate),
+      this.writeTarget(
+        "apps/web/package.json",
+        JSON.stringify(pkgJson, null, 2)
+      ),
       this.writeTarget("apps/web/tailwind.config.ts", this.tailwindTemplate),
       this.writeTarget("apps/web/tsconfig.json", this.tsconfigJson),
       this.writeTarget("apps/web/global.d.ts", this.globalDts),

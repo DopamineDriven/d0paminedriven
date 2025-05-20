@@ -11,4 +11,8 @@ export { TsScaffolder } from "@/services/scaffold/tooling/ts-scaffold.ts";
 export { WebAppScaffolder } from "@/services/scaffold/apps/generic-scaffold.ts";
 export type { CliServiceProps } from "@/services/cli/index.ts";
 export type { ScaffoldServiceProps } from "@/services/scaffold/index.ts";
-export type { PromptPropsBase } from "@/types/index.ts";
+export type {
+  PromptPropsBase,
+  NpmLatest,
+  ToPascalCase
+} from "@/types/index.ts";

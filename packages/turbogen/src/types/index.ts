@@ -7,3 +7,15 @@ export type ToPascalCase<S extends string> = string extends S
   : S extends `${infer T}-${infer U}`
     ? `${Capitalize<T>}${ToPascalCase<U>}`
     : Capitalize<S>;
+
+export type NpmLatest = {
+  name: string;
+  version: string;
+  keywords: string[];
+  [record: string]:
+    | string
+    | number
+    | boolean
+    | string[]
+    | Record<string, string>;
+};

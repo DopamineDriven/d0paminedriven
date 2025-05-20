@@ -14,13 +14,13 @@
     "jest": ">=29"
   },
   "dependencies": {
-    "ts-jest": "latest"
+    "ts-jest": "^29.3.4"
   },
   "devDependencies": {
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "jest-environment-jsdom": "latest",
-    "prettier": "latest",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.5.3",
     "typescript": "latest"
   },
   "prettier": "@d0paminedriven/prettier-config"
