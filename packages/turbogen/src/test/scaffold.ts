@@ -1,4 +1,10 @@
-{
+import { ConfigHandler } from "@/config/index.ts";
+
+const h = new ConfigHandler(process.cwd());
+
+h.withWs(
+  "src/test/__out__/scaffold/settings.json",
+`{
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -47,12 +53,12 @@
   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
   "tailwindCSS.experimental.classRegex": [
     [
-      "cva\\(([^)]*)\\)",
-      "[\"'`]([^\"'`]*).*?[\"'`]"
+      "cva\\\\(([^)]*)\\\\)",
+      "[\\"'\`]([^\\"'\`]*).*?[\\"'\`]"
     ],
     [
-      "cx\\(([^)]*)\\)",
-      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+      "cx\\\\(([^)]*)\\\\)",
+      "(?:'|\\"|\`)([^']*)(?:'|\\"|\`)"
     ]
   ],
   "tailwindCSS.classAttributes": [
@@ -84,4 +90,5 @@
     "markdown": false,
     "scminput": false
   }
-}
+}`
+);

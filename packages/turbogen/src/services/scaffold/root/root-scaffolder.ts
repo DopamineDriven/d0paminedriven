@@ -173,14 +173,13 @@ export default [
   "files.autoSave": "afterDelay",
   "javascript.referencesCodeLens.showOnAllFunctions": true,
   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
-   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
   "tailwindCSS.experimental.classRegex": [
     [
-      "cva\\(([^)]*)\\)",
+      "cva\\\\(([^)]*)\\\\)",
       "[\\"'\`]([^\\"'\`]*).*?[\\"'\`]"
     ],
     [
-      "cx\\(([^)]*)\\)",
+      "cx\\\\(([^)]*)\\\\)",
       "(?:'|\\"|\`)([^']*)(?:'|\\"|\`)"
     ]
   ],
