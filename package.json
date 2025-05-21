@@ -32,7 +32,7 @@
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@types/node": "^22.15.19",
+    "@types/node": "^22.15.21",
     "dotenv": "^16.5.0",
     "eslint": "^9.27.0",
     "husky": "^9.1.7",
