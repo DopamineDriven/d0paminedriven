@@ -1,5 +1,5 @@
-import type { PromptPropsBase } from "@/types/index.js";
-import { ConfigHandler } from "@/config/index.js";
+import type { PromptPropsBase } from "@/types/index.ts";
+import { ConfigHandler } from "@/config/index.ts";
 
 export class JestScaffolder extends ConfigHandler {
   constructor(

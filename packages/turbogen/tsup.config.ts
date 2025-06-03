@@ -12,6 +12,7 @@ const tsupConfig = (options: Options) =>
       "src/services/cli/index.ts",
       "src/services/cli/inquirer.ts",
       "src/services/scaffold/apps/generic-scaffold.ts",
+      "src/services/scaffold/packages/ui.ts",
       "src/services/scaffold/root/root-scaffolder.ts",
       "src/services/scaffold/tooling/eslint-scaffold.ts",
       "src/services/scaffold/tooling/jest-scaffold.ts",

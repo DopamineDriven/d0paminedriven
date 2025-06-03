@@ -1,5 +1,5 @@
-import type { PromptPropsBase } from "@/types/index.js";
-import { ConfigHandler } from "@/config/index.js";
+import type { PromptPropsBase } from "@/types/index.ts";
+import { ConfigHandler } from "@/config/index.ts";
 
 export class EslintScaffolder extends ConfigHandler {
   constructor(
@@ -38,7 +38,7 @@ export class EslintScaffolder extends ConfigHandler {
       "typescript-eslint"
     ] as const;
   }
-  
+
   private get baseScaffold() {
     // prettier-ignore
     return `/// <reference types="./types.d.ts" />

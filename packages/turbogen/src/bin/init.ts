@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import * as inquirer from "@inquirer/prompts";
-import { ConfigHandler } from "@/config/index.js";
-import { cliService } from "@/services/cli/index.js";
-import { scaffoldService } from "@/services/scaffold/index.js";
+import { ConfigHandler } from "@/config/index.ts";
+import { cliService } from "@/services/cli/index.ts";
+import { scaffoldService } from "@/services/scaffold/index.ts";
 
 export async function testInquirer() {
   const { i } = cliService(inquirer.input);
@@ -27,15 +27,14 @@ if (process.argv[2] === "test") {
 if (process.argv[2] === "init") {
   Promise.all([
     testInquirer().then(async v => {
-      const { eslint, jest, prettier, root, typescript, web } = scaffoldService(
-        process.cwd(),
-        v
-      );
+      const { eslint, jest, prettier, root, typescript, ui, web } =
+        scaffoldService(process.cwd(), v);
       eslint.exeEslint();
       jest.exeJestPresets();
       prettier.exePrettier();
       typescript.exeTs();
       root.exeRoot();
+      ui.exeUIPkg();
       web.exeWebApp();
       return v;
     })

@@ -1,5 +1,5 @@
-import type { PromptPropsBase } from "@/types/index.js";
-import { ConfigHandler } from "@/config/index.js";
+import type { PromptPropsBase } from "@/types/index.ts";
+import { ConfigHandler } from "@/config/index.ts";
 
 export class RootScaffolder extends ConfigHandler {
   constructor(
@@ -279,7 +279,8 @@ max_line_length = 40
   "ui": "stream",
   "globalEnv": [
     "COREPACK_ENABLE_STRICT",
-    "NODE_ENV"
+    "NODE_ENV",
+    "VERCEL_ENV"
   ]
 }
 ` as const;

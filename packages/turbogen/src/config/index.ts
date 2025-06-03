@@ -123,6 +123,7 @@ auto-install-peers=true
     packages: readonly string[],
     devPackages: readonly string[],
     localDeps: readonly string[],
+    localDevDeps: readonly string[],
     workspace = "placeholder",
     port = "3000"
   ) {
@@ -138,6 +139,7 @@ auto-install-peers=true
         return [pkg, `^${v}`] as const;
       })
     );
+    const localDevEntries = localDevDeps.map(p => [p, "workspace:*"] as const);
     const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
     return {
       name: `@${workspace}/web`,
@@ -153,8 +155,8 @@ auto-install-peers=true
         start: "next start",
         lint: "eslint"
       },
-      dependencies: Object.fromEntries(entries),
-      devDependencies: Object.fromEntries([...localEntries, ...devEntries])
+      dependencies: Object.fromEntries([...localEntries,...entries]),
+      devDependencies: Object.fromEntries([...localDevEntries, ...devEntries])
     };
   }
 
@@ -180,6 +182,8 @@ auto-install-peers=true
         private: true,
         packageManager: `${packageManager}`,
         scripts: {
+          "build:targeted": "pnpm build:ui",
+          "build:ui": `turbo build --filter=@${workspace}/ui`,
           "build:web": `turbo build --filter=@${workspace}/web`,
           changeset: "changeset",
           clean: "git clean -xdf node_modules",
@@ -189,7 +193,7 @@ auto-install-peers=true
           prepare: "husky",
           typecheck: "turbo typecheck",
           "clean:house":
-            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
+            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../../packages/ui && git clean -xdf dist .turbo node_modules && cd ../../apps/web && git clean -xdf node_modules .next .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install && pnpm build:targeted",
           "generate:base64": "openssl rand -base64 64",
           "generate:hex": "openssl rand -hex 64",
           "npm:registry": "npm set registry https://registry.npmjs.org",
@@ -212,6 +216,8 @@ auto-install-peers=true
         private: true,
         packageManager: `${packageManager}`,
         scripts: {
+          "build:targeted": "pnpm build:ui",
+          "build:ui": `turbo build --filter=@${workspace}/ui`,
           "build:web": `turbo build --filter=@${workspace}/web`,
           changeset: "changeset",
           clean: "git clean -xdf node_modules",
@@ -221,7 +227,7 @@ auto-install-peers=true
           prepare: "husky",
           typecheck: "turbo typecheck",
           "clean:house":
-            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
+            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../../packages/ui && git clean -xdf dist .turbo node_modules && cd ../../apps/web && git clean -xdf node_modules .next .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install && pnpm build:targeted",
           "generate:base64": "openssl rand -base64 64",
           "generate:hex": "openssl rand -hex 64",
           "npm:registry": "npm set registry https://registry.npmjs.org",
@@ -355,6 +361,120 @@ auto-install-peers=true
         format: "prettier --check . --ignore-path ../../.gitignore",
         typecheck: "tsc --noEmit"
       },
+      dependencies: Object.fromEntries(entries),
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+      prettier: `@${workspace}/prettier-config`
+    };
+  }
+
+  public async resolveAllDepsUIPkg(
+    deps: readonly string[],
+    devDeps: readonly string[],
+    localDeps: readonly string[],
+    peerDeps: readonly string[],
+    workspace = "placeholder"
+  ) {
+    const entries = await Promise.all(
+      deps.map(async pkg => {
+        const version = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${version}`] as const;
+      })
+    );
+    const devEntries = await Promise.all(
+      devDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const peerEntries = await Promise.all(
+      peerDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `>=${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+
+    return {
+      name: `@${workspace}/ui`,
+      version: "1.0.0",
+      description: "a react-ui component starter",
+      files: ["dist/**/*.{js,mjs,cjs,d.mts,d.ts,d.cts,css}"],
+      license: "MIT",
+      sideEffecs: ["**/*.css"],
+      type: "module",
+      typesVersions: {
+        "*": {
+          "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
+          "globals.css": ["dist/globals.d.ts"],
+          icons: [
+            "dist/icons/arrow-right.d.ts",
+            "dist/icons/code.d.ts",
+            "dist/icons/github.d.ts",
+            "dist/icons/index.d.ts",
+            "dist/icons/layers.d.ts",
+            "dist/icons/moon.d.ts",
+            "dist/icons/package.d.ts",
+            "dist/icons/sun.d.ts",
+            "dist/icons/terminal.d.ts",
+            "dist/icons/zap.d.ts"
+          ],
+          lib: ["dist/lib/utils.d.ts"],
+          ui: ["dist/ui/button.d.ts"]
+        }
+      },
+      publishConfig: {
+        access: "public",
+        typesVersions: {
+          "*": {
+            "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
+            "globals.css": ["dist/globals.d.ts"],
+            icons: [
+              "dist/icons/arrow-right.d.ts",
+              "dist/icons/code.d.ts",
+              "dist/icons/github.d.ts",
+              "dist/icons/index.d.ts",
+              "dist/icons/layers.d.ts",
+              "dist/icons/moon.d.ts",
+              "dist/icons/package.d.ts",
+              "dist/icons/sun.d.ts",
+              "dist/icons/terminal.d.ts",
+              "dist/icons/zap.d.ts"
+            ],
+            lib: ["dist/lib/utils.d.ts"],
+            ui: ["dist/ui/button.d.ts"]
+          }
+        }
+      },
+      source: "src/index.ts",
+      module: "./dist/index.js",
+      types: "./dist/index.d.ts",
+      exports: {
+        ".": "./dist/index.js",
+        "./*": "./dist/*.js",
+        "./globals.css": "./dist/globals.css",
+        "./icons": "./dist/icons/index.js",
+        "./icons/arrow-right": "./dist/icons/arrow-right.js",
+        "./icons/code": "./dist/icons/code.js",
+        "./icons/github": "./dist/icons/github.js",
+        "./icons/layers": "./dist/icons/layers.js",
+        "./icons/moon": "./dist/icons/moon.js",
+        "./icons/package": "./dist/icons/package.js",
+        "./icons/sun": "./dist/icons/sun.js",
+        "./icons/terminal": "./dist/icons/terminal.js",
+        "./icons/zap": "./dist/icons/zap.js",
+        "./lib/utils": "./dist/lib/utils.js",
+        "./ui/button": "./dist/ui/button.js"
+      },
+      scripts: {
+        lint: "eslint",
+        dev: "pnpm build",
+        prebuild: "rm -rf dist",
+        postbuild: "tsx src/services/postbuild.ts flag-check",
+        build: "tsup",
+        clean: "git clean -xdf dist node_modules",
+        types: "tsc --emitDeclarationOnly"
+      },
+      peerDependencies: Object.fromEntries(peerEntries),
       dependencies: Object.fromEntries(entries),
       devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
       prettier: `@${workspace}/prettier-config`

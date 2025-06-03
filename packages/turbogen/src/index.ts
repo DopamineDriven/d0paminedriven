@@ -8,6 +8,7 @@ export { PrettierScaffolder } from "@/services/scaffold/tooling/prettier-scaffol
 export { RootScaffolder } from "@/services/scaffold/root/root-scaffolder.ts";
 export { scaffoldService } from "@/services/scaffold/index.ts";
 export { TsScaffolder } from "@/services/scaffold/tooling/ts-scaffold.ts";
+export { UIPackageScaffolder } from "@/services/scaffold/packages/ui.ts";
 export { WebAppScaffolder } from "@/services/scaffold/apps/generic-scaffold.ts";
 export type { CliServiceProps } from "@/services/cli/index.ts";
 export type { ScaffoldServiceProps } from "@/services/scaffold/index.ts";
