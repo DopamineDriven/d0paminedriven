@@ -816,7 +816,7 @@ import reactConfig from "@${this.workspace}/eslint-config/react";
 
 export default [
   ...baseConfig,
-  ...reactConfig
+  ...reactConfig,
   {
     ignores: ["dist/**"],
     rules: {

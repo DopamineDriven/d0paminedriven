@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "rapidly generate a turbo-powered pnpm workspace",
   "publishConfig": {
     "access": "public",
