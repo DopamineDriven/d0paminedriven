@@ -59,29 +59,32 @@ if (process.argv[2] === "init") {
       return v;
     })
   ]).then(() => {
-    try {
-      if (handler.exists("pnpm-lock.yaml")) {
-        handler.executeCommand({command: "rm -rf pnpm-lock.yaml"});
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      console.log(
-        "\nInstalling dependencies... (this may take a few seconds)\n"
-      );
+    return handler.wait(2000).then(() => {
+      try {
+        if (handler.exists("pnpm-lock.yaml")) {
+          handler.executeCommand({ command: "rm -rf pnpm-lock.yaml" });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        handler.executeCommand({command: "echo 'testing'"})
+        console.log(
+          "\nInstalling dependencies... (this may take a few seconds)\n"
+        );
 
-      installDeps()
-        .then(() => {
-          console.log(
-            "\n✅ All dependencies installed!\n\nNext steps:\n run `pnpm run:web` to fire up apps/web!\n"
-          );
-        })
-        .catch(err => {
-          console.error(
-            "\n❌ Failed to install dependencies. Please run 'pnpm install' manually.\n",
-            err
-          );
-        });
-    }
+        installDeps()
+          .then(() => {
+            console.log(
+              "\n✅ All dependencies installed!\n\nNext steps:\n run `pnpm run:web` to fire up apps/web!\n"
+            );
+          })
+          .catch(err => {
+            console.error(
+              "\n❌ Failed to install dependencies. Please run 'pnpm install' manually.\n",
+              err
+            );
+          });
+      }
+    });
   });
 }
