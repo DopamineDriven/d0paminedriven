@@ -1,5 +1,5 @@
 export { ConfigHandler } from "@/config/index.ts";
-export { testArgs, testInquirer } from "@/bin/init.ts";
+export { exeInquirer } from "@/bin/init.ts";
 export { cliService } from "@/services/cli/index.ts";
 export { InquirerService } from "@/services/cli/inquirer.ts";
 export { EslintScaffolder } from "@/services/scaffold/tooling/eslint-scaffold.ts";
