@@ -44,37 +44,44 @@ if (process.argv[2] === "test") {
 }
 
 if (process.argv[2] === "init") {
+  const handler = new ConfigHandler(process.cwd());
   Promise.all([
-    exeInquirer()
-      .then(async v => {
-        const { eslint, jest, prettier, root, typescript, ui, web } =
-          scaffoldService(process.cwd(), v);
-        eslint.exeEslint();
-        jest.exeJestPresets();
-        prettier.exePrettier();
-        typescript.exeTs();
-        root.exeRoot();
-        ui.exeUIPkg();
-        web.exeWebApp();
-        return v;
-      })
-      .then(() => {
-        console.log(
-          "\nInstalling dependencies... (this may take a few seconds)\n"
-        );
+    exeInquirer().then(async v => {
+      const { eslint, jest, prettier, root, typescript, ui, web } =
+        scaffoldService(process.cwd(), v);
+      eslint.exeEslint();
+      jest.exeJestPresets();
+      prettier.exePrettier();
+      typescript.exeTs();
+      root.exeRoot();
+      ui.exeUIPkg();
+      web.exeWebApp();
+      return v;
+    })
+  ]).then(() => {
+    try {
+      if (handler.exists("pnpm-lock.yaml")) {
+        handler.rm("pnpm-lock.yaml");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      console.log(
+        "\nInstalling dependencies... (this may take a few seconds)\n"
+      );
 
-        installDeps()
-          .then(() => {
-            console.log(
-              "\n✅ All dependencies installed!\n\nNext steps:\n run `pnpm run:web` to fire up apps/web!\n"
-            );
-          })
-          .catch(err => {
-            console.error(
-              "\n❌ Failed to install dependencies. Please run 'pnpm install' manually.\n",
-              err
-            );
-          });
-      })
-  ]);
+      installDeps()
+        .then(() => {
+          console.log(
+            "\n✅ All dependencies installed!\n\nNext steps:\n run `pnpm run:web` to fire up apps/web!\n"
+          );
+        })
+        .catch(err => {
+          console.error(
+            "\n❌ Failed to install dependencies. Please run 'pnpm install' manually.\n",
+            err
+          );
+        });
+    }
+  });
 }
