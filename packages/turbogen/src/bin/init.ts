@@ -61,7 +61,7 @@ if (process.argv[2] === "init") {
   ]).then(() => {
     try {
       if (handler.exists("pnpm-lock.yaml")) {
-        handler.rm("pnpm-lock.yaml");
+        handler.executeCommand({command: "rm -rf pnpm-lock.yaml"});
       }
     } catch (err) {
       console.error(err);
