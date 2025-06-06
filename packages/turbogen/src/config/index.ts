@@ -204,8 +204,8 @@ auto-install-peers=true
         devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
         prettier: `@${workspace}/prettier-config`,
         engines: {
-          node: ">=22",
-          npm: ">=10",
+          node: ">=20",
+          npm: ">=9",
           pnpm: ">=9"
         }
       };
@@ -238,8 +238,8 @@ auto-install-peers=true
         devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
         prettier: `@${workspace}/prettier-config`,
         engines: {
-          node: ">=22",
-          npm: ">=10",
+          node: ">=20",
+          npm: ">=9",
           pnpm: ">=9"
         }
       };

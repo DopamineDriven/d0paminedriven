@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "5.5.0",
+  "version": "5.5.1",
   "description": "rapidly generate a turbo-powered pnpm workspace",
   "publishConfig": {
     "access": "public",
@@ -104,7 +104,7 @@
     "fix": "npm pkg fix"
   },
   "dependencies": {
-    "@d0paminedriven/fs": "^4.1.0",
+    "@d0paminedriven/fs": "^5.0.0",
     "@inquirer/core": "^10.1.13",
     "@inquirer/prompts": "^7.5.3",
     "dotenv": "^16.5.0",
@@ -116,17 +116,17 @@
     "@d0paminedriven/tsconfig": "workspace:*",
     "@inquirer/type": "^3.0.7",
     "@microsoft/api-extractor": "^7.52.8",
-    "@swc/core": "^1.11.29",
-    "@swc/wasm": "^1.11.29",
+    "@swc/core": "^1.11.31",
+    "@swc/wasm": "^1.11.31",
     "@types/gradient-string": "^1.1.6",
-    "@types/node": "^22.15.29",
+    "@types/node": "^22.15.30",
     "chokidar": "^4.0.3",
     "dotenv-cli": "^8.0.0",
     "dotenv-expand": "^12.0.2",
     "eslint": "^9.28.0",
     "jiti": "^2.4.2",
     "prettier": "^3.5.3",
-    "terser": "^5.40.0",
+    "terser": "^5.41.0",
     "tslib": "latest",
     "tsup": "latest",
     "tsx": "latest",

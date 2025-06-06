@@ -28,7 +28,7 @@ export class RootScaffolder extends ConfigHandler {
 
   private get readmeMinimal() {
     // prettier-ignore
-    return `### Welcome to the @${this.workspace}/* workspace 👋` as const
+    return `### Welcome to the \`@${this.workspace}/*\` workspace 👋` as const
   }
 
   private pkgJsonRepo() {
