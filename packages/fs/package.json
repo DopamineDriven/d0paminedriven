@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "description": "convenient fs helpers",
   "publishConfig": {
     "access": "public",
@@ -13,14 +13,22 @@
         "fs": [
           "dist/fs/index.d.ts"
         ],
+        "mime": [
+          "dist/mime/index.d.ts"
+        ],
         "types": [
           "dist/types/index.d.ts"
+        ],
+        "url": [
+          "dist/url/index.d.ts"
+        ],
+        "utils": [
+          "dist/utils/index.d.ts"
         ]
       }
     }
   },
   "license": "MIT",
-  "source": "src/index.ts",
   "typesVersions": {
     "*": {
       "*": [
@@ -30,12 +38,22 @@
       "fs": [
         "dist/fs/index.d.ts"
       ],
+      "mime": [
+        "dist/mime/index.d.ts"
+      ],
       "types": [
         "dist/types/index.d.ts"
+      ],
+      "url": [
+        "dist/url/index.d.ts"
+      ],
+      "utils": [
+        "dist/utils/index.d.ts"
       ]
     }
   },
   "type": "module",
+  "source": "src/index.ts",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
@@ -46,7 +64,10 @@
     ".": "./dist/index.js",
     "./*": "./dist/*.js",
     "./fs": "./dist/fs/index.js",
-    "./types": "./dist/types/index.js"
+    "./mime": "./dist/mime/index.js",
+    "./types": "./dist/types/index.js",
+    "./url": "./dist/url/index.js",
+    "./utils": "./dist/utils/index.js"
   },
   "scripts": {
     "build": "tsup",
@@ -57,6 +78,7 @@
   },
   "dependencies": {
     "dotenv": "^16.5.0",
+    "dotenv-expand": "^12.0.2",
     "sharp": "^0.34.2"
   },
   "devDependencies": {
@@ -69,7 +91,6 @@
     "@types/node": "^22.15.29",
     "chokidar": "^4.0.3",
     "dotenv-cli": "^8.0.0",
-    "dotenv-expand": "^12.0.2",
     "eslint": "^9.28.0",
     "jiti": "^2.4.2",
     "prettier": "^3.5.3",

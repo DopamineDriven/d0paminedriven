@@ -244,6 +244,9 @@ importers:
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
+      dotenv-expand:
+        specifier: ^12.0.2
+        version: 12.0.2
       sharp:
         specifier: ^0.34.2
         version: 0.34.2
@@ -275,9 +278,6 @@ importers:
       dotenv-cli:
         specifier: ^8.0.0
         version: 8.0.0
-      dotenv-expand:
-        specifier: ^12.0.2
-        version: 12.0.2
       eslint:
         specifier: ^9.28.0
         version: 9.28.0(jiti@2.4.2)

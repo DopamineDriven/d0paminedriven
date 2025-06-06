@@ -1,5 +1,14 @@
 export { default as Fs } from "@/fs/index.ts";
 export type {
+  AllMimeTypes,
+  FileExtension,
+  FileExtensionToMimeType,
+  InferTopLevelPresent,
+  MimeTopLevelType,
+  PresentMimeTopLevelTypes
+} from "@/mime/index.ts";
+export { extMimeMap, MimeService } from "@/mime/index.ts";
+export type {
   Abortable,
   ArrayBufferView,
   ArrayOrReadOnlyArray,
@@ -54,3 +63,12 @@ export type {
   WriteStreamProps,
   XOR
 } from "@/types/index.ts";
+export type {
+  HandleQueryParamsOrHash,
+  InferExtensionIfPresent,
+  LastSegment,
+  SplitForwardSlash,
+  UrlFileExt
+} from "@/url/index.ts";
+export { UrlService } from "@/url/index.ts";
+export { UtilsService } from "@/utils/index.ts";
