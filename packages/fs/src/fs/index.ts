@@ -82,7 +82,7 @@ export default class Fs extends MimeService {
   public existsSync<const T extends string>(path: T) {
     if (!/\//gm.test(path))
       return fsSync.existsSync(resolve(join(this.cwd, path)));
-    return fsSync.existsSync(relative(this.cwd ?? process.cwd(), path));
+    return fsSync.existsSync(relative(this.cwd, path));
   }
 
   public pathHandler<const T extends string>(path: T) {
@@ -95,12 +95,12 @@ export default class Fs extends MimeService {
     path: T,
     options?: MkDirSyncOptions
   ) {
-    return fsSync.mkdirSync(relative(this.cwd ?? process.cwd(), path), options);
+    return fsSync.mkdirSync(relative(this.cwd, path), options);
   }
 
   public fileSizeMb<const T extends string>(path: T) {
     return (
-      fsSync.statSync(relative(this.cwd ?? process.cwd(), path)).size /
+      fsSync.statSync(relative(this.cwd, path)).size /
       (1024 * 1024)
     );
   }
@@ -391,12 +391,18 @@ export default class Fs extends MimeService {
 
       // else use original base64 → buffer method
       const result = await this.assetToBufferView(inputUrl);
-      const cleanData = this.cleanDataUrl(result.b64encodedData);
-      this.withWs(formattedPath, Buffer.from(cleanData, "base64"));
+      const cleanedData = this.cleanDataUrl(result.b64encodedData);
+      this.withWs(formattedPath, Buffer.from(cleanedData, "base64"));
     } catch (err) {
-      console.error(`[fetchRemoteWriteLocal error]:`, err);
+      console.error(`[fetchRemoteWriteLocalLargeFiles error]:`, err);
     }
   }
+  /**
+   *
+   * @access package-private
+   *
+   * work in progress, for internal package maintainer use only
+   */
   // USE fluent-ffmpeg for video/animated image transforms (apng, etc)
   // https://www.npmjs.com/package/fluent-ffmpeg
   // https://www.npmjs.com/package/@types/fluent-ffmpeg
