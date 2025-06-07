@@ -1,11 +1,10 @@
 "use client";
 
+import { Icon } from "@d0paminedriven/ui";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Package } from "lucide-react";
 import { useTheme } from "next-themes";
-import { GithubIcon as Github } from "@/ui/icons/github";
 
 const ThemeToggle = dynamic(
   () => import("@/ui/theme").then(d => d.ThemeToggle),
@@ -42,7 +41,7 @@ export function Nav() {
       <div className="container flex h-14 items-center">
         <div className="mx-2 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Package className="size-6" />
+            <Icon.Package className="size-6" />
             <span className="font-bold">turbogen</span>
           </Link>
         </div>
@@ -53,11 +52,11 @@ export function Nav() {
               target="_blank"
               rel="noreferrer"
               className="flex items-center space-x-2">
-              <Github className="size-5" />
+              <Icon.Github className="size-5" />
               <span className="sr-only">GitHub</span>
             </Link>
             <Link
-              href="/docs"
+              href="#"
               className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
               Documentation
             </Link>

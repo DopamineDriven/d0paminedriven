@@ -1,28 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@config "../../tailwind.config.ts";
-@plugin "tailwindcss-motion";
+@config "../tailwind.config.ts";
 
-/*
-  https://tailwindcss.com/docs/dark-mode#toggling-dark-mode-manually
-
-  Uncomment the following to use a CSS Selector instead of the `prefers-color-scheme` media-query
-
-  @custom-variant dark (&:where(.dark, .dark *));
-*/
-
-/*
-  https://tailwindcss.com/docs/dark-mode#using-a-data-attribute
-
-  Using a data-attribute instead of a dark theme selector
-
-*/
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @font-face {
   font-family: "CalSans";
-  src: url("/fonts/CalSans-SemiBold.woff2") format("woff2");
+  src: url("https://raw.githubusercontent.com/DopamineDriven/d0paminedriven/refs/heads/master/packages/turbogen/public/CalSans-SemiBold.woff2")
+    format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -30,7 +16,8 @@
 
 @font-face {
   font-family: "CalSans";
-  src: url("/fonts/CalSans-Regular.woff2") format("woff2");
+  src: url("https://raw.githubusercontent.com/DopamineDriven/d0paminedriven/refs/heads/master/packages/turbogen/public/CalSans-Regular.woff2")
+    format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -38,7 +25,6 @@
 
 @theme {
   --font-cal-sans: CalSans, sans-serif;
-  --font-inter: var(--font-inter);
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.14 0.0044 285.82);
   --color-card: oklch(1 0 0);
@@ -65,7 +51,7 @@
   --color-chart-5: oklch(0.8372 0.1644 84.53);
   --color-hue-0: oklch(0.9434 0.199 105.96);
   --color-hue-1: oklch(0.6477 0.263 359.98);
-  --color-hue-2: oklch(0.6404 0.300 324.36);
+  --color-hue-2: oklch(0.6404 0.3 324.36);
   --color-hue-3: oklch(0.5636 0.292 301.63);
   --color-hue-4: oklch(0.5898 0.211 259.36);
   --color-hue-5: oklch(0.8203 0.141 210.49);
@@ -92,23 +78,12 @@
   @keyframes shimmer {
     0% {
       opacity: 0.5;
-    } /* Start with a semi-transparent state */
-    50% {
-      opacity: 1;
-    } /* Become fully visible */
-    100% {
-      opacity: 0.5;
-    } /* Return to semi-transparent */
-  }
-
-  --animate-twinkle: twinkle 5s infinite;
-  @keyframes twinkle {
-    0%,
-    100% {
-      opacity: 1;
     }
     50% {
-      opacity: 0.2;
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.5;
     }
   }
 }
@@ -141,14 +116,13 @@
     --color-chart-5: oklch(0.8372 0.1644 84.53);
     --color-hue-0: oklch(0.9434 0.199 105.96);
     --color-hue-1: oklch(0.6477 0.263 359.98);
-    --color-hue-2: oklch(0.6404 0.300 324.36);
+    --color-hue-2: oklch(0.6404 0.3 324.36);
     --color-hue-3: oklch(0.5636 0.292 301.63);
     --color-hue-4: oklch(0.5898 0.211 259.36);
     --color-hue-5: oklch(0.8203 0.141 210.49);
     --color-hue-6: oklch(0.8842 0.107 168.47);
   }
 }
-
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -173,10 +147,6 @@
   }
   * {
     border-color: var(--color-border);
-  }
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
   }
 }
 

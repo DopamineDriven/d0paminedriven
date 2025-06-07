@@ -47,18 +47,12 @@ importers:
 
   apps/web:
     dependencies:
-      '@radix-ui/react-slot':
-        specifier: ^1.2.3
-        version: 1.2.3(@types/react@19.1.6)(react@19.1.0)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
+      '@d0paminedriven/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      lucide-react:
-        specifier: ^0.513.0
-        version: 0.513.0(react@19.1.0)
       motion:
         specifier: ^12.16.0
         version: 12.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -93,12 +87,6 @@ importers:
       '@d0paminedriven/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@edge-runtime/cookies':
-        specifier: ^6.0.0
-        version: 6.0.0
-      '@edge-runtime/types':
-        specifier: ^4.0.0
-        version: 4.0.0
       '@playwright/test':
         specifier: ^1.52.0
         version: 1.52.0
@@ -114,15 +102,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.6
         version: 19.1.6(@types/react@19.1.6)
-      '@vercel/functions':
-        specifier: ^2.1.0
-        version: 2.1.0
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.4)
-      csstype:
-        specifier: ^3.1.3
-        version: 3.1.3
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -622,6 +604,103 @@ importers:
         specifier: latest
         version: 8.33.1(eslint@9.28.0(jiti@2.4.2))(typescript@5.8.3)
 
+  packages/ui:
+    dependencies:
+      '@radix-ui/react-slot':
+        specifier: ^1.2.3
+        version: 1.2.3(@types/react@19.1.6)(react@19.1.0)
+      '@swc/helpers':
+        specifier: ^0.5.17
+        version: 0.5.17
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      tailwind-merge:
+        specifier: ^3.3.0
+        version: 3.3.0
+    devDependencies:
+      '@d0paminedriven/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@d0paminedriven/fs':
+        specifier: ^5.0.0
+        version: 5.0.0
+      '@d0paminedriven/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@d0paminedriven/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@microsoft/api-extractor':
+        specifier: ^7.52.8
+        version: 7.52.8(@types/node@22.15.30)
+      '@swc/core':
+        specifier: ^1.11.31
+        version: 1.11.31(@swc/helpers@0.5.17)
+      '@tailwindcss/postcss':
+        specifier: ^4.1.8
+        version: 4.1.8
+      '@types/node':
+        specifier: ^22.15.30
+        version: 22.15.30
+      '@types/react':
+        specifier: ^19.1.6
+        version: 19.1.6
+      '@types/react-dom':
+        specifier: ^19.1.6
+        version: 19.1.6(@types/react@19.1.6)
+      autoprefixer:
+        specifier: ^10.4.21
+        version: 10.4.21(postcss@8.5.4)
+      chokidar:
+        specifier: ^4.0.3
+        version: 4.0.3
+      eslint:
+        specifier: ^9.28.0
+        version: 9.28.0(jiti@2.4.2)
+      jiti:
+        specifier: ^2.4.2
+        version: 2.4.2
+      next:
+        specifier: ^15.3.3
+        version: 15.3.3(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      postcss:
+        specifier: ^8.5.4
+        version: 8.5.4
+      prettier:
+        specifier: ^3.5.3
+        version: 3.5.3
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+      tailwindcss:
+        specifier: ^4.1.8
+        version: 4.1.8
+      terser:
+        specifier: ^5.41.0
+        version: 5.41.0
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
+      tsup:
+        specifier: latest
+        version: 8.5.0(@microsoft/api-extractor@7.52.8(@types/node@22.15.30))(@swc/core@1.11.31(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.4)(tsx@4.19.4)(typescript@5.8.3)
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      tw-animate-css:
+        specifier: ^1.3.4
+        version: 1.3.4
+      typescript:
+        specifier: latest
+        version: 5.8.3
+
   tooling/eslint:
     dependencies:
       '@eslint/compat':
@@ -1021,18 +1100,6 @@ packages:
 
   '@d0paminedriven/fs@5.0.0':
     resolution: {integrity: sha512-HrykEzIGf78IlC9Hm/hg+HAuLi4o8E5jTfZMVtmeBw1fBJs0DA6ub5ZgdbUiKc5Z7hkktQ0X3ShGNtmtShrK+w==}
-
-  '@edge-runtime/cookies@6.0.0':
-    resolution: {integrity: sha512-VVO/8AwC2qVbygLb2IOkX1zWFx2yWIHzFv4D602CTnoRffd/+cdcXqpSydKaedFrk7a1dRYXbWwjzfV/gwZ2Gw==}
-    engines: {node: '>=18'}
-
-  '@edge-runtime/primitives@6.0.0':
-    resolution: {integrity: sha512-FqoxaBT+prPBHBwE1WXS1ocnu/VLTQyZ6NMUBAdbP7N2hsFTTxMC/jMu2D/8GAlMQfxeuppcPuCUk/HO3fpIvA==}
-    engines: {node: '>=18'}
-
-  '@edge-runtime/types@4.0.0':
-    resolution: {integrity: sha512-6HiX1oSir5R+X74IzM08fCQkR5mTcOxgfFVdn335jz/CckIHVFphh7hNkIcI+XsMYhAfWOJ5b8TfBU/Hbx1EIQ==}
-    engines: {node: '>=18'}
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -2380,15 +2447,6 @@ packages:
     resolution: {integrity: sha512-friS8NEQfHaDbkThxopGk+LuE5v3iY0StruifjQEt7SLbA46OnfgMO15sOTkbpJkol6RB+1l1TYPXh0sCddpvA==}
     cpu: [x64]
     os: [win32]
-
-  '@vercel/functions@2.1.0':
-    resolution: {integrity: sha512-1gSbK9zfrbJxk1JTBVERDhLi01mK3fz+gw4GjOjZwHnqs0zsBhQA70HGVtXQX/Z3BTRMfbpAEMVDfhecRw0lDA==}
-    engines: {node: '>= 18'}
-    peerDependencies:
-      '@aws-sdk/credential-provider-web-identity': '*'
-    peerDependenciesMeta:
-      '@aws-sdk/credential-provider-web-identity':
-        optional: true
 
   '@webassemblyjs/ast@1.14.1':
     resolution: {integrity: sha512-nuBEDgQfm1ccRp/8bCQrx1frohyufl4JlbMMZ4P1wpeOfDhF6FQkxZJ1b/e+PLwr6X1Nhw6OLme5usuBWYBvuQ==}
@@ -4035,11 +4093,6 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
-
-  lucide-react@0.513.0:
-    resolution: {integrity: sha512-CJZKq2g8Y8yN4Aq002GahSXbG2JpFv9kXwyiOAMvUBv7pxeOFHUWKB0mO7MiY4ZVFCV4aNjv2BJFq/z3DgKPQg==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
@@ -5713,14 +5766,6 @@ snapshots:
       dotenv-expand: 12.0.2
       sharp: 0.34.2
 
-  '@edge-runtime/cookies@6.0.0': {}
-
-  '@edge-runtime/primitives@6.0.0': {}
-
-  '@edge-runtime/types@4.0.0':
-    dependencies:
-      '@edge-runtime/primitives': 6.0.0
-
   '@emnapi/core@1.4.3':
     dependencies:
       '@emnapi/wasi-threads': 1.0.2
@@ -7051,8 +7096,6 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.7.2':
     optional: true
-
-  '@vercel/functions@2.1.0': {}
 
   '@webassemblyjs/ast@1.14.1':
     dependencies:
@@ -9135,10 +9178,6 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
-
-  lucide-react@0.513.0(react@19.1.0):
-    dependencies:
-      react: 19.1.0
 
   magic-string@0.30.17:
     dependencies:

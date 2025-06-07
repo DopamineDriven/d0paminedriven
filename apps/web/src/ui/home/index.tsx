@@ -1,9 +1,8 @@
 "use client";
 
+import { Button, Icon } from "@d0paminedriven/ui";
 import Link from "next/link";
-import { ArrowRight, Code, Layers, Package, Terminal, Zap } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "@/ui/button";
 
 export function LandingPage() {
   return (
@@ -43,8 +42,8 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-x-4">
             <Button asChild>
-              <Link href="/docs">
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="#" scroll={false}>
+                Get Started <Icon.ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild>
@@ -82,7 +81,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Zap className="size-6 text-purple-600" />
+              <Icon.Zap className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">High Performance</h3>
@@ -100,7 +99,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Layers className="size-6 text-purple-600" />
+              <Icon.Layers className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Monorepo Structure</h3>
@@ -118,7 +117,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Code className="size-6 text-purple-600" />
+              <Icon.Code className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Tooling Included</h3>
@@ -153,7 +152,7 @@ export function LandingPage() {
           viewport={{ once: true }}
           className="bg-muted/50 mx-auto mt-12 max-w-[58rem] rounded-lg border p-6 md:p-8">
           <div className="flex items-center">
-            <Terminal className="mr-2 size-5" />
+            <Icon.Terminal className="mr-2 size-5" />
             <h3 className="font-bold">Start developing</h3>
           </div>
           <div className="mt-4 space-y-4">
@@ -163,7 +162,7 @@ export function LandingPage() {
 pnpm install
 
 # Start development server
-pnpm dev`}</code>
+pnpm run:web`}</code>
               </pre>
             </div>
             <p className="text-muted-foreground text-sm">
@@ -183,7 +182,7 @@ pnpm dev`}</code>
             viewport={{ once: true }}
             className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="bg-muted rounded-full p-3">
-              <Package className="h-6 w-6 text-purple-600" />
+              <Icon.Package className="size-6 text-purple-600" />
             </div>
             <h3 className="font-heading text-2xl leading-[1.1]">
               Explore your workspace
@@ -200,16 +199,16 @@ pnpm dev`}</code>
 │   └── ui/
 └── tooling/
     ├── eslint/
+    ├── jest-presets/
     ├── prettier/
-    ├── typescript/
-    └── jest/`}
+    └── typescript/`}
                 </code>
               </pre>
             </div>
             <Button asChild>
-              <Link href="/docs/structure">
+              <Link href="#" scroll={false}>
                 Learn more about the structure&nbsp;
-                <ArrowRight className="ml-2 size-4" />
+                <Icon.ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
           </motion.div>
@@ -218,5 +217,3 @@ pnpm dev`}</code>
     </>
   );
 }
-
-
