@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import React from "react";
-import "./globals.css";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/ui/page-layout";
+import "@d0paminedriven/ui/globals.css";
+import "./globals.css";
+
 /* populate relevant values in src/lib/site-url.ts and uncomment for url injetion */
 // import { getSiteUrl } from "@/lib/site-url";
 

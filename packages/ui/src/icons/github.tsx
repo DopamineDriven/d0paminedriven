@@ -1,8 +1,8 @@
-import type { SVGProps } from "react";
+import type { ComponentPropsWithRef } from "react";
 
-export function GithubIcon({
+export function Github({
   ...svg
-}: Omit<SVGProps<SVGSVGElement>, "xmlns" | "viewBox" | "role">) {
+}: Omit<ComponentPropsWithRef<"svg">, "xmlns" | "viewBox" | "role">) {
   return (
     <svg
       viewBox="0 0 96 96"

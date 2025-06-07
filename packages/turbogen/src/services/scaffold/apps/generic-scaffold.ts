@@ -1,5 +1,5 @@
-import { ConfigHandler } from "@/config/index.js";
-import { PromptPropsBase } from "@/types/index.js";
+import { ConfigHandler } from "@/config/index.ts";
+import { PromptPropsBase } from "@/types/index.ts";
 
 /* eslint-disable no-useless-escape */
 
@@ -43,12 +43,11 @@ export function PageLayout({ children }: { children: ReactNode }) {
     // prettier-ignore
     return `"use client";
 
+import { Icon } from "@${this.workspace}/ui";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Package } from "lucide-react";
 import { useTheme } from "next-themes";
-import { GithubIcon as Github } from "@/ui/icons/github";
 
 const ThemeToggle = dynamic(
   () => import("@/ui/theme").then(d => d.ThemeToggle),
@@ -85,7 +84,7 @@ export function Nav() {
       <div className="container flex h-14 items-center">
         <div className="mx-2 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Package className="size-6" />
+            <Icon.Package className="size-6" />
             <span className="font-bold">turbogen</span>
           </Link>
         </div>
@@ -96,11 +95,11 @@ export function Nav() {
               target="_blank"
               rel="noreferrer"
               className="flex items-center space-x-2">
-              <Github className="size-5" />
+              <Icon.Github className="size-5" />
               <span className="sr-only">GitHub</span>
             </Link>
             <Link
-              href="/docs"
+              href="#"
               className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
               Documentation
             </Link>
@@ -109,30 +108,6 @@ export function Nav() {
         </div>
       </div>
     </header>
-  );
-}` as const;
-  }
-
-  private get uiGithubIcon() {
-    // prettier-ignore
-    return `import type { SVGProps } from "react";
-
-export function GithubIcon({
-  ...svg
-}: Omit<SVGProps<SVGSVGElement>, "xmlns" | "viewBox" | "role">) {
-  return (
-    <svg
-      viewBox="0 0 96 96"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      {...svg}>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
-        fill="currentColor"
-      />
-    </svg>
   );
 }
 ` as const;
@@ -171,29 +146,23 @@ export function Footer() {
     // prettier-ignore
     return `"use client";
 
+import { Button, Icon } from "@${this.workspace}/ui";
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/ui/button";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Ensure component is mounted to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Simple toggle function
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  // During initial load (not mounted), we'll show an icon based on a simple check
-  // of the user's preferred color scheme to avoid flickering
   if (!mounted) {
-    // Check if user prefers dark mode
     const prefersDark =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -213,7 +182,11 @@ export function ThemeToggle() {
           height: "2.5rem",
           borderRadius: "0.375rem"
         }}>
-        {prefersDark ? <Moon size={20} /> : <Sun size={20} />}
+        {prefersDark ? (
+          <Icon.Moon className="size-5" />
+        ) : (
+          <Icon.Sun className="size-5" />
+        )}
         <span
           style={{
             position: "absolute",
@@ -248,7 +221,11 @@ export function ThemeToggle() {
         height: "2.5rem",
         borderRadius: "0.375rem"
       }}>
-      {resolvedTheme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
+      {resolvedTheme === "dark" ? (
+        <Icon.Moon className="size-5" />
+      ) : (
+        <Icon.Sun className="size-5" />
+      )}
       <span
         style={{
           position: "absolute",
@@ -265,74 +242,7 @@ export function ThemeToggle() {
       </span>
     </Button>
   );
-}` as const;
-  }
-
-  private get uiButton() {
-    return `"use client";
-
-import type { VariantProps } from "class-variance-authority";
-import type { ComponentPropsWithRef } from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline"
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10"
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default"
-    }
-  }
-);
-
-export interface ButtonProps
-  extends ComponentPropsWithRef<"button">,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
 }
-
-const Button = ({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ref,
-  ...props
-}: ButtonProps) => {
-  const Comp = asChild ? Slot : "button";
-  return (
-    <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
-      {...props}
-    />
-  );
-};
-
-Button.displayName = "Button";
-
-export { Button, buttonVariants };
 ` as const;
   }
 
@@ -440,69 +350,56 @@ export default {
 }` as const;
   }
 
-  private get pkgJsonTemplate() {
-    // prettier-ignore
-    return `{
-  "name": "@${this.workspace}/web",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "license": "MIT",
-  "prettier": "@${this.workspace}/prettier-config",
-  "scripts": {
-    "dev": "next dev -p ${this.port} --turbo",
-    "build": "next build",
-    "format": "prettier --write \\"**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx,graphql,gql}\\" --ignore-unknown --cache",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@radix-ui/react-slot": "latest",
-    "class-variance-authority": "latest",
-    "clsx": "latest",
-    "lucide-react": "latest",
-    "motion": "latest",
-    "next": "latest",
-    "next-themes": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "tailwind-merge": "latest",
-    "tw-animate-css": "latest"
-  },
-  "devDependencies": {
-    "@edge-runtime/cookies": "latest",
-    "@edge-runtime/types": "latest",
-    "@playwright/test": "latest",
-    "@${this.workspace}/eslint-config": "workspace:*",
-    "@${this.workspace}/prettier-config": "workspace:*",
-    "@${this.workspace}/tsconfig": "workspace:*",
-    "@tailwindcss/postcss": "latest",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@vercel/functions": "latest",
-    "autoprefixer": "latest",
-    "csstype": "latest",
-    "dotenv": "latest",
-    "dotenv-cli": "latest",
-    "dotenv-expand": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
-    "motion-dom": "latest",
-    "motion-utils": "latest",
-    "postcss": "latest",
-    "prettier": "latest",
-    "sharp": "latest",
-    "tailwindcss": "latest",
-    "tailwindcss-motion": "latest",
-    "tslib": "latest",
-    "tsx": "latest",
-    "typescript": "latest",
-    "urlpattern-polyfill": "latest",
-    "webpack": "latest"
+  private get deps() {
+    return [
+      "clsx",
+      "lucide-react",
+      "motion",
+      "next",
+      "next-themes",
+      "react",
+      "react-dom",
+      "tailwind-merge",
+      "tw-animate-css"
+    ] as const;
   }
-}
-` as const;
+
+  private get devDeps() {
+    return [
+      "@playwright/test",
+      "@tailwindcss/postcss",
+      "@types/node",
+      "@types/react",
+      "@types/react-dom",
+      "autoprefixer",
+      "dotenv",
+      "eslint",
+      "eslint-config-next",
+      "motion-dom",
+      "motion-utils",
+      "postcss",
+      "prettier",
+      "sharp",
+      "tailwindcss",
+      "tailwindcss-motion",
+      "tslib",
+      "tsx",
+      "typescript",
+      "urlpattern-polyfill",
+      "webpack"
+    ] as const;
+  }
+
+  private get localDevDeps() {
+    return [
+      `@${this.workspace}/eslint-config`,
+      `@${this.workspace}/prettier-config`,
+      `@${this.workspace}/tsconfig`
+    ] as const;
+  }
+
+  private get localDeps() {
+    return [`@${this.workspace}/ui`] as const;
   }
 
   private get nextConfigTemplate() {
@@ -654,27 +551,6 @@ export default {
     } /* Return to semi-transparent */
   }
 
-  --animate-brushed-metal: brushed-metal-shift 8s linear infinite alternate;
-  @keyframes brushed-metal-shift {
-    0% {
-      background-position: 0% center;
-    }
-    100% {
-      background-position: 100% center;
-    }
-  }
-
-  --animate-cursor-blink: cursor-blink 0.7s step-end infinite;
-  @keyframes cursor-blink {
-    0%,
-    100% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
-
   --animate-twinkle: twinkle 5s infinite;
   @keyframes twinkle {
     0%,
@@ -683,26 +559,6 @@ export default {
     }
     50% {
       opacity: 0.2;
-    }
-  }
-
-  --animate-cursor-advance: cursor-advance 0.1s linear;
-  @keyframes cursor-advance {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-
-  --animate-carousel: carousel-scroll 60s linear infinite;
-  @keyframes carousel-scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-100%);
     }
   }
 }
@@ -833,16 +689,15 @@ export default function GlobalError({
       <body>
         <h2>Something went wrong!</h2>
         <button onClick={() => reset()}>Try again</button>
-        <details className='[&_details[open]]:p-2 [&_details[open]_summary]:mb-2 [&_details[open]_summary]:border-b [&_details[open]_summary]:border-solid [&_details[open]_summary]:border-[#aaa]'>
-          <summary className='-my-2 mx-0 p-2 font-sans'>
-            Details
-          </summary>
+        <details className="[&_details[open]]:p-2 [&_details[open]_summary]:mb-2 [&_details[open]_summary]:border-b [&_details[open]_summary]:border-solid [&_details[open]_summary]:border-[#aaa]">
+          <summary className="mx-0 -my-2 p-2 font-sans">Details</summary>
           <pre>{JSON.stringify(error, null, 2)}</pre>
         </details>
       </body>
     </html>
   );
-}` as const;
+}
+` as const;
   }
 
   private get rootLayoutTsx() {
@@ -854,13 +709,12 @@ export default function GlobalError({
       // prettier-ignore
       return `import type { Metadata, Viewport } from "next";
 import React from "react";
-import "./globals.css";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/ui/page-layout";
-/* populate relevant values in src/lib/site-url.ts and uncomment for url injetion */
-// import { getSiteUrl } from "@/lib/site-url";
+import "./globals.css";
+import "@${this.workspace}/ui/globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -1071,9 +925,7 @@ export type InferGSPRT<V extends (...args: any) => any> = {
 
   private get typeHelpersTs() {
     // prettier-ignore
-    return `import type React from "react";
-
-/* General Helper Types BEGIN */
+    return `/* General Helper Types BEGIN */
 
 export type Unenumerate<T> = T extends readonly (infer U)[] | (infer U)[]
   ? U
@@ -1248,10 +1100,9 @@ export default function HomePage() {
     // prettier-ignore
     return `"use client";
 
+import { Button, Icon } from "@${this.workspace}/ui";
 import Link from "next/link";
-import { ArrowRight, Code, Layers, Package, Terminal, Zap } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "@/ui/button";
 
 export function LandingPage() {
   return (
@@ -1291,8 +1142,8 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-x-4">
             <Button asChild>
-              <Link href="/docs">
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="#" scroll={false}>
+                Get Started <Icon.ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild>
@@ -1330,7 +1181,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Zap className="size-6 text-purple-600" />
+              <Icon.Zap className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">High Performance</h3>
@@ -1348,7 +1199,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Layers className="size-6 text-purple-600" />
+              <Icon.Layers className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Monorepo Structure</h3>
@@ -1366,7 +1217,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Code className="size-6 text-purple-600" />
+              <Icon.Code className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Tooling Included</h3>
@@ -1401,7 +1252,7 @@ export function LandingPage() {
           viewport={{ once: true }}
           className="bg-muted/50 mx-auto mt-12 max-w-[58rem] rounded-lg border p-6 md:p-8">
           <div className="flex items-center">
-            <Terminal className="mr-2 size-5" />
+            <Icon.Terminal className="mr-2 size-5" />
             <h3 className="font-bold">Start developing</h3>
           </div>
           <div className="mt-4 space-y-4">
@@ -1411,7 +1262,7 @@ export function LandingPage() {
 pnpm install
 
 # Start development server
-pnpm dev\`}</code>
+pnpm run:web\`}</code>
               </pre>
             </div>
             <p className="text-muted-foreground text-sm">
@@ -1431,7 +1282,7 @@ pnpm dev\`}</code>
             viewport={{ once: true }}
             className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="bg-muted rounded-full p-3">
-              <Package className="h-6 w-6 text-purple-600" />
+              <Icon.Package className="size-6 text-purple-600" />
             </div>
             <h3 className="font-heading text-2xl leading-[1.1]">
               Explore your workspace
@@ -1448,16 +1299,16 @@ pnpm dev\`}</code>
 │   └── ui/
 └── tooling/
     ├── eslint/
+    ├── jest-presets/
     ├── prettier/
-    ├── typescript/
-    └── jest/\`}
+    └── typescript/\`}
                 </code>
               </pre>
             </div>
             <Button asChild>
-              <Link href="/docs/structure">
+              <Link href="#" scroll={false}>
                 Learn more about the structure&nbsp;
-                <ArrowRight className="ml-2 size-4" />
+                <Icon.ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
           </motion.div>
@@ -1466,8 +1317,6 @@ pnpm dev\`}</code>
     </>
   );
 }
-
-
 ` as const;
   }
 
@@ -1502,12 +1351,10 @@ pnpm dev\`}</code>
       svgNext: this.appPath("public/next.svg"),
       svgVercel: this.appPath("public/vercel.svg"),
       svgWindow: this.appPath("public/window.svg"),
-      uiButton: this.appPath("src/ui/button/index.tsx"),
       uiHome: this.appPath("src/ui/home/index.tsx"),
       uiTheme: this.appPath("src/ui/theme/index.tsx"),
       uiNav: this.appPath("src/ui/nav/index.tsx"),
       uiFooter: this.appPath("src/ui/footer/index.tsx"),
-      uiGithubIcon: this.appPath("src/ui/icons/github.tsx"),
       uiPageLayout: this.appPath("src/ui/page-layout/index.tsx")
     } as const;
   }
@@ -1523,11 +1370,22 @@ pnpm dev\`}</code>
     return this.withWs(target, template);
   }
 
-  public exeWebApp() {
+  public async exeWebApp() {
+    const pkgJson = await this.resolveAllDeps(
+      this.deps,
+      this.devDeps,
+      this.localDeps,
+      this.localDevDeps,
+      this.workspace,
+      this.port
+    );
     return Promise.all([
       this.writeTarget("apps/web/turbo.json", this.turboJson),
       this.writeTarget("apps/web/next.config.ts", this.nextConfigTemplate),
-      this.writeTarget("apps/web/package.json", this.pkgJsonTemplate),
+      this.writeTarget(
+        "apps/web/package.json",
+        JSON.stringify(pkgJson, null, 2)
+      ),
       this.writeTarget("apps/web/tailwind.config.ts", this.tailwindTemplate),
       this.writeTarget("apps/web/tsconfig.json", this.tsconfigJson),
       this.writeTarget("apps/web/global.d.ts", this.globalDts),
@@ -1553,11 +1411,9 @@ pnpm dev\`}</code>
       this.writeTarget("apps/web/public/vercel.svg", this.svgVercel),
       this.writeTarget("apps/web/public/window.svg", this.svgWindow),
       this.writeTarget("apps/web/src/app/page.tsx", this.rootPageTsx),
-      this.writeTarget("apps/web/src/ui/button/index.tsx", this.uiButton),
       this.writeTarget("apps/web/src/ui/home/index.tsx", this.uiHome),
       this.writeTarget("apps/web/src/ui/theme/index.tsx", this.uiTheme),
       this.writeTarget("apps/web/src/ui/footer/index.tsx", this.uiFooter),
-      this.writeTarget("apps/web/src/ui/icons/github.tsx", this.uiGithubIcon),
       this.writeTarget("apps/web/src/ui/nav/index.tsx", this.uiNav),
       this.writeTarget(
         "apps/web/src/ui/page-layout/index.tsx",

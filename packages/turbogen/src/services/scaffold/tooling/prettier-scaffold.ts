@@ -1,5 +1,5 @@
-import type { PromptPropsBase } from "@/types/index.js";
-import { ConfigHandler } from "@/config/index.js";
+import type { PromptPropsBase } from "@/types/index.ts";
+import { ConfigHandler } from "@/config/index.ts";
 
 export class PrettierScaffolder extends ConfigHandler {
   constructor(
@@ -44,7 +44,7 @@ const config = {
     "decorators-legacy",
     "importAttributes"
   ],
-  importOrderTypeScriptVersion: "5.6.3",
+  importOrderTypeScriptVersion: "5.8.3",
   semi: true,
   singleQuote: false,
   trailingComma: "none",
@@ -62,33 +62,20 @@ export default config;
 ` as const;
   }
 
-  private get pkgJsonTemplate() {
-    // prettier-ignore
-    return `{
-  "name": "@${this.workspace}/prettier-config",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "exports": {
-    ".": "./index.mjs"
-  },
-  "scripts": {
-    "clean": "git clean -xdf .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "latest",
-    "prettier": "latest",
-    "prettier-plugin-tailwindcss": "latest"
-  },
-  "devDependencies": {
-    "@${this.workspace}/tsconfig": "workspace:*",
-    "typescript": "latest"
-  },
-  "prettier": "@${this.workspace}/prettier-config"
-}
-` as const;
+  private get deps() {
+    return [
+      "@ianvs/prettier-plugin-sort-imports",
+      "prettier",
+      "prettier-plugin-tailwindcss"
+    ] as const;
+  }
+
+  private get devDeps() {
+    return ["typescript"] as const;
+  }
+
+  private get localDeps() {
+    return [`@${this.workspace}/tsconfig`] as const;
   }
 
   private get tsconfigTemplate() {
@@ -128,10 +115,19 @@ export default config;
     return this.withWs(target, template);
   }
 
-  public exePrettier() {
+  public async exePrettier() {
+    const pkgJson = await this.resolveAllDepsPrettier(
+      this.deps,
+      this.devDeps,
+      this.localDeps,
+      this.workspace
+    );
     return Promise.all([
       this.writeTarget("tooling/prettier/index.mjs", this.indexTemplate),
-      this.writeTarget("tooling/prettier/package.json", this.pkgJsonTemplate),
+      this.writeTarget(
+        "tooling/prettier/package.json",
+        JSON.stringify(pkgJson, null, 2)
+      ),
       this.writeTarget("tooling/prettier/tsconfig.json", this.tsconfigTemplate)
     ]);
   }

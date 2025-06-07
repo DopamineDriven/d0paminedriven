@@ -1,5 +1,5 @@
-import type { PromptPropsBase } from "@/types/index.js";
-import { ConfigHandler } from "@/config/index.js";
+import type { PromptPropsBase } from "@/types/index.ts";
+import { ConfigHandler } from "@/config/index.ts";
 
 export class RootScaffolder extends ConfigHandler {
   constructor(
@@ -28,7 +28,7 @@ export class RootScaffolder extends ConfigHandler {
 
   private get readmeMinimal() {
     // prettier-ignore
-    return `### 👋 Welcome to the ${this.toTitleCase(this.workspace)} workspace` as const
+    return `### Welcome to the \`@${this.workspace}/*\` workspace 👋` as const
   }
 
   private pkgJsonRepo() {
@@ -41,106 +41,27 @@ export class RootScaffolder extends ConfigHandler {
     } else return `pnpm` as const;
   }
 
-  private get pkgJsonTemplate() {
-    const repo = this.pkgJsonRepo();
-    if (repo) {
-      // prettier-ignore
-      return `{
-  "repository": "${repo}",
-  "name": "@${this.workspace}/root",
-  "license": "MIT",
-  "private": true,
-  "packageManager": "${this.packageManager}",
-  "scripts": {
-    "build:web": "turbo build --filter=@${this.workspace}/web",
-    "changeset": "changeset",
-    "clean": "git clean -xdf node_modules pnpm-lock.yaml",
-    "dev": "turbo dev --parallel --continue",
-    "format": "prettier --write \\"**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx}\\" --ignore-unknown --cache",
-    "lint": "turbo lint",
-    "prepare": "husky",
-    "typecheck": "turbo typecheck",
-    "npm:registry": "npm set registry https://registry.npmjs.org",
-    "clean:house": "cd apps/web && git clean -xdf node_modules .next .turbo && cd ../..tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
-    "generate:base64": "openssl rand -base64 64",
-    "generate:hex": "openssl rand -hex 64",
-    "run:web": "turbo dev --filter=@${this.workspace}/web",
-    "latest:pnpm": "corepack use pnpm@latest",
-    "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
-  },
-  "devDependencies": {
-    "@changesets/cli": "latest",
-    "@${this.workspace}/eslint-config": "workspace:*",
-    "@${this.workspace}/prettier-config": "workspace:*",
-    "@${this.workspace}/tsconfig": "workspace:*",
-    "@d0paminedriven/turbogen": "latest",
-    "@types/node": "latest",
-    "dotenv": "latest",
-    "eslint": "latest",
-    "husky": "latest",
-    "jiti": "latest",
-    "prettier": "latest",
-    "tsx": "latest",
-    "turbo": "latest",
-    "typescript": "latest",
-    "vercel": "latest"
-  },
-  "prettier": "@${this.workspace}/prettier-config",
-  "engines": {
-    "node": ">=20",
-    "npm": ">=10",
-    "pnpm": ">=9"
+  private get localDeps() {
+    return [
+      `@${this.workspace}/eslint-config`,
+      `@${this.workspace}/prettier-config`,
+      `@${this.workspace}/tsconfig`
+    ] as const;
   }
-}
-`  as const
-    } else {
-      // prettier-ignore
-      return `{
-  "name": "@${this.workspace}/root",
-  "license": "MIT",
-  "private": true,
-  "packageManager": "${this.packageManager}",
-  "scripts": {
-    "build:web": "turbo build --filter=@${this.workspace}/web",
-    "changeset": "changeset",
-    "clean": "git clean -xdf node_modules",
-    "dev": "turbo dev --parallel --continue",
-    "format": "prettier --write \\"**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx}\\" --ignore-unknown --cache",
-    "lint": "turbo lint",
-    "prepare": "husky",
-    "typecheck": "turbo typecheck",
-    "clean:house": "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install",
-    "generate:base64": "openssl rand -base64 64",
-    "generate:hex": "openssl rand -hex 64",
-    "npm:registry": "npm set registry https://registry.npmjs.org",
-    "run:web": "turbo dev --filter=@${this.workspace}/web",
-    "latest:pnpm": "corepack use pnpm@latest",
-    "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
-  },
-  "devDependencies": {
-    "@changesets/cli": "latest",
-    "@${this.workspace}/eslint-config": "workspace:*",
-    "@${this.workspace}/prettier-config": "workspace:*",
-    "@${this.workspace}/tsconfig": "workspace:*",
-    "@d0paminedriven/turbogen": "latest",
-    "@types/node": "latest",
-    "dotenv": "latest",
-    "eslint": "latest",
-    "husky": "latest",
-    "prettier": "latest",
-    "tsx": "latest",
-    "turbo": "latest",
-    "typescript": "latest"
-  },
-  "prettier": "@${this.workspace}/prettier-config",
-  "engines": {
-    "node": ">=22",
-    "npm": ">=10",
-    "pnpm": ">=9"
-  }
-}
-` as const
-    }
+
+  private get devDeps() {
+    return [
+      "@changesets/cli",
+      "@d0paminedriven/turbogen",
+      "@types/node",
+      "dotenv",
+      "eslint",
+      "husky",
+      "prettier",
+      "tsx",
+      "turbo",
+      "typescript"
+    ] as const;
   }
 
   private get eslintTemplate() {
@@ -218,10 +139,18 @@ export default [
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "on"
+  },
   "C_Cpp.dimInactiveRegions": false,
   "css.completion.completePropertyWithSemicolon": true,
   "css.format.enable": true,
   "css.format.newlineBetweenSelectors": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
   "css.hover.documentation": true,
   "css.hover.references": true,
   "editor.bracketPairColorization.enabled": false,
@@ -252,14 +181,13 @@ export default [
   "files.autoSave": "afterDelay",
   "javascript.referencesCodeLens.showOnAllFunctions": true,
   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
-   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
   "tailwindCSS.experimental.classRegex": [
     [
-      "cva\\(([^)]*)\\)",
+      "cva\\\\(([^)]*)\\\\)",
       "[\\"'\`]([^\\"'\`]*).*?[\\"'\`]"
     ],
     [
-      "cx\\(([^)]*)\\)",
+      "cx\\\\(([^)]*)\\\\)",
       "(?:'|\\"|\`)([^']*)(?:'|\\"|\`)"
     ]
   ],
@@ -359,7 +287,8 @@ max_line_length = 40
   "ui": "stream",
   "globalEnv": [
     "COREPACK_ENABLE_STRICT",
-    "NODE_ENV"
+    "NODE_ENV",
+    "VERCEL_ENV"
   ]
 }
 ` as const;
@@ -458,7 +387,14 @@ pnpm-lock.yaml
     return this.withWs(target, template);
   }
 
-  public exeRoot() {
+  public async exeRoot() {
+    const pkgJson = await this.resolveAllDepsRoot(
+      this.devDeps,
+      this.localDeps,
+      this.workspace,
+      this.packageManager,
+      this.pkgJsonRepo()
+    );
     return Promise.all([
       this.handleNpmrc(),
       this.writeTarget(".prettierignore", this.prettierignoreTemplate),
@@ -470,7 +406,7 @@ pnpm-lock.yaml
       this.writeTarget(".editorconfig", this.editorConfigTemplate),
       this.writeTarget(".gitignore", this.gitignoreTemplate),
       this.writeTarget("eslint.config.mjs", this.eslintTemplate),
-      this.writeTarget("package.json", this.pkgJsonTemplate),
+      this.writeTarget("package.json", JSON.stringify(pkgJson, null, 2)),
       this.writeTarget("pnpm-workspace.yaml", this.pnpmWorkspaceYamlTemplate),
       this.writeTarget("tsconfig.json", this.tsconfigTemplate),
       this.writeTarget("turbo.json", this.turboJsonTemplate),

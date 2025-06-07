@@ -1,28 +1,22 @@
 "use client";
 
+import { Button, Icon } from "@d0paminedriven/ui";
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/ui/button";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Ensure component is mounted to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Simple toggle function
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  // During initial load (not mounted), we'll show an icon based on a simple check
-  // of the user's preferred color scheme to avoid flickering
   if (!mounted) {
-    // Check if user prefers dark mode
     const prefersDark =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -42,7 +36,11 @@ export function ThemeToggle() {
           height: "2.5rem",
           borderRadius: "0.375rem"
         }}>
-        {prefersDark ? <Moon size={20} /> : <Sun size={20} />}
+        {prefersDark ? (
+          <Icon.Moon className="size-5" />
+        ) : (
+          <Icon.Sun className="size-5" />
+        )}
         <span
           style={{
             position: "absolute",
@@ -77,7 +75,11 @@ export function ThemeToggle() {
         height: "2.5rem",
         borderRadius: "0.375rem"
       }}>
-      {resolvedTheme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
+      {resolvedTheme === "dark" ? (
+        <Icon.Moon className="size-5" />
+      ) : (
+        <Icon.Sun className="size-5" />
+      )}
       <span
         style={{
           position: "absolute",

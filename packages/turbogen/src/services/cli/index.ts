@@ -1,4 +1,4 @@
-import { InquirerService } from "./inquirer.js";
+import { InquirerService } from "./inquirer.ts";
 
 export interface CliServiceProps {
   i: InquirerService;

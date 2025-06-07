@@ -1,0 +1,13 @@
+{
+  "name": "@d0paminedriven/mdx",
+  "version": "1.0.0",
+  "description": "a no bullshit mdx+frontmatter parser and mdx-to-react processor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1"
+}

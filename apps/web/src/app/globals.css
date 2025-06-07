@@ -101,27 +101,6 @@
     } /* Return to semi-transparent */
   }
 
-  --animate-brushed-metal: brushed-metal-shift 8s linear infinite alternate;
-  @keyframes brushed-metal-shift {
-    0% {
-      background-position: 0% center;
-    }
-    100% {
-      background-position: 100% center;
-    }
-  }
-
-  --animate-cursor-blink: cursor-blink 0.7s step-end infinite;
-  @keyframes cursor-blink {
-    0%,
-    100% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
-
   --animate-twinkle: twinkle 5s infinite;
   @keyframes twinkle {
     0%,
@@ -130,26 +109,6 @@
     }
     50% {
       opacity: 0.2;
-    }
-  }
-
-  --animate-cursor-advance: cursor-advance 0.1s linear;
-  @keyframes cursor-advance {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-
-  --animate-carousel: carousel-scroll 60s linear infinite;
-  @keyframes carousel-scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-100%);
     }
   }
 }

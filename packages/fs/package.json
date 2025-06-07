@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "4.2.0",
+  "version": "6.0.0",
   "description": "convenient fs helpers",
   "publishConfig": {
     "access": "public",
@@ -13,14 +13,22 @@
         "fs": [
           "dist/fs/index.d.ts"
         ],
+        "mime": [
+          "dist/mime/index.d.ts"
+        ],
         "types": [
           "dist/types/index.d.ts"
+        ],
+        "url": [
+          "dist/url/index.d.ts"
+        ],
+        "utils": [
+          "dist/utils/index.d.ts"
         ]
       }
     }
   },
   "license": "MIT",
-  "source": "src/index.ts",
   "typesVersions": {
     "*": {
       "*": [
@@ -30,15 +38,25 @@
       "fs": [
         "dist/fs/index.d.ts"
       ],
+      "mime": [
+        "dist/mime/index.d.ts"
+      ],
       "types": [
         "dist/types/index.d.ts"
+      ],
+      "url": [
+        "dist/url/index.d.ts"
+      ],
+      "utils": [
+        "dist/utils/index.d.ts"
       ]
     }
   },
   "type": "module",
+  "source": "src/index.ts",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": true,
+  "sideEffects": false,
   "files": [
     "dist/**/*.{js,cjs,d.ts,d.cts,css}"
   ],
@@ -46,7 +64,10 @@
     ".": "./dist/index.js",
     "./*": "./dist/*.js",
     "./fs": "./dist/fs/index.js",
-    "./types": "./dist/types/index.js"
+    "./mime": "./dist/mime/index.js",
+    "./types": "./dist/types/index.js",
+    "./url": "./dist/url/index.js",
+    "./utils": "./dist/utils/index.js"
   },
   "scripts": {
     "build": "tsup",
@@ -57,23 +78,23 @@
   },
   "dependencies": {
     "dotenv": "^16.5.0",
-    "sharp": "^0.34.1"
+    "dotenv-expand": "^12.0.2",
+    "sharp": "^0.34.2"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@microsoft/api-extractor": "^7.52.8",
-    "@swc/core": "^1.11.24",
-    "@swc/wasm": "^1.11.24",
-    "@types/node": "^22.15.19",
+    "@swc/core": "^1.11.31",
+    "@swc/wasm": "^1.11.31",
+    "@types/node": "^22.15.30",
     "chokidar": "^4.0.3",
     "dotenv-cli": "^8.0.0",
-    "dotenv-expand": "^12.0.2",
-    "eslint": "latest",
+    "eslint": "^9.28.0",
     "jiti": "^2.4.2",
-    "prettier": "latest",
-    "terser": "^5.39.2",
+    "prettier": "^3.5.3",
+    "terser": "^5.41.0",
     "tslib": "latest",
     "tsup": "latest",
     "tsx": "latest",
