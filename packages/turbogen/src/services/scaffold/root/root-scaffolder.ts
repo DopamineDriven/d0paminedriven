@@ -139,10 +139,18 @@ export default [
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "on"
+  },
   "C_Cpp.dimInactiveRegions": false,
   "css.completion.completePropertyWithSemicolon": true,
   "css.format.enable": true,
   "css.format.newlineBetweenSelectors": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
   "css.hover.documentation": true,
   "css.hover.references": true,
   "editor.bracketPairColorization.enabled": false,
