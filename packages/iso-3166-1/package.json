@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
-    "@d0paminedriven/fs": "^5.0.0",
+    "@d0paminedriven/fs": "^6.0.0",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@microsoft/api-extractor": "^7.52.8",

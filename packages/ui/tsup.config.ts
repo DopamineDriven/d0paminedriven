@@ -21,12 +21,6 @@ const tsupConfig = (options: Options) =>
       "src/ui/button.tsx",
       "!src/services/postbuild.ts"
     ],
-    // esbuildOptions: (options, _) => {
-    //   options.keepNames = true;
-    //   options.minifyIdentifiers = false;
-    // },
-    // minifyIdentifiers: false,
-    // banner: { js: '"use client"' },
     dts: true,
     external: ["react"],
     watch: process.env.NODE_ENV === "development",

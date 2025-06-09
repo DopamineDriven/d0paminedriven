@@ -104,7 +104,7 @@
     "fix": "npm pkg fix"
   },
   "dependencies": {
-    "@d0paminedriven/fs": "^5.0.0",
+    "@d0paminedriven/fs": "^6.0.0",
     "@inquirer/core": "^10.1.13",
     "@inquirer/prompts": "^7.5.3",
     "dotenv": "^16.5.0",
