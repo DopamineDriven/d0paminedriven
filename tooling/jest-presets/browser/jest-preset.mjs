@@ -1,12 +1,12 @@
 /**
- * Jest preset for Node + TypeScript workspaces (ESM, CJS, all the things)
- * https://github.com/DopamineDriven/d0paminedriven
+ * Jest preset for Browser + TypeScript workspaces
+ * https://github.com/DopamineDriven/d0paminedriven/tree/master/packages/turbogen
  *
  * @type {import("ts-jest").JestConfigWithTsJest}
  */
-module.exports = {
+export default {
   roots: ["<rootDir>"],
-  testEnvironment: "node", // Explicit, for clarity and reliability
+  testEnvironment: "jsdom",
   transform: {
     "^.+\\.(mjs|cjs|js|jsx|ts|tsx|mts|cts)$": "ts-jest"
   },
@@ -25,28 +25,37 @@ module.exports = {
   modulePathIgnorePatterns: [
     "<rootDir>/test/__fixtures__",
     "<rootDir>/node_modules",
-    "<rootDir>/dist"
+    "<rootDir>/dist",
+    "<rootDir>/artifacts",
+    "<rootDir>/build",
+    "<rootDir>/.story",
+    "<rootDir>/.next",
+    "<rootDir>/.turbo",
+    "<rootDir>/.out",
+    "<rootDir>/.output"
   ],
-  // Some users prefer <rootDir>/build as well, if you ever use that
   preset: "ts-jest",
   cacheDirectory: "<rootDir>/node_modules/.cache/jest",
-
   globals: {
     "ts-jest": {
       tsconfig: "<rootDir>/tsconfig.json",
       diagnostics: true,
       isolatedModules: true,
-      useESM: undefined
+      useESM: true
     }
   },
   testTimeout: 30000,
-  testMatch: [
-    "**/__tests__/**/*.[jt]s?(x)",
-    "**/?(*.)+(spec|test).[jt]s?(x)"
-  ],
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
   coveragePathIgnorePatterns: [
     "/node_modules/",
     "/test/__fixtures__/",
-    "/dist/"
+    "/dist/",
+    "/artifacts/",
+    "/build/",
+    "/.story/",
+    "/.turbo/",
+    "/.next/",
+    "/.out/",
+    "/.output/"
   ]
 };
