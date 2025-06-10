@@ -188,15 +188,14 @@ export type WriteFileAsyncDataUnion =
   | WithImplicitCoercion<string>
   | { [Symbol.toPrimitive](hint: "string"): string };
 
-export type ReadDirOptions =
-  | BufferEncodingUnion
-  | (
-      | (ObjEncodingOptions & {
-          withFileTypes?: false | undefined;
-          recursive?: boolean | undefined;
-        })
-      | null
-    );
+export interface ReadDirOptionsEntity extends ObjEncodingOptions {
+  withFileTypes?: false | undefined;
+  recursive?: boolean | undefined;
+}
+
+export type ReadDirOptions = {
+  [P in keyof ReadDirOptionsEntity]: ReadDirOptionsEntity[P];
+};
 
 export type WriteFileAsyncOptions =
   | (ObjEncodingOptions & {
@@ -390,3 +389,16 @@ export type ParsedUrlInfo = {
   search: string;
   hash: string;
 };
+
+export const unitsObj = {
+  PB: 5,
+  TB: 4,
+  GB: 3,
+  MB: 2,
+  KB: 1,
+  B: 0
+} as const;
+
+export type Unit = keyof typeof unitsObj;
+
+export type SizeOpts = { decimals?: number; includeUnits?: boolean };

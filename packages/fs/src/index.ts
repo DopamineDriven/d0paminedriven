@@ -50,9 +50,11 @@ export type {
   RemoveFields,
   RequiredToConditional,
   Signals,
+  SizeOpts,
   StdioOptions,
   TypedArray,
   Unenumerate,
+  Unit,
   UnwrapPromise,
   Without,
   WriteFileAsyncDataUnion,
@@ -63,6 +65,7 @@ export type {
   WriteStreamProps,
   XOR
 } from "@/types/index.ts";
+export { unitsObj } from "@/types/index.ts";
 export type {
   HandleQueryParamsOrHash,
   InferExtensionIfPresent,

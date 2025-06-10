@@ -1,13 +1,89 @@
 {
   "name": "@d0paminedriven/mdx",
-  "version": "1.0.0",
-  "description": "a no bullshit mdx+frontmatter parser and mdx-to-react processor",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+ "version": "1.0.0",
+  "description": "unopinionated mdx-to-react parser & processor that just works",
+  "files": [
+    "dist/**/*.{js,mjs,cjs,d.mts,d.ts,d.cts,css}"
+  ],
+  "license": "MIT",
+  "sideEffecs": false,
+  "type": "module",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*.d.ts",
+        "dist/*.d.cts",
+        "dist/*/index.d.ts"
+      ]
+    }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.11.1"
+  "publishConfig": {
+    "access": "public",
+    "typesVersions": {
+      "*": {
+        "*": [
+          "dist/*.d.ts",
+          "dist/*.d.cts",
+          "dist/*/index.d.ts"
+        ]
+      }
+    }
+  },
+  "source": "src/index.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "dev": "pnpm build",
+    "prebuild": "rm -rf dist",
+    "postbuild": "tsx src/services/postbuild.ts flag-check",
+    "build": "tsup",
+    "clean": "git clean -xdf dist node_modules",
+    "types": "tsc --emitDeclarationOnly"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "dependencies": {
+    "@d0paminedriven/fs": "^6.0.1",
+    "@mdx-js/react": "^3.1.0",
+    "rehype-pretty-code": "^0.14.1",
+    "rehype-react": "^8.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-directive": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "vfile": "^6.0.3",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@d0paminedriven/eslint-config": "workspace:*",
+    "@d0paminedriven/prettier-config": "workspace:*",
+    "@d0paminedriven/tsconfig": "workspace:*",
+    "@types/mdast": "^4.0.4",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.7",
+    "@types/react-dom": "^19.1.6",
+    "@types/unist": "^3.0.3",
+    "eslint": "^9.28.0",
+    "jiti": "^2.4.2",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "terser": "^5.42.0",
+    "tslib": "^2.8.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "unist-util-remove": "^4.0.0",
+    "unist-util-visit": "^5.0.0"
+  },
+  "prettier": "@d0paminedriven/prettier-config"
 }

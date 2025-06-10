@@ -68,9 +68,6 @@
     "@d0paminedriven/jest-presets": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@microsoft/api-extractor": "^7.52.8",
-    "@swc/core": "^1.11.31",
-    "@swc/wasm": "^1.11.31",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.30",
     "chokidar": "^4.0.3",
@@ -80,13 +77,13 @@
     "jiti": "^2.4.2",
     "prettier": "^3.5.3",
     "redis": "^5.5.6",
-    "terser": "^5.41.0",
+    "terser": "^5.42.0",
     "ts-jest": "^29.3.4",
-    "tslib": "latest",
-    "tsup": "latest",
-    "tsx": "latest",
-    "typescript": "latest",
-    "typescript-eslint": "latest"
+    "tslib": "^2.8.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.0"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }
