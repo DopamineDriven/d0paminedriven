@@ -91,19 +91,16 @@
     "react-dom": ">=19.1.0"
   },
   "dependencies": {
-    "@swc/helpers": "^0.5.17",
     "lodash.throttle": "^4.1.1"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
-    "@d0paminedriven/fs": "^6.0.0",
+    "@d0paminedriven/fs": "^6.0.1",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@microsoft/api-extractor": "^7.52.8",
-    "@swc/core": "^1.11.31",
     "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^22.15.30",
-    "@types/react": "^19.1.6",
+    "@types/react": "^19.1.7",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.21",
     "chokidar": "^4.0.3",
@@ -118,11 +115,11 @@
     "prettier": "^3.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "terser": "^5.41.0",
-    "tslib": "latest",
-    "tsup": "latest",
-    "tsx": "latest",
-    "typescript": "latest"
+    "terser": "^5.42.0",
+    "tslib": "^2.8.1",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }

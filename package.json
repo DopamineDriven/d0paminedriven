@@ -2,11 +2,12 @@
   "name": "@d0paminedriven/root",
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912",
+  "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac",
   "scripts": {
     "build:chess-icons": "turbo build --filter=@d0paminedriven/chess-icons",
     "build:fs": "turbo build --filter=@d0paminedriven/fs",
     "build:iso-3166-1": "turbo build --filter=@d0paminedriven/iso-3166-1",
+    "build:mdx": "turbo build --filter=@d0paminedriven/mdx",
     "build:motion": "turbo build --filter=@d0paminedriven/motion",
     "build:redis-utils": "turbo build --filter=@d0paminedriven/redis-utils",
     "build:targeted": "pnpm build:chess-icons && pnpm build:fs && pnpm build:iso-3166-1 && pnpm build:redis-utils && pnpm build:turbogen && pnpm build:ui && pnpm build:motion",
@@ -20,7 +21,7 @@
     "lint": "turbo lint",
     "prepare": "husky",
     "typecheck": "turbo typecheck",
-    "clean:house": "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../../packages/chess-icons && git clean -xdf dist node_modules && cd ../ui && git clean -xdf dist node_modules && cd ../motion && git clean -xdf dist node_modules && cd ../fs && git clean -xdf dist node_modules && cd ../iso-3166-1 && git clean -xdf node_modules && cd ../redis-utils && git clean -xdf node_modules &&  cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install && pnpm build:targeted",
+    "clean:house": "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../../packages/chess-icons && git clean -xdf dist node_modules && cd ../ui && git clean -xdf dist node_modules && cd ../mdx && git clean -xdf dist node_modules && cd ../motion && git clean -xdf dist node_modules && cd ../fs && git clean -xdf dist node_modules && cd ../iso-3166-1 && git clean -xdf node_modules && cd ../redis-utils && git clean -xdf node_modules &&  cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install && pnpm build:targeted",
     "generate:base64": "openssl rand -base64 64",
     "generate:hex": "openssl rand -hex 64",
     "npm:registry": "npm set registry https://registry.npmjs.org",
@@ -38,9 +39,10 @@
     "eslint": "^9.28.0",
     "husky": "^9.1.7",
     "prettier": "^3.5.3",
-    "tsx": "latest",
-    "turbo": "latest",
-    "typescript": "latest"
+    "tsx": "^4.19.4",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3",
+    "vercel": "^42.3.0"
   },
   "prettier": "@d0paminedriven/prettier-config",
   "engines": {

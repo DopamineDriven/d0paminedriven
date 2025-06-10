@@ -10,12 +10,15 @@ import type {
   MkDirSyncOptions,
   ReadDirOptions,
   RmDirOptions,
+  SizeOpts,
+  Unit,
   WriteFileAsyncDataUnion,
   WriteFileAsyncOptions,
   WriteStreamDataShape,
   WriteStreamOptions
 } from "@/types/index.ts";
 import { MimeService } from "@/mime/index.ts";
+import { unitsObj } from "@/types/index.ts";
 
 dotenv.config();
 
@@ -32,16 +35,85 @@ export default class Fs extends MimeService {
     return expand.expand(this.myEnv);
   }
 
+  /**
+   *
+   * @param target path to the file or directory to check for existence
+   * @returns true if the file or directory exists, false otherwise
+   * @example
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * const exists = fs.exists("my-file.txt");
+   * console.log(exists); // true if the file exists, false otherwise
+   * ```
+   * @description
+   * This method checks if a file or directory exists at the specified path input
+   *
+   * Additional Note:
+   *
+   * say you have a directory that begins with a dot, such as `.turbo`;
+   *
+   * in this scenario, both `./.turbo` and `.turbo` will return true if the directory exists
+   *
+   */
   public exists<const T extends string>(target: T) {
-    if (!/\//gm.test(target))
-      return fsSync.existsSync(resolve(join(this.cwd, target)));
-    return fsSync.existsSync(relative(this.cwd ?? process.cwd(), target));
+    if (!/\//gm.test(target)) {
+      if (/\./g.test(target)) {
+        return fsSync.existsSync(resolve(join(this.cwd, target)));
+      } else {
+        const statsSync = fsSync.statSync(resolve(join(this.cwd, target)), {
+          throwIfNoEntry: false
+        });
+        const isDir = statsSync?.isDirectory();
+        if (isDir) {
+          return isDir;
+        } else return false;
+      }
+    } else {
+      if (/\./g.test(target)) {
+        return fsSync.existsSync(relative(this.cwd ?? process.cwd(), target));
+      } else {
+        const statsSync = fsSync.statSync(relative(this.cwd, target), {
+          throwIfNoEntry: false
+        });
+        const isDir = statsSync?.isDirectory();
+        if (isDir) {
+          return isDir;
+        } else return false;
+      }
+    }
   }
 
+  /**
+   *
+   * @param ms milliseconds to wait
+   * @returns a promise that resolves after the specified number of milliseconds
+   * @example
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * await fs.wait(1000); // waits for 1 second
+   * console.log("Done waiting!");
+   * ```
+   *
+   * Alternatively, you can use it like this:
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * fs.wait(1000).then(() => { // waits for 1 second
+   *   console.log("Done waiting!");
+   *   // do something after waiting
+   * });
+   * ```
+   *
+   * @description
+   * This method is useful for delaying execution in asynchronous code, such as when you need to wait for a file operation to complete or when you want to introduce a delay in a loop.
+   */
   public wait<T extends number>(ms: T) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-
+  /**
+   * Handles an array or readonly array of strings and/or Buffers, converting Buffers to strings
+   * @param arr An array or readonly array of strings and/or Buffers
+   * @returns An array of strings with Buffers converted to UTF-8 strings.
+   */
   public handleBuffStrArrUnion<
     const T extends (string | Buffer)[] | readonly (string | Buffer)[]
   >(arr: T) {
@@ -56,10 +128,35 @@ export default class Fs extends MimeService {
     } else return false;
   }
 
-  public readDir<const T extends string>(path: T, options?: ReadDirOptions) {
+  /**
+   *
+   * @param path path to the directory relative to the cwd
+   * @param options options for reading the directory, defaults to recursive
+   *
+   * The following two examples are equivalent:
+   *
+   * @example
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * const files = fs.readDir("./my-directory", { recursive: true });
+   * console.log(files);
+   * ```
+   * @example
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * const files = fs.readDir("my-directory", { recursive: true });
+   * console.log(files);
+   * ```
+   *
+   * @returns an array of strings representing the contents of the directory
+   */
+  public readDir<const T extends string>(
+    path: T,
+    options: ReadDirOptions = { recursive: true }
+  ) {
     if (this.isRootPathTargeted(path)) {
       return this.handleBuffStrArrUnion(
-        fsSync.readdirSync(resolve(join(this.cwd, "./")), options)
+        fsSync.readdirSync(resolve(join(this.cwd, "./")), { ...options })
       );
     } else {
       return this.handleBuffStrArrUnion(
@@ -80,9 +177,7 @@ export default class Fs extends MimeService {
     );
 
   public existsSync<const T extends string>(path: T) {
-    if (!/\//gm.test(path))
-      return fsSync.existsSync(resolve(join(this.cwd, path)));
-    return fsSync.existsSync(relative(this.cwd, path));
+    return this.exists(path);
   }
 
   public pathHandler<const T extends string>(path: T) {
@@ -98,19 +193,79 @@ export default class Fs extends MimeService {
     return fsSync.mkdirSync(relative(this.cwd, path), options);
   }
 
+  private units = unitsObj;
+  private u = ["B", "KB", "MB", "GB", "TB", "PB"] as const;
+
+  public autoFileSizeRaw(size: number | bigint) {
+    let s = typeof size === "bigint" ? Number(size) : size;
+    let i = 0;
+    while (s >= 1024 && i < this.u.length - 1) {
+      s /= 1024;
+      i++;
+    }
+    return { value: s, unit: this.u[i] };
+  }
+
+  public getSize<const S extends Unit | Lowercase<Unit> | "auto">(
+    size: number | bigint,
+    target: S,
+    opts: SizeOpts = { decimals: 4, includeUnits: true }
+  ) {
+    const { decimals, includeUnits } = opts;
+
+    if (target === "auto") {
+      const { value, unit } = this.autoFileSizeRaw(size);
+      const rounded = value.toFixed(decimals);
+      return includeUnits ? `${rounded} ${unit}` : Number.parseFloat(rounded);
+    }
+
+    const key = (
+      target as Exclude<S, "auto">
+    ).toUpperCase() as keyof typeof this.units;
+    const exp = this.units[key];
+    const divisor =
+      typeof size === "bigint" ? 1024n ** BigInt(exp) : 1024 ** exp;
+    let v = 0;
+    if (typeof size === "bigint" || typeof divisor === "bigint") {
+      if (typeof size === "bigint" && typeof divisor === "bigint")
+        v = Number(size / divisor);
+      else if (typeof size !== "bigint" && typeof divisor === "bigint")
+        v = size / Number(divisor);
+      else if (typeof size === "bigint" && typeof divisor !== "bigint")
+        v = Number(size) / divisor;
+    } else if (typeof size === "number" && typeof divisor === "number") {
+      v = size / divisor;
+    }
+    const rounded = v.toFixed(decimals);
+
+    return includeUnits
+      ? (`${rounded} ${key}` as const)
+      : Number.parseFloat(rounded);
+  }
+
   public fileSizeMb<const T extends string>(path: T) {
-    return (
-      fsSync.statSync(relative(this.cwd, path)).size /
-      (1024 * 1024)
-    );
+    return fsSync.statSync(relative(this.cwd, path)).size / (1024 * 1024);
+  }
+
+  public fileSize<
+    const T extends string,
+    const S extends Unit | Lowercase<Unit> | "auto"
+  >(path: T, target: S, opts?: SizeOpts) {
+    if (!this.exists(path)) throw new Error(`path ${path} does not exist`);
+    else {
+      return this.getSize(
+        fsSync.statSync(relative(this.cwd, path)).size,
+        target,
+        opts
+      );
+    }
   }
 
   public generateDirIfDNE<const T extends string>(
     path: T,
     options?: MkDirSyncOptions
   ) {
-    const doesExist = this.existsSync(path);
-    if (doesExist === true) return;
+    if (this.existsSync(path)) return;
     else {
       return this.mkdirSync(path, options);
     }
@@ -177,15 +332,6 @@ export default class Fs extends MimeService {
     }
   };
 
-  public dirExists<const T extends string>(dir: T) {
-    const resolved = relative(this.cwd, dir);
-    try {
-      return fsSync.statSync(resolved).isDirectory();
-    } catch {
-      return false;
-    }
-  }
-
   public async unlink<const P extends string>(path: P) {
     if (this.existsSync(path)) {
       return await fsAsync.unlink(relative(this.cwd, path));
@@ -195,7 +341,7 @@ export default class Fs extends MimeService {
   }
 
   public rmFile<const FP extends string>(filePath: FP) {
-    if (this.existsSync(filePath)) {
+    if (this.exists(filePath)) {
       if (this.isRootPathTargeted(filePath)) {
         fsSync.rmSync(resolve(join(this.cwd, filePath)));
       } else fsSync.rmSync(resolve(this.cwd, filePath));
@@ -205,7 +351,7 @@ export default class Fs extends MimeService {
   public async rmdir<const D extends string>(dir: D, options?: RmDirOptions) {
     const resolved = relative(this.cwd, dir);
 
-    if (this.dirExists(dir)) {
+    if (this.exists(dir)) {
       return fsAsync.rmdir(relative(this.cwd, dir), options);
     } else {
       // Either doesn't exist or is not a directory
@@ -215,7 +361,7 @@ export default class Fs extends MimeService {
 
   public rmDirSync<const D extends string>(dir: D) {
     const resolved = resolve(this.cwd, dir);
-    if (this.dirExists(dir)) {
+    if (this.exists(dir)) {
       return fsSync.rm(resolved, { force: true, recursive: true }, err => {
         if (err?.message) {
           console.error(err?.message);

@@ -16,6 +16,35 @@ export interface MdxEntity extends FrontMatter {
   content: string;
 }
 
+export class MdxParser extends Fs {
+  constructor(public override cwd: string) {
+    super((cwd ??= process.cwd()));
+  }
+  private omitFrontMatterRegex = /^---[\r\n]+([\s\S]*?)[\r\n]+---/g;
+
+  /**
+   * returns only the content portion of the mdx file
+   */
+  private omitFrontMatter<const T extends string>(frontMatter: T) {
+    return frontMatter.replace(this.omitFrontMatterRegex, "");
+  }
+
+  private getMdxPaths<const V extends string>(dir: V, recursive = false) {
+    if (this.exists(dir) === false) {
+      throw new Error(`directory ${dir} does not exist in cwd ${this.cwd}`);
+    } else {
+      return this.readDir(dir, { recursive }).filter(path =>
+        /\.mdx$/.test(path)
+      );
+    }
+  }
+
+  private readMdxFile<const P extends string>(path: P) {
+  
+  return this.fileToBuffer(path).toString("utf-8");
+}
+}
+
 export const omitFrontMatter = <const T extends string>(frontMatter: T) => {
   return frontMatter.replace(/^---[\r\n]+([\s\S]*?)[\r\n]+---/g, "");
 };
@@ -82,7 +111,6 @@ export function parseFrontmatter(fileContent: string) {
 
   return { frontMatter: toCleanFrontMatterObj, content };
 }
-
 
 export function getMdxData<const V extends string>(path: V) {
   if (/\.mdx$/.test(path)) {
