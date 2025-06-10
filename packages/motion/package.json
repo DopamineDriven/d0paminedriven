@@ -85,7 +85,7 @@
   "peerDependencies": {
     "motion": ">=12.16.0",
     "motion-dom": ">=12.16.0",
-    "motion-plus": ">=1.1.4",
+    "motion-plus": ">=1.2.0",
     "motion-utils": ">=12.12.1",
     "react": ">=19.1.0",
     "react-dom": ">=19.1.0"
@@ -95,11 +95,11 @@
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
-    "@d0paminedriven/fs": "^6.0.1",
+    "@d0paminedriven/fs": "^6.1.0",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/lodash.throttle": "^4.1.9",
-    "@types/node": "^22.15.30",
+    "@types/node": "^24.0.0",
     "@types/react": "^19.1.7",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.21",
@@ -109,7 +109,7 @@
     "jiti": "^2.4.2",
     "motion": "^12.16.0",
     "motion-dom": "^12.16.0",
-    "motion-plus": "^1.1.4",
+    "motion-plus": "^1.2.0",
     "motion-utils": "^12.12.1",
     "postcss": "^8.5.4",
     "prettier": "^3.5.3",

@@ -15,51 +15,131 @@ export class JestScaffolder extends ConfigHandler {
 
   private get browserTemplate() {
     // prettier-ignore
-    return `module.exports = {
+    return `/**
+ * Jest preset for Browser + TypeScript workspaces
+ * https://github.com/DopamineDriven/d0paminedriven/tree/master/packages/turbogen
+ *
+ * @type {import("ts-jest").JestConfigWithTsJest}
+ */
+export default {
   roots: ["<rootDir>"],
   testEnvironment: "jsdom",
   transform: {
-    "^.+\\.tsx?$": "ts-jest"
+    "^.+\\\\.(mjs|cjs|js|jsx|ts|tsx|mts|cts)$": "ts-jest"
   },
-  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  moduleFileExtensions: [
+    "ts",
+    "tsx",
+    "mts",
+    "cts",
+    "js",
+    "jsx",
+    "mjs",
+    "cjs",
+    "json",
+    "node"
+  ],
   modulePathIgnorePatterns: [
     "<rootDir>/test/__fixtures__",
     "<rootDir>/node_modules",
-    "<rootDir>/dist"
+    "<rootDir>/dist",
+    "<rootDir>/artifacts",
+    "<rootDir>/build",
+    "<rootDir>/.story",
+    "<rootDir>/.next",
+    "<rootDir>/.turbo",
+    "<rootDir>/.out",
+    "<rootDir>/.output"
   ],
-  preset: "ts-jest"
+  preset: "ts-jest",
+  cacheDirectory: "<rootDir>/node_modules/.cache/jest",
+  globals: {
+    "ts-jest": {
+      tsconfig: "<rootDir>/tsconfig.json",
+      diagnostics: true,
+      isolatedModules: true,
+      useESM: true
+    }
+  },
+  testTimeout: 30000,
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/test/__fixtures__/",
+    "/dist/",
+    "/artifacts/",
+    "/build/",
+    "/.story/",
+    "/.turbo/",
+    "/.next/",
+    "/.out/",
+    "/.output/"
+  ]
 };` as const;
   }
 
   private get nodeTemplate() {
     // prettier-ignore
     return `/**
- * @type {import("ts-jest").ConfigSet}
+ * Jest preset for Node + TypeScript workspaces
+ * https://github.com/DopamineDriven/d0paminedriven/tree/master/packages/turbogen
+ *
+ * @type {import("ts-jest").JestConfigWithTsJest}
  */
-module.exports = {
+export default {
   roots: ["<rootDir>"],
+  testEnvironment: "node",
   transform: {
-    "^.+\\.(m|c)?(j|t)sx?$": "ts-jest"
+    "^.+\\\\.(mjs|cjs|js|jsx|ts|tsx|mts|cts)$": "ts-jest"
   },
   moduleFileExtensions: [
     "ts",
     "tsx",
-    "cts",
     "mts",
-    "mjs",
-    "cjs",
+    "cts",
     "js",
     "jsx",
+    "mjs",
+    "cjs",
     "json",
-    "json5",
     "node"
   ],
   modulePathIgnorePatterns: [
     "<rootDir>/test/__fixtures__",
     "<rootDir>/node_modules",
-    "<rootDir>/dist"
+    "<rootDir>/dist",
+    "<rootDir>/artifacts",
+    "<rootDir>/build",
+    "<rootDir>/.story",
+    "<rootDir>/.next",
+    "<rootDir>/.turbo",
+    "<rootDir>/.out",
+    "<rootDir>/.output"
   ],
-  preset: "ts-jest"
+  preset: "ts-jest",
+  cacheDirectory: "<rootDir>/node_modules/.cache/jest",
+  globals: {
+    "ts-jest": {
+      tsconfig: "<rootDir>/tsconfig.json",
+      diagnostics: true,
+      isolatedModules: true,
+      useESM: true
+    }
+  },
+  testTimeout: 30000,
+  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/test/__fixtures__/",
+    "/dist/",
+    "/artifacts/",
+    "/build/",
+    "/.story/",
+    "/.turbo/",
+    "/.next/",
+    "/.out/",
+    "/.output/"
+  ]
 };
 ` as const;
   }
@@ -102,8 +182,8 @@ module.exports = {
 
   private get getPaths() {
     return {
-      browser: this.jestPath("browser/jest-preset.js"),
-      node: this.jestPath("node/jest-preset.js"),
+      browser: this.jestPath("browser/jest-preset.mjs"),
+      node: this.jestPath("node/jest-preset.mjs"),
       packageJson: this.jestPath("package.json"),
       tsconfig: this.jestPath("tsconfig.json")
     } as const;
@@ -132,11 +212,11 @@ module.exports = {
     );
     return Promise.all([
       this.writeTarget(
-        "tooling/jest-presets/browser/jest-preset.js",
+        "tooling/jest-presets/browser/jest-preset.mjs",
         this.browserTemplate
       ),
       this.writeTarget(
-        "tooling/jest-presets/node/jest-preset.js",
+        "tooling/jest-presets/node/jest-preset.mjs",
         this.nodeTemplate
       ),
       this.writeTarget(

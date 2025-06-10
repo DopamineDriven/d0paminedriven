@@ -602,6 +602,8 @@ export default class Fs extends MimeService {
         .tint(tint)
         .resize(resize.widthOrOptions, resize.height, resize.options)
         .toBuffer();
-    } else return await sharp(target).toFormat(format, { quality }).toBuffer();
+    } else {
+      return await sharp(target).toFormat(format, { quality }).toBuffer();
+    }
   }
 }

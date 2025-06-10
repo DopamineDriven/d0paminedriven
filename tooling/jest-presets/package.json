@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
+  "type": "module",
   "files": [
-    "browser/jest-preset.js",
-    "node/jest-preset.js"
+    "browser/jest-preset.mjs",
+    "node/jest-preset.mjs"
   ],
+  "exports": {
+    "./browser": "./browser/jest-preset.mjs",
+    "./node": "./node/jest-preset.mjs"
+  },
   "scripts": {
     "clean": "git clean -xdf node_modules"
   },
   "peerDependencies": {
-    "jest": ">=29"
+    "jest": ">=30"
   },
   "dependencies": {
     "ts-jest": "^29.3.4"
@@ -19,7 +24,7 @@
   "devDependencies": {
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "jest-environment-jsdom": "30.0.0-beta.3",
+    "jest-environment-jsdom": "^30.0.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"
   },

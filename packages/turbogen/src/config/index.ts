@@ -155,7 +155,7 @@ auto-install-peers=true
         start: "next start",
         lint: "eslint"
       },
-      dependencies: Object.fromEntries([...localEntries,...entries]),
+      dependencies: Object.fromEntries([...localEntries, ...entries]),
       devDependencies: Object.fromEntries([...localDevEntries, ...devEntries])
     };
   }
@@ -318,7 +318,12 @@ auto-install-peers=true
       version: "1.0.0",
       private: true,
       license: "MIT",
-      files: ["browser/jest-preset.js", "node/jest-preset.js"],
+      type: "module",
+      exports: {
+        "./browser": "./browser/jest-preset.mjs",
+        "./node": "./node/jest-preset.mjs"
+      },
+      files: ["browser/jest-preset.mjs", "node/jest-preset.mjs"],
       scripts: {
         clean: "git clean -xdf node_modules"
       },
