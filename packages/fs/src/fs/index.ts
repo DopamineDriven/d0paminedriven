@@ -25,8 +25,8 @@ dotenv.config();
 export default class Fs extends MimeService {
   constructor(public cwd: string) {
     super();
+    cwd ??= process.cwd();
   }
-
   private get myEnv() {
     return dotenv.config({ processEnv: {} });
   }
@@ -488,7 +488,22 @@ export default class Fs extends MimeService {
       return console.error(err);
     }
   }
-
+    /**
+     *
+     * @param inputUrl remote url to fetch data from
+     * @param outputPath desired output path relative to the cwd
+     * @param useDetectedExtension optional, defaults to true
+     *
+     * if `useDetectedExtension` is false you must include the file extension in your output path &rarr;
+     *
+     *  🚫 'public/assets/image-1'
+     *
+     *  ✅ 'public/assets/image-1.png'
+     *
+     * @description
+     * This method is designed for large files that may not fit into memory.
+     * It streams the data directly to disk instead of loading it all into memory.
+     */
   public async fetchRemoteWriteLocalLargeFiles<
     const I extends string,
     const O extends string
@@ -501,8 +516,9 @@ export default class Fs extends MimeService {
       const fileSizeMb = contentLength
         ? parseInt(contentLength, 10) / (1024 * 1024)
         : null;
+      let outputPath = "";
 
-      const formattedPath = useDetectedExtension
+    const formattedPath = useDetectedExtension
         ? `${outputPath}.${this.assetType(inputUrl)}`
         : outputPath;
 

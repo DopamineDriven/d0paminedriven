@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "6.1.0",
+  "version": "6.2.0",
   "description": "convenient fs helpers",
   "publishConfig": {
     "access": "public",
@@ -85,18 +85,18 @@
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.0.3",
     "chokidar": "^4.0.3",
     "dotenv-cli": "^8.0.0",
-    "eslint": "^9.28.0",
+    "eslint": "^9.29.0",
     "jiti": "^2.4.2",
-    "prettier": "^3.5.3",
-    "terser": "^5.42.0",
+    "prettier": "^3.6.0",
+    "terser": "^5.43.1",
     "tslib": "^2.8.1",
     "tsup": "^8.5.0",
-    "tsx": "^4.19.4",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.34.0"
+    "typescript-eslint": "^8.34.1"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }

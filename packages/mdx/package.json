@@ -46,8 +46,8 @@
     "types": "tsc --emitDeclarationOnly"
   },
   "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19"
+    "react": ">=19.1.0",
+    "react-dom": ">=19.1.0"
   },
   "dependencies": {
     "@d0paminedriven/fs": "^6.1.0",
@@ -69,19 +69,19 @@
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.0.0",
-    "@types/react": "^19.1.7",
+    "@types/node": "^24.0.3",
+    "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/unist": "^3.0.3",
-    "eslint": "^9.28.0",
+    "eslint": "^9.29.0",
     "jiti": "^2.4.2",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "terser": "^5.42.0",
+    "terser": "^5.43.1",
     "tslib": "^2.8.1",
     "tsup": "^8.5.0",
-    "tsx": "^4.19.4",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "unist-util-remove": "^4.0.0",
     "unist-util-visit": "^5.0.0"
