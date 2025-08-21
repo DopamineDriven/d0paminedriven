@@ -284,38 +284,177 @@ export type UnwrapPromise<T> = T extends Promise<infer U> | PromiseLike<infer U>
   ? U
   : T;
 
+export type Unenumerate<T> = T extends (infer U)[] | readonly (infer U)[]
+  ? U
+  : T;
+
+export type Rm<T, P extends keyof T = keyof T> = {
+  [S in keyof T as Exclude<S, P>]: T[S];
+};
+
+/**
+ * helper workup for use in XOR type below
+ * makes properties from U optional and undefined in T, and vice versa
+ */
+export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+
+/**
+ * enforces mutual exclusivity of T | U
+ */
+// prettier-ignore
+export type XOR<T, U> =
+  [T, U] extends [object, object]
+    ? (Without<T, U> & U) | (Without<U, T> & T)
+    : T | U
+
+/**
+ * Conditional to Required
+ */
+export type CTR<
+  T,
+  K extends keyof OnlyOptional<T> = keyof OnlyOptional<T>
+> = Rm<T, K> & {
+  [Q in K]-?: T[Q];
+};
+
+/**
+ * Required to Conditional
+ */
+export type RTC<
+  T,
+  K extends keyof OnlyRequired<T> = keyof OnlyRequired<T>
+> = Rm<T, K> & {
+  [Q in K]?: T[Q];
+};
+export type IsExact<T, U> = [T] extends [U] ? ([U] extends [T] ? true : false) : false;
+/**
+ * To Conditionally never
+ */
+export type TCN<T, X extends keyof T = keyof T> = Rm<T, X> & {
+  [Q in X]?: XOR<T[Q], never>;
+};
+
+export type ArrFieldReplacer<
+  T extends unknown[] | readonly unknown[],
+  V extends keyof Unenumerate<T>,
+  Q extends boolean = false,
+  P = unknown
+> = T extends (infer U)[] | readonly (infer U)[]
+  ? V extends keyof U
+    ? Q extends true
+      ? P extends Record<infer Y, infer X>
+        ? (Rm<U, V> & Record<Y, X>)[]
+        : (Rm<U, V> & P)[]
+      : Q extends false
+        ? Rm<U, V>[]
+        : U
+    : T
+  : T;
+
+export type IsOptional<T, K extends keyof T> = undefined extends T[K]
+  ? object extends Pick<T, K>
+    ? true
+    : false
+  : false;
+
+export type OnlyOptional<T> = {
+  [K in keyof T as IsOptional<T, K> extends true ? K : never]: T[K];
+};
+
+export type OnlyRequired<T> = {
+  [K in keyof T as IsOptional<T, K> extends false ? K : never]: T[K];
+}
+/**
+ * Expect that the thing passed to Expect<T> is true.
+ *
+ * For instance, `Expect<true>` won't error. But
+ * `Expect<false>` will error.
+ */
+export type Expect<T extends true> = T;
+
 export type RemoveFields<T, P extends keyof T = keyof T> = {
   [S in keyof T as Exclude<S, P>]: T[S];
 };
 
+/**
+ * Checks that X and Y are exactly equal.
+ *
+ * For instance, `Equal<'a', 'a'>` is true. But
+ * `Equal<'a', 'b'>` is false.
+ *
+ * This also checks for exact intersection equality. So
+ * `Equal<{ a: string; b: string  }, { a: string; b: string }>`
+ * is true. But `Equal<{ a: string; b: string  }, { a: string; } & { b: string }>`
+ * is false.
+ */
+export type Equal<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+    ? true
+    : false;
+
+/**
+ * Checks that Y is assignable to X.
+ *
+ * For instance, `Extends<string, 'a'>` is true. This is because
+ * 'a' can be passed to a function which expects a string.
+ *
+ * But `Extends<'a', string>` is false. This is because a string
+ * CANNOT be passed to a function which expects 'a'.
+ */
+export type Extends<X, Y> = Y extends X ? true : false;
+
+export type DX<Y> = {
+  [P in keyof Y]: Y[P];
+};
+
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
+export type DeepPartialFields<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]?: DeepPartial<T[P]>;
+};
+
+// Recursive type replacement
+export type DeepReplace<T, From, To> = T extends From
+  ? To
+  : T extends object
+    ? { [K in keyof T]: DeepReplace<T[K], From, To> }
+    : T;
+
+// Make certain nested fields required
+export type RequireNested<
+  T,
+  Path extends string
+> = Path extends `${infer K}.${infer Rest}`
+  ? K extends keyof T
+    ? Rm<T, K> & Record<K, RequireNested<Required<T>[K], Rest>>
+    : T
+  : Path extends keyof T
+    ? Rm<T, Path> & Record<Path, Required<T>[Path]>
+    : T;
+
 export type ConditionalToRequired<
   T,
   Z extends keyof T = keyof T
-> = RemoveFields<T, Z> & { [Q in Z]-?: T[Q] };
+> = Rm<T, Z> & { [Q in Z]-?: T[Q] };
 
 export type RequiredToConditional<
   T,
   X extends keyof T = keyof T
-> = RemoveFields<T, X> & { [Q in X]?: T[Q] };
+> = Rm<T, X> & { [Q in X]?: T[Q] };
 
 export type FieldToConditionallyNever<
   T,
   X extends keyof T = keyof T
-> = RemoveFields<T, X> & { [Q in X]?: XOR<T[Q], never> };
+> = Rm<T, X> & { [Q in X]?: XOR<T[Q], never> };
 
-export type ExcludeFieldEnumerable<T, K extends keyof T> = RemoveFields<T, K>;
+export type ExcludeFieldEnumerable<T, K extends keyof T> = Rm<T, K>;
 
 export type ArrayOrReadOnlyArray<T> = T[] | readonly T[];
 
-export type Unenumerate<T> = T extends readonly (infer U)[] | (infer U)[]
-  ? U
-  : T;
-
-export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-
-export type XOR<T, U> = T | U extends object
-  ? (Without<T, U> & U) | (Without<U, T> & T)
-  : T | U;
 
 export type Depth<
   Y extends { [record: string | symbol | number]: unknown },
@@ -345,40 +484,6 @@ export type InjectScriptsProps<T> = {
   tuplesToInject: T;
 };
 
-/**
- * Expect that the thing passed to Expect<T> is true.
- *
- * For instance, `Expect<true>` won't error. But
- * `Expect<false>` will error.
- */
-export type Expect<T extends true> = T;
-
-/**
- * Checks that X and Y are exactly equal.
- *
- * For instance, `Equal<'a', 'a'>` is true. But
- * `Equal<'a', 'b'>` is false.
- *
- * This also checks for exact intersection equality. So
- * `Equal<{ a: string; b: string  }, { a: string; b: string }>`
- * is true. But `Equal<{ a: string; b: string  }, { a: string; } & { b: string }>`
- * is false.
- */
-export type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-    ? true
-    : false;
-
-/**
- * Checks that Y is assignable to X.
- *
- * For instance, `Extends<string, 'a'>` is true. This is because
- * 'a' can be passed to a function which expects a string.
- *
- * But `Extends<'a', string>` is false. This is because a string
- * CANNOT be passed to a function which expects 'a'.
- */
-export type Extends<X, Y> = Y extends X ? true : false;
 
 export type ParsedUrlInfo = {
   href: string;
@@ -402,3 +507,15 @@ export const unitsObj = {
 export type Unit = keyof typeof unitsObj;
 
 export type SizeOpts = { decimals?: number; includeUnits?: boolean };
+
+export interface ImageSize {
+  width: number;
+  height: number;
+  type: "png" | "jpeg" | "gif" | "bmp" | "webp" | "avif" | "unknown";
+}
+
+// Helper for AVIF box finding
+export interface BoxInfo {
+  pos: number;
+  size: number;
+}

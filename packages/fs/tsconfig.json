@@ -6,7 +6,8 @@
     },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "baseUrl": "./",
-    "rootDir": "./src",
+    "rootDir": "./",
+    "sourceRoot": "./src",
     "outDir": "dist",
     "emitDeclarationOnly": true
   },

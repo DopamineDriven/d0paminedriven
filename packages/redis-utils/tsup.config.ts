@@ -12,18 +12,15 @@ const tsupConfig = (options: Options) =>
       "!src/__tests__/**/*",
       "!public/**/*"
     ],
-    target: ["esnext"],
+    target: ["node24"],
     dts: true,
     watch: process.env.NODE_ENV === "development",
     keepNames: true,
-    format: ["cjs", "esm"],
-    shims: true,
+    format: ["esm"],
     sourcemap: true,
-    cjsInterop: true,
     tsconfig: relative(process.cwd(), "tsconfig.json"),
     clean: true,
     outDir: "dist",
-    // onSuccess: process.env.NODE_ENV === "development" ? "node dist/index.js" : undefined,
     ...options
   }) satisfies Options;
 

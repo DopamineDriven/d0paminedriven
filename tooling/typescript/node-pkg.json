@@ -9,7 +9,7 @@
     "declarationMap": true,
     "importHelpers": false,
     "incremental": true,
-    "module": "Node16",
+    "module": "Node18",
     "moduleResolution": "NodeNext",
     "noEmit": true,
     "sourceMap": true,
