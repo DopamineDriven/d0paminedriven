@@ -1,5 +1,6 @@
 import type { RemoveFields, Unenumerate } from "@/types/index.ts";
 
+
 export class UtilsService {
   public chunkArray<T extends number>(
     arr: string[],
@@ -31,16 +32,20 @@ export class UtilsService {
   public b64ToBlob<const T extends string>(b64Data: T) {
     {
       const sliceSize = 512;
-      // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-      const typeMatch = b64Data.match(
-        /^data:(?:image|application|haptics|video|text|font|model|audio|multipart)\/[A-Za-z0-9+-.]+(?:;[^,]+)*;base64,/i
-      );
-      const type = typeMatch?.[1];
+      const typeMatch =
+        /^data:((?:image|application|haptics|video|text|font|model|audio|multipart)\/[A-Za-z0-9+-.]+(?:;[^,]+)*);base64,(.+)$/i.exec(
+          b64Data
+        );
 
       if (!typeMatch) {
         throw new Error(`${b64Data} is not a valid data Url`);
       }
-      const byteCharacters = Buffer.from(b64Data, "base64").toString("utf-8");
+
+      const type = typeMatch[1];
+      const base64Data = typeMatch?.[2] ?? "";
+      const byteCharacters = Buffer.from(base64Data, "base64").toString(
+        "binary"
+      );
       const byteArrays = Array.of<Uint8Array>();
 
       for (
@@ -50,8 +55,7 @@ export class UtilsService {
       ) {
         const slice = byteCharacters.slice(offset, offset + sliceSize);
 
-        const byteNumbers = Array.of<number>();
-        byteNumbers.push(slice.length);
+        const byteNumbers = new Array(slice.length);
         for (let i = 0; i < slice.length; i++) {
           byteNumbers[i] = slice.charCodeAt(i);
         }
@@ -60,7 +64,7 @@ export class UtilsService {
         byteArrays.push(byteArray);
       }
 
-      const blob = new Blob(byteArrays, { type: type });
+      const blob = new Blob(byteArrays as BlobPart[], { type });
       // const file = new File([blob], `someblob.fileextension`);
       return blob;
     }
@@ -156,30 +160,31 @@ export class UtilsService {
     ) as Pick<T, Unenumerate<typeof props>>;
   };
 
-  public countsSorter = <
-    T extends Record<string, number> | Readonly<Record<string, number>>,
-    K extends "ASC" | "DESC" | undefined,
-    V extends "ASC" | "DESC" | undefined
-  >({
-    counter,
-    keySort,
-    valSort
-  }: {
-    counter: T;
-    keySort?: K;
-    valSort?: V;
-  }) =>
+  public countsSorter = <const T extends object>(
+    counter: T,
+    keySort: "ASC" | "DESC" = "ASC",
+    valSort: "DESC" | "ASC" = "DESC"
+  ) =>
     Object.fromEntries(
-      Object.entries(counter)
+      Array.from(Object.entries(counter))
         .sort(([aStr, _aNum], [bStr, _bNum]) =>
           keySort === "DESC"
             ? bStr.localeCompare(aStr) - aStr.localeCompare(bStr)
             : aStr.localeCompare(bStr) - bStr.localeCompare(aStr)
         )
-        .sort(([_aStr, aNum], [_bStr, bNum]) =>
-          valSort === "ASC" ? aNum - bNum : bNum - aNum
-        )
-    ) satisfies Record<string, number> | Readonly<Record<string, number>>;
+        .sort(([aStr, aNum], [bStr, bNum]) => {
+          if (typeof (aNum && bNum) === "number") {
+            return valSort === "ASC" ? aNum - bNum : bNum - aNum;
+          } else if (typeof (aNum && bNum) === "string") {
+            return valSort === "ASC"
+              ? aStr.localeCompare(bStr) - bStr.localeCompare(aStr)
+              : bStr.localeCompare(aStr) - aStr.localeCompare(bStr);
+          } else
+            throw new Error(
+              "only Record<string, string> and Record<string,number> types supported"
+            );
+        })
+    );
 
   public range(from: number, to: number): number[] {
     const values = Array.of<number>();
@@ -203,3 +208,41 @@ export class UtilsService {
       .reverse()
       .filter(this.isPrimeNumber);
 }
+
+// function XOOOOO(p: "mime" | "ext" = "mime") {
+//   let a: Record<string, number> = {};
+//   if (p === "mime") {
+//     for (const [_key, vals] of Object.entries(extMimeMap)) {
+//       for (const val of vals) {
+//         a[val] = (a[val] ?? 0) + 1;
+//       }
+//     }
+//     for (const [key, _val] of Object.entries(mimeToExt)) {
+//       a[key] = (a[key] ?? 0) + 1;
+//     }
+//     return Object.fromEntries(
+//       Object.entries(a).sort(([_a, aa], [_b, bb]) => bb - aa)
+//     );
+//   } else {
+//     for (const [_key, vals] of Object.entries(mimeToExt)) {
+//       for (const val of vals) {
+//         a[val] = (a[val] ?? 0) + 1;
+//       }
+//     }
+//     for (const [key, _val] of Object.entries(extMimeMap)) {
+//       a[key] = (a[key] ?? 0) + 1;
+//     }
+//     return Object.fromEntries(
+//       Object.entries(a).sort(([_a, aa], [_b, bb]) => bb - aa)
+//     );
+//   }
+// }
+
+
+// console.log(relative(process.cwd(),homedir()))
+// console.log(homedir());
+// const _fs = new Fs(process.cwd());
+// console.log(tmpdir());
+// console.log(homedir());
+// console.log(process.cwd());
+// console.log(new URL(import.meta.url));

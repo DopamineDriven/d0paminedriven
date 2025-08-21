@@ -46,8 +46,8 @@
     "types": "tsc --emitDeclarationOnly"
   },
   "peerDependencies": {
-    "react": ">=19.1.0",
-    "react-dom": ">=19.1.0"
+    "react": ">=19.1.1",
+    "react-dom": ">=19.1.1"
   },
   "dependencies": {
     "@d0paminedriven/fs": "^6.1.0",
@@ -61,7 +61,7 @@
     "remark-rehype": "^11.1.2",
     "vfile": "^6.0.3",
     "unified": "^11.0.5",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
@@ -69,20 +69,20 @@
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.0.3",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
     "@types/unist": "^3.0.3",
-    "eslint": "^9.29.0",
-    "jiti": "^2.4.2",
-    "prettier": "^3.6.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "eslint": "^9.33.0",
+    "jiti": "^2.5.1",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "terser": "^5.43.1",
     "tslib": "^2.8.1",
     "tsup": "^8.5.0",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
     "unist-util-remove": "^4.0.0",
     "unist-util-visit": "^5.0.0"
   },

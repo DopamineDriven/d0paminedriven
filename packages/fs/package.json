@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "convenient fs helpers",
   "publishConfig": {
     "access": "public",
@@ -77,26 +77,26 @@
     "fix": "npm pkg fix"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.2.1",
     "dotenv-expand": "^12.0.2",
-    "sharp": "^0.34.2"
+    "sharp": "^0.34.3"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.3.0",
     "chokidar": "^4.0.3",
-    "dotenv-cli": "^8.0.0",
-    "eslint": "^9.29.0",
-    "jiti": "^2.4.2",
-    "prettier": "^3.6.0",
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^9.33.0",
+    "jiti": "^2.5.1",
+    "prettier": "^3.6.2",
     "terser": "^5.43.1",
     "tslib": "^2.8.1",
     "tsup": "^8.5.0",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.34.1"
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.40.0"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }

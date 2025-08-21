@@ -1,3 +1,4 @@
+import type { XOR } from "@/types/index.ts";
 import { UrlService } from "@/url/index.ts";
 
 export const extMimeMap = {
@@ -10,7 +11,7 @@ export const extMimeMap = {
   avif: ["image/avif"],
   avi: ["video/x-msvideo"],
   azw: ["application/vnd.amazon.ebook"],
-  bin: ["application/octet-stream"],
+  bin: ["application/octet-stream", "multipart/voice-message"],
   bmp: ["image/bmp"],
   bz: ["application/x-bzip"],
   bz2: ["application/x-bzip2"],
@@ -30,7 +31,7 @@ export const extMimeMap = {
   gif: ["image/gif"],
   glb: ["model/gltf-binary"],
   gltf: ["model/gltf+json"],
-  gz: ["application/x-gzip", "application/gzip"],
+  gz: ["application/gzip", "application/x-gzip"],
   hjif: ["haptics/hjif"],
   hmpg: ["haptics/hmpg"],
   htm: ["text/html"],
@@ -38,6 +39,7 @@ export const extMimeMap = {
   ico: ["image/vnd.microsoft.icon"],
   ics: ["text/calendar"],
   ivs: ["haptics/ivs"],
+  ivt: ["haptics/ivs"],
   jar: ["application/java-archive"],
   jpeg: ["image/jpeg"],
   jpg: ["image/jpeg"],
@@ -58,8 +60,10 @@ export const extMimeMap = {
   mp4: ["video/mp4"],
   mpeg: ["video/mpeg"],
   mpkg: ["application/vnd.apple.installer+xml"],
+
   ndjson: ["application/x-ndjson"],
-  obj: ["application/octet-stream", "text/plain", "model/obj"],
+  node: ["application/node", "text/javascript"],
+  obj: ["model/obj", "application/octet-stream", "text/plain"],
   odp: ["application/vnd.oasis.opendocument.presentation"],
   ods: ["application/vnd.oasis.opendocument.spreadsheet"],
   odt: ["application/vnd.oasis.opendocument.text"],
@@ -80,9 +84,11 @@ export const extMimeMap = {
   py: ["text/x-python"],
   pyc: ["application/x-python-code"],
   rar: ["application/vnd.rar"],
+  rs: ["text/rust"],
   rtf: ["application/rtf"],
   sh: ["application/x-sh"],
   sql: ["application/sql"],
+  sse: ["text/event-stream"],
   svg: ["image/svg+xml"],
   tar: ["application/x-tar"],
   tif: ["image/tiff"],
@@ -113,7 +119,126 @@ export const extMimeMap = {
   "7z": ["application/x-7z-compressed"]
 } as const;
 
+export const mimeToExt = {
+  "application/epub+zip": ["epub"],
+  "application/font-sfnt": ["ttf"],
+  "application/gzip": ["gz"],
+  "application/java-archive": ["jar"],
+  "application/json": ["json"],
+  "application/ld+json": ["jsonld"],
+  "application/msword": ["doc"],
+  "application/node": ["node", "js"],
+  "application/octet-stream": ["bin", "obj"],
+  "application/ogg": ["ogx"],
+  "application/pdf": ["pdf"],
+  "application/rtf": ["rtf"],
+  "application/sql": ["sql"],
+  "application/toml": ["toml"],
+  "application/vnd.amazon.ebook": ["azw"],
+  "application/vnd.apple.installer+xml": ["mpkg"],
+  "application/vnd.apple.mpegurl": ["m3u8"],
+  "application/vnd.apple.pkpass": ["pkpass"],
+  "application/vnd.mozilla.xul+xml": ["xul"],
+  "application/vnd.ms-excel": ["xls"],
+  "application/vnd.ms-fontobject": ["eot"],
+  "application/vnd.ms-powerpoint": ["ppt"],
+  "application/vnd.oasis.opendocument.presentation": ["odp"],
+  "application/vnd.oasis.opendocument.spreadsheet": ["ods"],
+  "application/vnd.oasis.opendocument.text": ["odt"],
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": [
+    "pptx"
+  ],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    "docx"
+  ],
+  "application/vnd.rar": ["rar"],
+  "application/vnd.visio": ["vsd"],
+  "application/wasm": ["wasm"],
+  "application/x-7z-compressed": ["7z"],
+  "application/x-abiword": ["abw"],
+  "application/x-bzip": ["bz"],
+  "application/x-bzip2": ["bz2"],
+  "application/x-cdf": ["cda"],
+  "application/x-csh": ["csh"],
+  "application/x-freearc": ["arc"],
+  "application/x-gzip": ["gz"],
+  "application/x-httpd-php": ["php"],
+  "application/x-mdx": ["mdx"],
+  "application/x-ndjson": ["ndjson"],
+  "application/x-python-code": ["pyc"],
+  "application/x-sh": ["sh"],
+  "application/x-tar": ["tar"],
+  "application/x-zip-compressed": ["zip"],
+  "application/xhtml+xml": ["xhtml"],
+  "application/xml": ["xml"],
+  "application/yaml": ["yml", "yaml"],
+  "application/zip": ["zip"],
+  "audio/aac": ["aac"],
+  "audio/midi": ["mid"],
+  "audio/mp4": ["m4a"],
+  "audio/mpeg": ["mp3"],
+  "audio/ogg": ["opus", "ogg", "oga"],
+  "audio/wav": ["wav"],
+  "audio/x-midi": ["midi"],
+  "font/otf": ["otf"],
+  "font/ttf": ["ttf"],
+  "font/woff": ["woff"],
+  "font/woff2": ["woff2"],
+  "haptics/hjif": ["hjif"],
+  "haptics/hmpg": ["hmpg"],
+  "haptics/ivs": ["ivs", "ivt"],
+  "image/aces": ["aces"],
+  "image/apng": ["apng"],
+  "image/avci": ["avci"],
+  "image/avif": ["avif"],
+  "image/bmp": ["bmp"],
+  "image/dpx": ["dpx"],
+  "image/emf": ["emf"],
+  "image/gif": ["gif"],
+  "image/jpeg": ["jpg", "jpeg"],
+  "image/ktx": ["ktx"],
+  "image/ktx2": ["ktx2"],
+  "image/png": ["png"],
+  "image/svg+xml": ["svg"],
+  "image/tiff": ["tiff", "tif"],
+  "image/vnd.microsoft.icon": ["ico"],
+  "image/webp": ["webp"],
+  "model/gltf-binary": ["glb"],
+  "model/gltf+json": ["gltf"],
+  "model/obj": ["obj"],
+  "model/vnd.usdz+zip": ["usdz"],
+  "multipart/voice-message": ["bin"],
+  "text/calendar": ["ics"],
+  "text/css": ["css"],
+  "text/csv": ["csv"],
+  "text/event-stream": ["sse", "ts", "rs", "py", "txt"],
+  "text/html": ["html", "htm"],
+  "text/javascript": ["cjs", "js", "mjs"],
+  "text/markdown": ["md"],
+  "text/plain": ["txt"],
+  "text/rust": ["rs"],
+  "text/typescript": ["ts"],
+  "text/vtt": ["vtt"],
+  "text/x-python": ["py"],
+  "video/3gpp": ["3gp"],
+  "video/3gpp2": ["3g2"],
+  "video/mp2t": ["ts"],
+  "video/mp4": ["mp4", "m4v"],
+  "video/mpeg": ["mpeg"],
+  "video/ogg": ["ogv"],
+  "video/vnd.dlna.mpeg-tts": ["ts"],
+  "video/webm": ["weba"],
+  "video/x-msvideo": ["avi"]
+} as const;
+
 export type FileExtension = keyof typeof extMimeMap;
+
+export type MimeType = keyof typeof mimeToExt;
+
+export type MimeTypeToFileExtension<
+  T extends XOR<typeof mimeToExt, typeof extMimeMap>
+> = T[keyof T];
 
 export type FileExtensionToMimeType<T extends FileExtension> =
   (typeof extMimeMap)[T][number];
@@ -142,6 +267,37 @@ export class MimeService extends UrlService {
     super();
   }
   public readonly mimeTypeObj = extMimeMap;
+
+  public readonly toExtObj = mimeToExt;
+
+  public compareMimeToExt(p: "mime" | "ext" = "mime") {
+    let a: Record<string, number> = {};
+    if (p === "mime") {
+      for (const [_key, vals] of Object.entries(extMimeMap)) {
+        for (const val of vals) {
+          a[val] = (a[val] ?? 0) + 1;
+        }
+      }
+      for (const [key, _val] of Object.entries(mimeToExt)) {
+        a[key] = (a[key] ?? 0) + 1;
+      }
+      return Object.fromEntries(
+        Object.entries(a).sort(([_a, aa], [_b, bb]) => bb - aa)
+      );
+    } else {
+      for (const [_key, vals] of Object.entries(mimeToExt)) {
+        for (const val of vals) {
+          a[val] = (a[val] ?? 0) + 1;
+        }
+      }
+      for (const [key, _val] of Object.entries(extMimeMap)) {
+        a[key] = (a[key] ?? 0) + 1;
+      }
+      return Object.fromEntries(
+        Object.entries(a).sort(([_a, aa], [_b, bb]) => bb - aa)
+      );
+    }
+  }
 
   public assetType<const T extends string>(url: T) {
     const parsed = this.parseUrl(url);
