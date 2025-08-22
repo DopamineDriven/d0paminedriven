@@ -511,7 +511,15 @@ export type SizeOpts = { decimals?: number; includeUnits?: boolean };
 export interface ImageSize {
   width: number;
   height: number;
-  type: "png" | "jpeg" | "gif" | "bmp" | "webp" | "avif" | "unknown";
+  format: 'png' | 'jpeg' | 'gif' | 'bmp' | 'webp' | 'avif' | 'unknown';
+  frames: number;
+  animated: boolean;
+  hasAlpha: boolean | null;
+  orientation: number | null; // EXIF orientation (1-8) or null
+  aspectRatio: number;
+  colorSpace: 'rgb' | 'rgba' | 'grayscale' | 'grayscale-alpha' | 'indexed' | 'cmyk' | 'ycbcr' | 'ycck' | 'unknown';
+  iccProfile: string | null; // Profile name/description if available, or 'embedded' if present but unnamed, null otherwise
+  exifDateTimeOriginal: string | null; // ISO-like string or null
 }
 
 // Helper for AVIF box finding

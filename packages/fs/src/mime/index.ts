@@ -299,6 +299,36 @@ export class MimeService extends UrlService {
     }
   }
 
+  public mimeToExt(mime: keyof typeof this.toExtObj) {
+    const extensions = this.toExtObj[mime];
+    
+    // Single extension - easy choice
+    if (extensions.length === 1) return extensions[0];
+    
+    // For multiple extensions, return the most common/standard one
+    // Priority: prefer shorter, more common extensions
+    if (extensions.length === 2) {
+      // Usually the first one is more common (e.g., "jpg" before "jpeg")
+      return extensions[0];
+    }
+    
+    if (extensions.length === 3) {
+      // For audio/ogg: ["opus", "ogg", "oga"] - ogg is most common
+      if (mime === "audio/ogg") return "ogg";
+      // Default to first
+      return extensions[0];
+    }
+    
+    if (extensions.length === 5) {
+      // Only text/event-stream has 5: ["sse", "ts", "rs", "py", "txt"]
+      // SSE (Server-Sent Events) is the most specific/correct
+      return "sse";
+    }
+    
+    // Fallback (shouldn't happen with current data)
+    return extensions[0];
+  }
+
   public assetType<const T extends string>(url: T) {
     const parsed = this.parseUrl(url);
     if (!parsed) return undefined;
