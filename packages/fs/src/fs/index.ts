@@ -23,7 +23,7 @@ import type {
 import { MimeService } from "@/mime/index.ts";
 import { unitsObj } from "@/types/index.ts";
 
-dotenv.config();
+dotenv.config({quiet:true});
 
 export default class Fs extends MimeService {
   constructor(public cwd: string) {
@@ -428,7 +428,6 @@ export default class Fs extends MimeService {
     if (!response.ok) {
       throw new Error(`Failed to fetch asset: ${response.statusText}`);
     }
-    console.log(Object.fromEntries(Array.from(response.headers.entries())));
     const reader = response.body?.getReader();
     if (reader) {
       const chunks = Array.of<Uint8Array>();
@@ -507,6 +506,59 @@ export default class Fs extends MimeService {
     } catch (err) {
       return console.error(err);
     }
+  }
+
+  public parseExif(
+    buffer: Buffer,
+    app1Pos: number,
+    _app1Size: number
+  ): { orientation: number | null; dateTimeOriginal: string | null } {
+    const exifHeader = buffer.toString("ascii", app1Pos + 2, app1Pos + 8);
+    if (exifHeader !== "Exif\0\0")
+      return { orientation: null, dateTimeOriginal: null };
+
+    let tiffPos = app1Pos + 8;
+    const byteOrder = buffer.toString("ascii", tiffPos, tiffPos + 2);
+    const littleEndian = byteOrder === "II";
+    const readUInt16 = littleEndian
+      ? buffer.readUInt16LE.bind(buffer)
+      : buffer.readUInt16BE.bind(buffer);
+    const readUInt32 = littleEndian
+      ? buffer.readUInt32LE.bind(buffer)
+      : buffer.readUInt32BE.bind(buffer);
+
+    if (readUInt16(tiffPos + 2) !== 0x2a)
+      return { orientation: null, dateTimeOriginal: null }; // Not TIFF
+    let ifdOffset = readUInt32(tiffPos + 4);
+    tiffPos += ifdOffset;
+
+    const numEntries = readUInt16(tiffPos);
+    tiffPos += 2;
+
+    let orientation: number | null = null;
+    let dateTimeOriginal: string | null = null;
+
+    for (let i = 0; i < numEntries; i++) {
+      const tag = readUInt16(tiffPos);
+      const type = readUInt16(tiffPos + 2);
+      const count = readUInt32(tiffPos + 4);
+      const valueOffset = tiffPos + 8;
+
+      if (tag === 0x0112 && type === 3 && count === 1) {
+        // Orientation (short)
+        orientation = readUInt16(valueOffset);
+      } else if (tag === 0x9003 && type === 2 && count === 20) {
+        // DateTimeOriginal (ASCII, 19 chars + null)
+        const offset = readUInt32(valueOffset);
+        dateTimeOriginal = buffer
+          .toString("ascii", app1Pos + 2 + offset, app1Pos + 2 + offset + 19)
+          .trim();
+      }
+
+      tiffPos += 12;
+    }
+
+    return { orientation, dateTimeOriginal };
   }
   /**
    *
@@ -612,7 +664,8 @@ export default class Fs extends MimeService {
     return null;
   }
 
-  public async getImageSize(filePath: string) {
+  public async getImageSpecs(filePath: string) {
+  
     const buffer = await this.fileToBufferAsync(filePath);
     // PNG: Signature is 89 50 4E 47 0D 0A 1A 0A, width/height in IHDR at offsets 16/20 (big-endian)
     if (
@@ -635,16 +688,101 @@ export default class Fs extends MimeService {
       ) {
         throw new Error("IHDR Chunk of png not found or incorrect.");
       }
+      const colorType = buffer[25]; // Offset 16 (width) + 4 (height) + 4 (bit depth) + 1 = 25
+      let colorSpace: ImageSize["colorSpace"];
+      let hasAlpha = false;
+
+      switch (colorType) {
+        case 0:
+          colorSpace = "grayscale";
+          break;
+        case 2:
+          colorSpace = "rgb";
+          break;
+        case 3:
+          colorSpace = "indexed";
+          break;
+        case 4:
+          colorSpace = "grayscale-alpha";
+          hasAlpha = true;
+          break;
+        case 6:
+          colorSpace = "rgba";
+          hasAlpha = true;
+          break;
+        default:
+          colorSpace = "unknown";
+      }
+      const width = buffer.readUInt32BE(16);
+      const height = buffer.readUInt32BE(20);
+      // For PNG, no native animation (APNG extension via acTL chunk)
+      let frames = 1;
+      let animated = false;
+      let iccProfile: string | null = null;
+      let exifDateTimeOriginal: string | null = null;
+      let orientation: number | null = null;
+      // Scan chunks for extras
+      let pos = 33; // After IHDR (8 sig + 4 len + 4 type + 13 data + 4 crc)
+      while (pos < buffer.length - 12) {
+        const chunkLen = buffer.readUInt32BE(pos);
+        const chunkType = buffer.toString("ascii", pos + 4, pos + 8);
+        const chunkData = pos + 8;
+        if (chunkType === "acTL") {
+          animated = true;
+          frames = buffer.readUInt32BE(chunkData); // num_frames
+        } else if (chunkType === "iCCP") {
+          // ICC profile: name (null-terminated) + compression + data
+          const nameEnd = buffer.indexOf(0, chunkData);
+          const profileName = buffer.toString("ascii", chunkData, nameEnd);
+          iccProfile = profileName || "embedded";
+        } else if (chunkType === "tIME") {
+          const month = buffer?.[chunkData + 2],
+            day = buffer?.[chunkData + 3],
+            hour = buffer?.[chunkData + 4],
+            minute = buffer?.[chunkData + 5],
+            second = buffer?.[chunkData + 6];
+          // Last modification time, but not DateTimeOriginal; approximate if no EXIF
+          if (
+            typeof month !== "undefined" &&
+            typeof day !== "undefined" &&
+            typeof hour !== "undefined" &&
+            typeof minute !== "undefined" &&
+            typeof second !== "undefined"
+          ) {
+            const year = buffer.readUInt16BE(chunkData);
+            exifDateTimeOriginal = `${year}:${month.toString().padStart(2, "0")}:${day.toString().padStart(2, "0")} ${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:${second.toString().padStart(2, "0")}`;
+          }
+        } else if (chunkType === "IDAT") {
+          break; // Data starts, no need to scan further for basics
+        }
+        pos += 12 + chunkLen; // len + type + data + crc
+      }
       return {
-        width: buffer.readUInt32BE(16),
-        height: buffer.readUInt32BE(20),
-        type: "png"
+        width,
+        height,
+        format: "png",
+        frames,
+        animated,
+        hasAlpha,
+        orientation,
+        aspectRatio: width / height,
+        colorSpace,
+        iccProfile,
+        exifDateTimeOriginal
       } satisfies ImageSize;
     }
 
     // JPEG: Starts with FF D8, dimensions in SOF marker (FF C0-FF CF, excluding some)
     if (buffer.length >= 10 && buffer[0] === 0xff && buffer[1] === 0xd8) {
-      let pos = 2;
+      let pos = 2,
+        colorSpace: ImageSize["colorSpace"] = "unknown",
+        hasAlpha = false,
+        width = 0,
+        height = 0,
+        iccProfile: string | null = null,
+        orientation: number | null = null,
+        exifDateTimeOriginal: string | null = null;
+
       while (pos < buffer.length - 10) {
         if (buffer[pos] !== 0xff) {
           throw new Error("Invalid JPEG file");
@@ -662,16 +800,55 @@ export default class Fs extends MimeService {
           marker !== 0xc8 &&
           marker !== 0xcc
         ) {
-          // Valid SOF marker with dimensions
-          return {
-            width: buffer.readUInt16BE(pos + 7),
-            height: buffer.readUInt16BE(pos + 5),
-            type: "jpeg"
-          } satisfies ImageSize;
+          const numComponents = buffer[pos + 4]; // After length (2 bytes) + precision (1) = pos + 4
+          switch (numComponents) {
+            case 1:
+              colorSpace = "grayscale";
+              break;
+            case 3:
+              colorSpace = "ycbcr";
+              break; // Most common for RGB JPEGs (stored as YCbCr)
+            case 4:
+              colorSpace = "ycck";
+              break; // YCCK for CMYK with alpha-like, but no true alpha
+            default:
+              colorSpace = "unknown";
+          }
+          width = buffer.readUInt16BE(pos + 7);
+          height = buffer.readUInt16BE(pos + 5);
+        } else if (marker === 0xe1) {
+          // APP1 for EXIF
+          const { orientation: ori, dateTimeOriginal } = this.parseExif(
+            buffer,
+            pos,
+            segmentSize
+          );
+          orientation = ori;
+          exifDateTimeOriginal = dateTimeOriginal;
+        } else if (marker === 0xe2) {
+          // APP2 for ICC
+          const iccHeader = buffer.toString("ascii", pos + 4, pos + 18);
+          if (iccHeader.startsWith("ICC_PROFILE")) {
+            iccProfile = "embedded";
+          }
         }
         pos += segmentSize + 2;
       }
-      throw new Error("No dimensions found in JPEG file");
+
+      if (width === 0) throw new Error("No dimensions found in JPEG file");
+      return {
+        width,
+        height,
+        format: "jpeg",
+        frames: 1,
+        animated: false, // JPEG not animated
+        hasAlpha,
+        orientation,
+        aspectRatio: width / height,
+        colorSpace,
+        iccProfile,
+        exifDateTimeOriginal
+      } satisfies ImageSize;
     }
 
     // GIF: Signature GIF87a or GIF89a, width/height at offsets 6/8 (little-endian)
@@ -680,19 +857,80 @@ export default class Fs extends MimeService {
       buffer.length >= 10 &&
       (gifHeader === "GIF87a" || gifHeader === "GIF89a")
     ) {
+      const width = buffer.readUInt16LE(6),
+        height = buffer.readUInt16LE(8);
+      let frames = 0;
+      let pos = 13; // After header (10) + screen descriptor (3 if no GCT, but skip GCT)
+      let bufTen = buffer?.[10];
+      if (typeof bufTen === "undefined") {
+        pos = 13;
+        frames = 0;
+      } else if (bufTen & 0x80) pos += 3 << ((bufTen & 0x07) + 1); // Skip global color table if present
+      while (pos < buffer.length) {
+        if (buffer[pos] === 0x21) {
+          // Extension
+          pos += 2; // Label + size
+          let subSize = buffer?.[pos];
+
+          while (subSize && subSize > 0) {
+            pos += subSize + 1;
+            subSize = buffer?.[pos];
+          }
+          pos++; // Next block
+        } else if (buffer?.[pos] && buffer?.[pos] === 0x2c) {
+          frames++;
+          pos += 10; // Image descriptor
+          let b = buffer?.[pos - 1];
+
+          if (typeof b !== "undefined" && b & 0x80)
+            pos += 3 << ((b & 0x07) + 1); // Local color table
+          pos++; // LZW min size
+          let dataSize = buffer?.[pos];
+          while (dataSize && dataSize > 0) {
+            pos += dataSize + 1;
+            dataSize = buffer[pos];
+          }
+          pos++; // Terminator
+        } else if (buffer[pos] === 0x3b) {
+          break; // Trailer
+        } else {
+          pos++;
+        }
+      }
       return {
-        width: buffer.readUInt16LE(6),
-        height: buffer.readUInt16LE(8),
-        type: "gif"
+        width,
+        height,
+        format: "gif",
+        frames,
+        animated: frames > 1,
+        hasAlpha: null, // GIF transparency is per-pixel binary, not full alpha; set null or true if transparent color exists, but complex
+        orientation: null, // No orientation in GIF
+        aspectRatio: width / height,
+        colorSpace: "indexed",
+        iccProfile: null, // No ICC in GIF
+        exifDateTimeOriginal: null // No EXIF in GIF
       } satisfies ImageSize;
     }
 
     // BMP: Signature BM, width/height at offsets 18/22 (little-endian, height can be negative for top-down)
-    if (buffer.length >= 26 && buffer[0] === 0x42 && buffer[1] === 0x4d) {
+    if (buffer.length >= 26 && buffer?.[0] === 0x42 && buffer?.[1] === 0x4d) {
+      const width = buffer.readInt32LE(18);
+      const height = Math.abs(buffer.readInt32LE(22));
+      const bitDepth = buffer.readUInt16LE(28);
+      let colorSpace: ImageSize["colorSpace"] =
+        bitDepth <= 8 ? "indexed" : "rgb";
       return {
-        width: buffer.readInt32LE(18),
-        height: Math.abs(buffer.readInt32LE(22)),
-        type: "bmp"
+        width,
+        height,
+        format: "bmp",
+        frames: 1,
+        animated: false,
+        hasAlpha: null, // Some BMP have alpha in 32bpp, check if bitDepth===32 && compression===3 (bitfields with alpha)
+        orientation: buffer.readInt32LE(22) < 0 ? 1 : 6, // Negative height means top-down (orientation 1), positive bottom-up (like 6, but simplified)
+        aspectRatio: width / height,
+        colorSpace,
+        iccProfile: null, // Rare in BMP
+        exifDateTimeOriginal: null
       } satisfies ImageSize;
     }
 
@@ -703,7 +941,18 @@ export default class Fs extends MimeService {
       buffer.toString("ascii", 8, 12) === "WEBP"
     ) {
       const chunkType = buffer.toString("ascii", 12, 16);
+      let colorSpace: ImageSize["colorSpace"] = "unknown";
+      let hasAlpha = false;
+      let width = 0;
+      let height = 0;
+      let frames = 1;
+      let animated = false;
+      let iccProfile: string | null = null;
       if (chunkType === "VP8X") {
+        const flags = buffer?.[20]; // Feature flags
+        colorSpace = flags ? (flags & 0x02 ? "rgba" : "rgb") : "unknown"; // Bit 1 alpha
+        hasAlpha = flags ? !!(flags & 0x02) : false;
+        animated = flags ? !!(flags & 0x01) : false; // Bit 0 animation
         let widthSubtractOne = 0;
         let heightSubtractOne = 0;
         if (buffer?.[24] && buffer?.[25] && buffer?.[26]) {
@@ -714,49 +963,67 @@ export default class Fs extends MimeService {
           heightSubtractOne =
             buffer[27] | (buffer[28] << 8) | (buffer[29] << 16);
         }
-        // Extended format
-
-        return {
-          width: widthSubtractOne + 1,
-          height: heightSubtractOne + 1,
-          type: "webp"
-        } satisfies ImageSize;
+        width = widthSubtractOne + 1;
+        height = heightSubtractOne + 1;
+        // Count frames if animated: Scan for ANMF chunks
+        if (animated) {
+          let pos = 30; // After VP8X
+          frames = 0;
+          while (pos < buffer.length - 8) {
+            const subChunkType = buffer.toString("ascii", pos, pos + 4);
+            const subChunkSize = buffer.readUInt32LE(pos + 4);
+            if (subChunkType === "ICCP") {
+              iccProfile = "embedded";
+            } else if (subChunkType === "ANMF") {
+              frames++;
+            }
+            pos += 8 + subChunkSize + (subChunkSize % 2); // Padded to even
+          }
+        }
       } else if (chunkType === "VP8 ") {
-        // Lossy simple
+        // Lossy simple: Always RGB (no alpha in simple VP8)
+        colorSpace = "rgb";
+        hasAlpha = false;
         const dataStart = 20;
         if (
-          buffer[dataStart + 3] !== 0x9d ||
-          buffer[dataStart + 4] !== 0x01 ||
-          buffer[dataStart + 5] !== 0x2a
+          buffer?.[dataStart + 3] !== 0x9d ||
+          buffer?.[dataStart + 4] !== 0x01 ||
+          buffer?.[dataStart + 5] !== 0x2a
         ) {
           throw new Error("Invalid VP8 keyframe");
         }
-        const width = buffer.readUInt16LE(dataStart + 6) & 0x3fff;
-        const height = buffer.readUInt16LE(dataStart + 8) & 0x3fff;
-        return {
-          width,
-          height,
-          type: "webp"
-        } satisfies ImageSize;
+        width = buffer.readUInt16LE(dataStart + 6) & 0x3fff;
+        height = buffer.readUInt16LE(dataStart + 8) & 0x3fff;
       } else if (chunkType === "VP8L") {
         // Lossless simple
         const dataStart = 20;
-        if (buffer[dataStart] !== 0x2f) {
+        if (buffer?.[dataStart] !== 0x2f) {
           throw new Error("Invalid VP8L signature");
         }
         const bits = buffer.readUInt32LE(dataStart + 1);
         if (bits >>> 29 !== 0) {
           throw new Error("Invalid VP8L version");
         }
-        const width = 1 + (bits & 0x3fff);
-        const height = 1 + ((bits >> 14) & 0x3fff);
-        return {
-          width,
-          height,
-          type: "webp"
-        } satisfies ImageSize;
+        colorSpace = bits & (1 << 8) ? "rgba" : "rgb"; // Bit 8 indicates alpha
+        hasAlpha = !!(bits & (1 << 8));
+        width = 1 + (bits & 0x3fff);
+        height = 1 + ((bits >> 14) & 0x3fff);
+      } else {
+        throw new Error("Unsupported WebP chunk");
       }
-      throw new Error("Unsupported WebP chunk");
+      return {
+        width,
+        height,
+        format: "webp",
+        frames,
+        animated,
+        hasAlpha,
+        orientation: null, // No standard orientation in WebP
+        aspectRatio: width / height,
+        colorSpace,
+        iccProfile,
+        exifDateTimeOriginal: null // Can have EXIF chunk, but rare; add if needed
+      } satisfies ImageSize;
     }
 
     // AVIF: ISOBMFF with ftyp avif/avis, dimensions in meta > iprp > ipco > ispe
@@ -764,8 +1031,9 @@ export default class Fs extends MimeService {
       const ftyp = this.findBox(buffer, "ftyp");
       if (!ftyp) throw new Error("Invalid AVIF: No ftyp");
       const brands = buffer.toString("ascii", ftyp.pos, ftyp.pos + ftyp.size);
-      if (!brands.includes("avif") && !brands.includes("avis"))
-        throw new Error("Not an AVIF file");
+      const isAvif = brands.includes("avif");
+      const isAvis = brands.includes("avis");
+      if (!isAvif && !isAvis) throw new Error("Not an AVIF file");
 
       const meta = this.findBox(buffer, "meta");
       if (!meta) throw new Error("Invalid AVIF: No meta");
@@ -782,10 +1050,65 @@ export default class Fs extends MimeService {
       if (buffer[ispe.pos] !== 0) throw new Error("Invalid ispe version");
       const width = buffer.readUInt32BE(ispe.pos + 4);
       const height = buffer.readUInt32BE(ispe.pos + 8);
+
+      // For color space, look for 'colr' box in ipco (simple color info) or assume RGB if no ICC
+      let colorSpace: ImageSize["colorSpace"] = "rgb"; // Default for most AVIF
+      let hasAlpha = false;
+      let iccProfile: string | null = null;
+      const colr = this.findBox(buffer, "colr", ipco.pos, ipco.pos + ipco.size);
+      if (colr) {
+        const colrType = buffer.toString("ascii", colr.pos, colr.pos + 4);
+        if (colrType === "nclx") {
+          // nclx profile: color primaries, transfer, matrix
+          // Simplified: We can check matrix coefficient for YUV vs RGB, but for now, flag as ycbcr if not RGB
+          const matrix = buffer.readUInt16BE(colr.pos + 6);
+          colorSpace = matrix === 2 ? "rgb" : "ycbcr"; // 2 is RGB identity
+        } else if (colrType === "rICC" || colrType === "prof") {
+          colorSpace = "unknown"; // ICC profile present
+          iccProfile = "embedded";
+        }
+      }
+      // Check for alpha: Look for 'auxC' box with alpha URI
+      const auxC = this.findBox(buffer, "auxC", ipco.pos, ipco.pos + ipco.size);
+      if (
+        auxC &&
+        buffer
+          .toString("ascii", auxC.pos, auxC.pos + auxC.size)
+          .includes("alpha")
+      ) {
+        hasAlpha = true;
+        if (colorSpace === "rgb" || colorSpace === "ycbcr") {
+          colorSpace = colorSpace === "rgb" ? "rgba" : "ycck"; // Approximate with alpha
+        } else if (colorSpace === "unknown") {
+          colorSpace = "grayscale-alpha";
+        }
+      }
+      // Animated/frames: If 'avis', it's sequence; count primary + alpha items or moov tracks, but simplified count iloc items
+      let frames = 1;
+      let animated = isAvis;
+      if (animated) {
+        const iloc = this.findBox(buffer, "iloc", metaSubStart, metaSubEnd);
+
+        if (iloc) {
+          // Simplified: Count items (full parse complex, assume frames = item count / 2 if alpha)
+          const version = buffer?.[iloc.pos];
+          const itemCountPos = iloc.pos + (version ? (version < 2 ? 4 : 6) : 4);
+          frames = buffer.readUInt16BE(itemCountPos); // Approx, as items include alpha
+        }
+      }
+
       return {
         width,
         height,
-        type: "avif"
+        format: "avif",
+        frames,
+        animated,
+        hasAlpha: hasAlpha ? true : null, // null if unknown
+        orientation: null, // Can have 'irot' or 'imir' transforms, but rare
+        aspectRatio: width / height,
+        colorSpace,
+        iccProfile,
+        exifDateTimeOriginal: null // Can have 'XMP' box, but parse XMP for date if needed
       } satisfies ImageSize;
     }
 
@@ -930,14 +1253,14 @@ export default class Fs extends MimeService {
     if (!pattern) {
       return tmpContents;
     }
-    if (typeof pattern ==="string") {
-      return tmpContents.filter((t) => t.includes(pattern));
+    if (typeof pattern === "string") {
+      return tmpContents.filter(t => t.includes(pattern));
     }
     return tmpContents.filter(path => {
       // const _filename = path.includes("/")
       //   ? (path.split("/")?.pop() ?? path)
       //   : path;
-      return  pattern.test(path);
+      return pattern.test(path);
     });
   }
 
@@ -1047,11 +1370,11 @@ export default class Fs extends MimeService {
     return removed;
   }
 
-  public rmTmpFile<const V extends string>(filename: V){
+  public rmTmpFile<const V extends string>(filename: V) {
     const tmpPath = resolve(this.tmpDir, filename);
 
     this.rmFile(tmpPath);
-}
+  }
 
   /**
    * Generate a unique tmp filename with optional prefix
@@ -1090,45 +1413,45 @@ export default class Fs extends MimeService {
    */
   public async *cleanTmpGenerator(pattern: string | RegExp, batchSize = 10) {
     const files = this.scanTmp(pattern);
-    
+
     // Use arrToArrOfArrs for effortless batching!
     const batches = await this.arrToArrOfArrs({
       arrToFragment: files,
       arrOfArrsAggregator: [],
       interval: batchSize
     });
-    
+
     let totalRemoved = 0;
-    
+
     for (const [index, batch] of batches.entries()) {
       // Yield current batch info before removing
-      yield { 
-        action: 'removing' as const, 
+      yield {
+        action: "removing" as const,
         batch: [...batch],
         batchNumber: index + 1,
         totalBatches: batches.length,
         totalFound: files.length,
-        removed: totalRemoved 
+        removed: totalRemoved
       };
-      
+
       // Remove files in this batch
       for (const file of batch) {
         this.rmTmpFile(file);
         totalRemoved++;
       }
-      
+
       // Yield progress after batch removal
-      yield { 
-        action: 'batch-complete' as const, 
+      yield {
+        action: "batch-complete" as const,
         batchNumber: index + 1,
         batchSize: batch.length,
         totalRemoved,
         remaining: files.length - totalRemoved
       };
     }
-    
-    return { 
-      action: 'complete' as const, 
+
+    return {
+      action: "complete" as const,
       totalRemoved,
       totalBatches: batches.length,
       pattern: pattern.toString()

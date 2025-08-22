@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "6.5.0",
+  "version": "7.0.0",
   "description": "convenient fs helpers",
   "publishConfig": {
     "access": "public",
