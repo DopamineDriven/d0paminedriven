@@ -881,7 +881,6 @@ export default class Fs extends MimeService {
     //   stream.write(data);
     //   stream.end();
     // }
-    return fullPath;
   }
 
   /**
@@ -918,7 +917,7 @@ export default class Fs extends MimeService {
    * ```
    */
   public scanTmp(
-    pattern?: string,
+    pattern?: string | RegExp,
     options: ReadDirOptions = {
       recursive: false,
       withFileTypes: false,
@@ -931,12 +930,14 @@ export default class Fs extends MimeService {
     if (!pattern) {
       return tmpContents;
     }
-
+    if (typeof pattern ==="string") {
+      return tmpContents.filter((t) => t.includes(pattern));
+    }
     return tmpContents.filter(path => {
-      const filename = path.includes("/")
-        ? (path.split("/").pop() ?? path)
-        : path;
-      return filename.includes(pattern) || path.startsWith(pattern);
+      // const _filename = path.includes("/")
+      //   ? (path.split("/")?.pop() ?? path)
+      //   : path;
+      return  pattern.test(path);
     });
   }
 
@@ -1024,14 +1025,14 @@ export default class Fs extends MimeService {
 
       try {
         const stats = fsSync.statSync(fullPath);
-        
+
         if (maxAge) {
           const age = Date.now() - stats.mtimeMs;
           if (age < maxAge) {
             continue;
           }
         }
-        
+
         if (stats.isDirectory()) {
           this.rmDirSync(fullPath);
         } else {
@@ -1045,6 +1046,12 @@ export default class Fs extends MimeService {
 
     return removed;
   }
+
+  public rmTmpFile<const V extends string>(filename: V){
+    const tmpPath = resolve(this.tmpDir, filename);
+
+    this.rmFile(tmpPath);
+}
 
   /**
    * Generate a unique tmp filename with optional prefix
@@ -1064,5 +1071,67 @@ export default class Fs extends MimeService {
     const parts = [prefix ?? "tmp", timestamp, random].join("-");
 
     return extension ? `${parts}.${extension}` : parts;
+  }
+
+  /**
+   * Async generator for cleaning tmp files with batched removal
+   * @param pattern Pattern to match files for deletion
+   * @param batchSize Number of files to remove per batch (default 10)
+   * @yields Progress information during cleanup
+   * @returns Final cleanup summary
+   * @example
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * // Clean up with progress tracking
+   * for await (const progress of fs.cleanTmpGenerator("session-", 25)) {
+   *   console.log(progress);
+   * }
+   * ```
+   */
+  public async *cleanTmpGenerator(pattern: string | RegExp, batchSize = 10) {
+    const files = this.scanTmp(pattern);
+    
+    // Use arrToArrOfArrs for effortless batching!
+    const batches = await this.arrToArrOfArrs({
+      arrToFragment: files,
+      arrOfArrsAggregator: [],
+      interval: batchSize
+    });
+    
+    let totalRemoved = 0;
+    
+    for (const [index, batch] of batches.entries()) {
+      // Yield current batch info before removing
+      yield { 
+        action: 'removing' as const, 
+        batch: [...batch],
+        batchNumber: index + 1,
+        totalBatches: batches.length,
+        totalFound: files.length,
+        removed: totalRemoved 
+      };
+      
+      // Remove files in this batch
+      for (const file of batch) {
+        this.rmTmpFile(file);
+        totalRemoved++;
+      }
+      
+      // Yield progress after batch removal
+      yield { 
+        action: 'batch-complete' as const, 
+        batchNumber: index + 1,
+        batchSize: batch.length,
+        totalRemoved,
+        remaining: files.length - totalRemoved
+      };
+    }
+    
+    return { 
+      action: 'complete' as const, 
+      totalRemoved,
+      totalBatches: batches.length,
+      pattern: pattern.toString()
+    };
   }
 }

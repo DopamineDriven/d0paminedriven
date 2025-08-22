@@ -98,8 +98,16 @@ fs.mimeToExt("image/jpeg");              // "jpg" (returns common extension)
 // Write to tmp with automatic cleanup
 const tmpPath = fs.writeTmp("session-data.json", JSON.stringify(data));
 
+// Generate unique tmp filenames
+const uniqueName = fs.uniqueTmpName("upload", "bin");
+// Result: "upload-1701234567890-x7y8z9.bin"
+
 // Scan tmp directory (non-recursive by default to avoid permission issues)
 const tmpFiles = fs.scanTmp("session-");  // Find all session files
+const regexFiles = fs.scanTmp(/\.json$/);  // Regex pattern support
+
+// Remove individual tmp files with precision
+fs.rmTmpFile("session-abc123.json");  // Targeted single file removal
 
 // Extract files from tmp to permanent location
 fs.extractFromTmp("processed-", "./output", { 
@@ -108,6 +116,12 @@ fs.extractFromTmp("processed-", "./output", {
 
 // Cleanup old tmp files
 fs.cleanupTmp("cache-", 60 * 60 * 1000);  // Remove files older than 1 hour
+
+// Async generator for batch removal with progress tracking
+for await (const progress of fs.cleanTmpGenerator("upload-", 20)) {
+  // Process files in batches of 20 with real-time progress
+  console.log(`Batch ${progress.batchNumber}/${progress.totalBatches}`);
+}
 ```
 
 ### 5. The Legendary `withWs` Method
@@ -187,6 +201,59 @@ async function processUpload(fileBuffer: Buffer, userId: string) {
   
   // Cleanup tmp (or let cleanupTmp handle it later)
   fs.cleanupTmp(`upload-${userId}`);
+}
+```
+
+### Advanced Tmp Management
+
+#### Granular Single File Removal
+```typescript
+const fs = new Fs(process.cwd());
+
+// Create some tmp files
+const tmpFile1 = fs.uniqueTmpName("session", "json");
+const tmpFile2 = fs.uniqueTmpName("cache", "dat");
+fs.writeTmp(tmpFile1, JSON.stringify({ user: "123" }));
+fs.writeTmp(tmpFile2, Buffer.from("cached data"));
+
+// Remove a specific tmp file
+fs.rmTmpFile(tmpFile1); // Removes only session-*.json file
+
+// Or find and remove specific files
+const sessionFiles = fs.scanTmp("session");
+sessionFiles.forEach(file => fs.rmTmpFile(file));
+```
+
+#### Batch Removal with Progress Tracking
+```typescript
+async function cleanupWithProgress() {
+  const fs = new Fs(process.cwd());
+  
+  // Clean tmp files in batches with real-time progress
+  for await (const progress of fs.cleanTmpGenerator("upload-", 25)) {
+    if (progress.action === 'removing') {
+      console.log(`Processing batch ${progress.batchNumber}/${progress.totalBatches}`);
+      console.log(`Files in batch: ${progress.batch.length}`);
+    } else if (progress.action === 'batch-complete') {
+      console.log(`Batch complete! Removed: ${progress.totalRemoved}`);
+      console.log(`Remaining: ${progress.remaining}`);
+    }
+  }
+}
+
+// Using regex patterns for more complex matching
+async function cleanupPatterns() {
+  const fs = new Fs(process.cwd());
+  
+  // Match multiple patterns with regex
+  const pattern = /(session|cache|upload)-.*/;
+  
+  for await (const progress of fs.cleanTmpGenerator(pattern, 50)) {
+    // Process large batches of 50 files at a time
+    if (progress.action === 'batch-complete') {
+      console.log(`Batch ${progress.batchNumber}: Removed ${progress.batchSize} files`);
+    }
+  }
 }
 ```
 

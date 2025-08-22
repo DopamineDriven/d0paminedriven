@@ -1,4 +1,5 @@
 import type { ParsedUrlInfo } from "@/types/index.ts";
+import { UtilsService } from "@/utils/index.ts";
 
 export type HandleQueryParamsOrHash<T> = T extends `${infer X}?${string}`
   ? X
@@ -29,12 +30,11 @@ export type InferExtensionIfPresent<L> = L extends `${string}.${infer F}`
  *
  * ```
  */
-
 export type UrlFileExt<S extends string> = InferExtensionIfPresent<
   LastSegment<SplitForwardSlash<HandleQueryParamsOrHash<S>>>
 >;
 
-export class UrlService {
+export class UrlService extends UtilsService {
   private URL_REGEX =
     /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
   public parseUrl(url: string) {
