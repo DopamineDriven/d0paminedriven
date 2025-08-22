@@ -1,7 +1,16 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "7.0.0",
+  "version": "7.0.1",
+  "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
+  "author": {
+    "email": "andrew@windycitydevs.io",
+    "name": "Andrew Ross"
+  },
   "description": "convenient fs helpers",
+  "repository": {
+    "url": "https://github.com/DopamineDriven/d0paminedriven/tree/master",
+    "directory": "./packages/fs"
+  },
   "publishConfig": {
     "access": "public",
     "typesVersions": {
