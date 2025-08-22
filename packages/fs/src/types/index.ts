@@ -326,7 +326,11 @@ export type RTC<
 > = Rm<T, K> & {
   [Q in K]?: T[Q];
 };
-export type IsExact<T, U> = [T] extends [U] ? ([U] extends [T] ? true : false) : false;
+export type IsExact<T, U> = [T] extends [U]
+  ? [U] extends [T]
+    ? true
+    : false
+  : false;
 /**
  * To Conditionally never
  */
@@ -363,7 +367,7 @@ export type OnlyOptional<T> = {
 
 export type OnlyRequired<T> = {
   [K in keyof T as IsOptional<T, K> extends false ? K : never]: T[K];
-}
+};
 /**
  * Expect that the thing passed to Expect<T> is true.
  *
@@ -436,25 +440,22 @@ export type RequireNested<
     ? Rm<T, Path> & Record<Path, Required<T>[Path]>
     : T;
 
-export type ConditionalToRequired<
-  T,
-  Z extends keyof T = keyof T
-> = Rm<T, Z> & { [Q in Z]-?: T[Q] };
+export type ConditionalToRequired<T, Z extends keyof T = keyof T> = Rm<T, Z> & {
+  [Q in Z]-?: T[Q];
+};
 
-export type RequiredToConditional<
-  T,
-  X extends keyof T = keyof T
-> = Rm<T, X> & { [Q in X]?: T[Q] };
+export type RequiredToConditional<T, X extends keyof T = keyof T> = Rm<T, X> & {
+  [Q in X]?: T[Q];
+};
 
-export type FieldToConditionallyNever<
+export type FieldToConditionallyNever<T, X extends keyof T = keyof T> = Rm<
   T,
-  X extends keyof T = keyof T
-> = Rm<T, X> & { [Q in X]?: XOR<T[Q], never> };
+  X
+> & { [Q in X]?: XOR<T[Q], never> };
 
 export type ExcludeFieldEnumerable<T, K extends keyof T> = Rm<T, K>;
 
 export type ArrayOrReadOnlyArray<T> = T[] | readonly T[];
-
 
 export type Depth<
   Y extends { [record: string | symbol | number]: unknown },
@@ -484,7 +485,6 @@ export type InjectScriptsProps<T> = {
   tuplesToInject: T;
 };
 
-
 export type ParsedUrlInfo = {
   href: string;
   protocol: string;
@@ -508,16 +508,25 @@ export type Unit = keyof typeof unitsObj;
 
 export type SizeOpts = { decimals?: number; includeUnits?: boolean };
 
-export interface ImageSize {
+export interface ImageSpecs {
   width: number;
   height: number;
-  format: 'png' | 'jpeg' | 'gif' | 'bmp' | 'webp' | 'avif' | 'unknown';
+  format: "png" | "jpeg" | "gif" | "bmp" | "webp" | "avif" | "unknown";
   frames: number;
   animated: boolean;
   hasAlpha: boolean | null;
   orientation: number | null; // EXIF orientation (1-8) or null
   aspectRatio: number;
-  colorSpace: 'rgb' | 'rgba' | 'grayscale' | 'grayscale-alpha' | 'indexed' | 'cmyk' | 'ycbcr' | 'ycck' | 'unknown';
+  colorSpace:
+    | "rgb"
+    | "rgba"
+    | "grayscale"
+    | "grayscale-alpha"
+    | "indexed"
+    | "cmyk"
+    | "ycbcr"
+    | "ycck"
+    | "unknown";
   iccProfile: string | null; // Profile name/description if available, or 'embedded' if present but unnamed, null otherwise
   exifDateTimeOriginal: string | null; // ISO-like string or null
 }

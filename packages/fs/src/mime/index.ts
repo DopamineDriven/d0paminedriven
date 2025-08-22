@@ -20,6 +20,7 @@ export const extMimeMap = {
   csh: ["application/x-csh"],
   css: ["text/css"],
   csv: ["text/csv"],
+  cur: ["image/x-icon"],
   doc: ["application/msword"],
   docx: [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -36,11 +37,14 @@ export const extMimeMap = {
   hmpg: ["haptics/hmpg"],
   htm: ["text/html"],
   html: ["text/html"],
-  ico: ["image/vnd.microsoft.icon"],
+  ico: ["image/vnd.microsoft.icon", "image/x-icon"],
   ics: ["text/calendar"],
   ivs: ["haptics/ivs"],
   ivt: ["haptics/ivs"],
   jar: ["application/java-archive"],
+  jfif: ["image/jpeg"],
+  jif: ["image/jpeg"],
+  jpe: ["image/jpeg"],
   jpeg: ["image/jpeg"],
   jpg: ["image/jpeg"],
   js: ["application/node", "text/javascript"],
@@ -58,9 +62,10 @@ export const extMimeMap = {
   mjs: ["text/javascript"],
   mp3: ["audio/mpeg"],
   mp4: ["video/mp4"],
+  mpd: ["application/dash+xml"],
   mpeg: ["video/mpeg"],
   mpkg: ["application/vnd.apple.installer+xml"],
-
+  mtlx: ["application/xml"],
   ndjson: ["application/x-ndjson"],
   node: ["application/node", "text/javascript"],
   obj: ["model/obj", "application/octet-stream", "text/plain"],
@@ -76,6 +81,8 @@ export const extMimeMap = {
   png: ["image/png"],
   pdf: ["application/pdf"],
   php: ["application/x-httpd-php"],
+  pjp: ["image/jpeg"],
+  pjpeg: ["image/jpeg"],
   pkpass: ["application/vnd.apple.pkpass"],
   ppt: ["application/vnd.ms-powerpoint"],
   pptx: [
@@ -102,14 +109,16 @@ export const extMimeMap = {
   vtt: ["text/vtt"],
   wasm: ["application/wasm"],
   wav: ["audio/wav"],
-  weba: ["video/webm"],
+  weba: ["audio/webm"],
+  webm:["video/webm"],
+  webmanifest: ["application/manifest+json"],
   webp: ["image/webp"],
   woff: ["font/woff"],
   woff2: ["font/woff2"],
   xhtml: ["application/xhtml+xml"],
   xls: ["application/vnd.ms-excel"],
   xlsx: ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
-  xml: ["application/xml"],
+  xml: ["application/xml", "text/xml"],
   xul: ["application/vnd.mozilla.xul+xml"],
   yaml: ["application/yaml"],
   yml: ["application/yaml"],
@@ -120,12 +129,14 @@ export const extMimeMap = {
 } as const;
 
 export const mimeToExt = {
+  "application/dash+xml": ["mpd"],
   "application/epub+zip": ["epub"],
   "application/font-sfnt": ["ttf"],
   "application/gzip": ["gz"],
   "application/java-archive": ["jar"],
   "application/json": ["json"],
   "application/ld+json": ["jsonld"],
+  "application/manifest+json":["webmanifest"],
   "application/msword": ["doc"],
   "application/node": ["node", "js"],
   "application/octet-stream": ["bin", "obj"],
@@ -171,7 +182,7 @@ export const mimeToExt = {
   "application/x-tar": ["tar"],
   "application/x-zip-compressed": ["zip"],
   "application/xhtml+xml": ["xhtml"],
-  "application/xml": ["xml"],
+  "application/xml": ["xml", "mtlx"],
   "application/yaml": ["yml", "yaml"],
   "application/zip": ["zip"],
   "audio/aac": ["aac"],
@@ -180,6 +191,7 @@ export const mimeToExt = {
   "audio/mpeg": ["mp3"],
   "audio/ogg": ["opus", "ogg", "oga"],
   "audio/wav": ["wav"],
+  "audio/webm": ["weba"],
   "audio/x-midi": ["midi"],
   "font/otf": ["otf"],
   "font/ttf": ["ttf"],
@@ -196,7 +208,7 @@ export const mimeToExt = {
   "image/dpx": ["dpx"],
   "image/emf": ["emf"],
   "image/gif": ["gif"],
-  "image/jpeg": ["jpg", "jpeg"],
+  "image/jpeg": ["jpg", "jpeg", "jpe", "jif", "jfif", "pjp", "pjpeg"],
   "image/ktx": ["ktx"],
   "image/ktx2": ["ktx2"],
   "image/png": ["png"],
@@ -204,6 +216,7 @@ export const mimeToExt = {
   "image/tiff": ["tiff", "tif"],
   "image/vnd.microsoft.icon": ["ico"],
   "image/webp": ["webp"],
+  "image/x-icon": ["cur", "ico"],
   "model/gltf-binary": ["glb"],
   "model/gltf+json": ["gltf"],
   "model/obj": ["obj"],
@@ -212,14 +225,15 @@ export const mimeToExt = {
   "text/calendar": ["ics"],
   "text/css": ["css"],
   "text/csv": ["csv"],
-  "text/event-stream": ["sse", "ts", "rs", "py", "txt"],
+  "text/event-stream": ["sse"],
   "text/html": ["html", "htm"],
-  "text/javascript": ["cjs", "js", "mjs"],
+  "text/javascript": ["js", "mjs", "cjs"],
   "text/markdown": ["md"],
   "text/plain": ["txt"],
   "text/rust": ["rs"],
   "text/typescript": ["ts"],
   "text/vtt": ["vtt"],
+  "text/xml": ["xml"],
   "text/x-python": ["py"],
   "video/3gpp": ["3gp"],
   "video/3gpp2": ["3g2"],
@@ -228,7 +242,7 @@ export const mimeToExt = {
   "video/mpeg": ["mpeg"],
   "video/ogg": ["ogv"],
   "video/vnd.dlna.mpeg-tts": ["ts"],
-  "video/webm": ["weba"],
+  "video/webm": ["webm"],
   "video/x-msvideo": ["avi"]
 } as const;
 
@@ -301,30 +315,27 @@ export class MimeService extends UrlService {
 
   public mimeToExt(mime: keyof typeof this.toExtObj) {
     const extensions = this.toExtObj[mime];
-    
-    // Single extension - easy choice
+
     if (extensions.length === 1) return extensions[0];
-    
+
     // For multiple extensions, return the most common/standard one
     // Priority: prefer shorter, more common extensions
     if (extensions.length === 2) {
       // Usually the first one is more common (e.g., "jpg" before "jpeg")
       return extensions[0];
     }
-    
+
     if (extensions.length === 3) {
       // For audio/ogg: ["opus", "ogg", "oga"] - ogg is most common
       if (mime === "audio/ogg") return "ogg";
       // Default to first
       return extensions[0];
     }
-    
-    if (extensions.length === 5) {
-      // Only text/event-stream has 5: ["sse", "ts", "rs", "py", "txt"]
-      // SSE (Server-Sent Events) is the most specific/correct
-      return "sse";
+
+    if (extensions.length === 7) {
+      return extensions[0]; // jpg
     }
-    
+
     // Fallback (shouldn't happen with current data)
     return extensions[0];
   }

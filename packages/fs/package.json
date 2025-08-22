@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "7.0.1",
+  "version": "7.1.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
   "author": {
     "email": "andrew@windycitydevs.io",
@@ -18,6 +18,9 @@
         "*": [
           "dist/*.d.ts",
           "dist/*/index.d.ts"
+        ],
+        "image": [
+          "dist/image/index.d.ts"
         ],
         "fs": [
           "dist/fs/index.d.ts"
@@ -47,6 +50,9 @@
       "fs": [
         "dist/fs/index.d.ts"
       ],
+      "image": [
+        "dist/image/index.d.ts"
+      ],
       "mime": [
         "dist/mime/index.d.ts"
       ],
@@ -73,6 +79,7 @@
     ".": "./dist/index.js",
     "./*": "./dist/*.js",
     "./fs": "./dist/fs/index.js",
+    "./image": "./dist/image/index.js",
     "./mime": "./dist/mime/index.js",
     "./types": "./dist/types/index.js",
     "./url": "./dist/url/index.js",
