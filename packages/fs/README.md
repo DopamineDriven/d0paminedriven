@@ -83,8 +83,19 @@ const metadata = await fs.getImageSpecs("massive-image.png");
 
 #### Comprehensive Metadata Extraction
 ```typescript
-const imageInfo = await fs.getImageSpecs("photo.jpg");
-console.log(imageInfo);
+// testing with a 4k PBR Texture
+let timer0 = 0;
+const getPerf = () => {
+  timer0 = performance.now();
+  return fsx.getImageSpecs("src/test/__gen__/elegant-stone-tiles-albedo.png");
+};
+
+getPerf().then(data => {
+  console.log(performance.now() - timer0);
+  console.log(data);
+});
+// 69.642293 ms
+// 53.9 MB Image
 // {
 //   width: 4096,
 //   height: 4096,
