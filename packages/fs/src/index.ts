@@ -1,4 +1,5 @@
 export { default as Fs } from "@/fs/index.ts";
+export { ImageService } from "@/image/index.ts";
 export type {
   AllMimeTypes,
   FileExtension,
@@ -42,7 +43,7 @@ export type {
   Extends,
   FieldToConditionallyNever,
   IOType,
-  ImageSize,
+  ImageSpecs,
   InferDepth,
   InjectScriptsProps,
   IsExact,

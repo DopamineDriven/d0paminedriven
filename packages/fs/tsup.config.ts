@@ -7,6 +7,8 @@ const tsupConfig = (options: Options) =>
     entry: [
       "src/index.ts",
       "src/fs/index.ts",
+      "src/image/index.ts",
+      "!src/image/notes.md",
       "src/mime/index.ts",
       "src/types/index.ts",
       "src/url/index.ts",
