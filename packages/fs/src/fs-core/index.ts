@@ -1,6 +1,6 @@
 import fsSync from "fs";
 import fsAsync from "fs/promises";
-import { join, relative, resolve } from "path";
+import { relative } from "path";
 import { FsSize } from "@/fs-size/index.ts";
 import {
   WriteFileAsyncDataUnion,
@@ -77,5 +77,5 @@ export class FsCore extends FsSize {
     }
   };
 
-  
+
 }
