@@ -1,7 +1,411 @@
 import type { BoxInfo, ImageSpecs } from "@/types/index.ts";
 import { MimeService } from "@/mime/index.ts";
+import { createReadStream } from "node:fs";
+import type { Readable } from "node:stream";
+import { relative } from "node:path";
 
 export class ImageService extends MimeService {
+  constructor(public cwd: string) {
+    super();
+  }
+  /**
+   * Read exactly N bytes from a stream, returning a Buffer
+   * Closes stream after reading or on error
+   */
+  private async readBytes(stream: Readable, bytes: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      let totalBytes = 0;
+
+      const cleanup = () => {
+        stream.removeAllListeners();
+        stream.destroy();
+      };
+
+      stream.on('error', (err) => {
+        cleanup();
+        reject(err);
+      });
+
+      stream.on('data', (chunk: Buffer) => {
+        const remaining = bytes - totalBytes;
+        if (chunk.length <= remaining) {
+          chunks.push(chunk);
+          totalBytes += chunk.length;
+        } else {
+          // Take only what we need
+          chunks.push(chunk.subarray(0, remaining));
+          totalBytes = bytes;
+        }
+
+        if (totalBytes >= bytes) {
+          cleanup();
+          resolve(Buffer.concat(chunks));
+        }
+      });
+
+      stream.on('end', () => {
+        cleanup();
+        resolve(Buffer.concat(chunks));
+      });
+    });
+  }
+
+  /**
+   * Extract image metadata from a stream, reading only ~4KB for most formats
+   * Automatically handles PNG, JPEG, GIF, BMP, WebP, and AVIF
+   */
+  public async extractFromStream(stream: Readable): Promise<ImageSpecs> {
+    // Read first 4KB - enough for most image headers
+    const headerSize = 4096;
+    const header = await this.readBytes(stream, headerSize);
+
+    // PNG: Complete metadata in first 24-33 bytes
+    if (this.isPNG(header)) {
+      return this.extractPNGFromBuffer(header);
+    }
+
+    // JPEG: Might need to read more for SOF markers
+    if (this.isJPEG(header)) {
+      return this.extractJPEGFromBuffer(header);
+    }
+
+    // GIF: Usually complete in first 4KB
+    if (this.isGIF(header)) {
+      return this.extractGIFFromBuffer(header);
+    }
+
+    // BMP: Complete in first 54 bytes
+    if (this.isBMP(header)) {
+      return this.extractBMPFromBuffer(header);
+    }
+
+    // WebP: Usually complete in first 4KB
+    if (this.isWebP(header)) {
+      return this.extractWebPFromBuffer(header);
+    }
+
+    // AVIF: Usually complete in first 4KB
+    if (this.isAVIF(header)) {
+      return this.extractAVIFFromBuffer(header);
+    }
+
+    throw new Error("Unsupported image format or invalid file");
+  }
+
+  /**
+   * Extract metadata from file path using streaming (memory efficient)
+   */
+  public async extractFromPath(filePath: string): Promise<ImageSpecs> {
+    const stream = createReadStream(relative(this.cwd, filePath), { highWaterMark: 4096 });
+    return this.extractFromStream(stream);
+  }
+
+  // Format detection helpers
+  private isPNG(buffer: Buffer): boolean {
+    return buffer?.length >= 8 &&
+      buffer[0] === 0x89 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x4e &&
+      buffer[3] === 0x47 &&
+      buffer[4] === 0x0d &&
+      buffer[5] === 0x0a &&
+      buffer[6] === 0x1a &&
+      buffer[7] === 0x0a;
+  }
+
+  private isJPEG(buffer: Buffer): boolean {
+    return buffer.length >= 2 &&
+      buffer[0] === 0xff &&
+      buffer[1] === 0xd8;
+  }
+
+  private isGIF(buffer: Buffer): boolean {
+    const header = buffer.toString("ascii", 0, 6);
+    return buffer.length >= 6 &&
+      (header === "GIF87a" || header === "GIF89a");
+  }
+
+  private isBMP(buffer: Buffer): boolean {
+    return buffer.length >= 2 &&
+      buffer[0] === 0x42 &&
+      buffer[1] === 0x4d;
+  }
+
+  private isWebP(buffer: Buffer): boolean {
+    return buffer.length >= 12 &&
+      buffer.toString("ascii", 0, 4) === "RIFF" &&
+      buffer.toString("ascii", 8, 12) === "WEBP";
+  }
+
+  private isAVIF(buffer: Buffer): boolean {
+    if (buffer.length < 32) return false;
+    const ftyp = buffer.toString("ascii", 4, 8);
+    if (ftyp !== "ftyp") return false;
+    const brands = buffer.toString("ascii", 8, 32);
+    return brands.includes("avif") || brands.includes("avis");
+  }
+
+  // Extract methods for each format (refactored from getImageSpecsWorkup)
+  private extractPNGFromBuffer(buffer: Buffer): ImageSpecs {
+    if (!this.isPNG(buffer) || buffer.length < 24) {
+      throw new Error("Invalid PNG header");
+    }
+
+    // PNG dimensions are always at fixed positions
+    const width = buffer.readUInt32BE(16);
+    const height = buffer.readUInt32BE(20);
+    const colorType = buffer[25];
+
+    let colorSpace: ImageSpecs["colorSpace"];
+    let hasAlpha = false;
+
+    switch (colorType) {
+      case 0: colorSpace = "grayscale"; break;
+      case 2: colorSpace = "rgb"; break;
+      case 3: colorSpace = "indexed"; break;
+      case 4: colorSpace = "grayscale-alpha"; hasAlpha = true; break;
+      case 6: colorSpace = "rgba"; hasAlpha = true; break;
+      default: colorSpace = "unknown";
+    }
+
+    // For streaming, we skip chunk scanning (would need more bytes)
+    return {
+      width,
+      height,
+      format: "png",
+      frames: 1,
+      animated: false,
+      hasAlpha,
+      orientation: null,
+      aspectRatio: width / height,
+      colorSpace,
+      iccProfile: null,
+      exifDateTimeOriginal: null
+    };
+  }
+
+  private extractJPEGFromBuffer(buffer: Buffer): ImageSpecs {
+    if (!this.isJPEG(buffer)) {
+      throw new Error("Invalid JPEG header");
+    }
+
+    let pos = 2;
+    let width = 0;
+    let height = 0;
+    let colorSpace: ImageSpecs["colorSpace"] = "unknown";
+
+    // Scan for SOF marker within available buffer
+    while (pos < buffer.length - 10) {
+      if (buffer[pos] !== 0xff) break;
+
+      const marker = buffer[pos + 1];
+      if (!marker || marker === 0xda) break; // Start of Scan or invalid
+
+      const segmentSize = buffer.readUInt16BE(pos + 2);
+
+      // SOF markers
+      if (marker && marker >= 0xc0 && marker <= 0xcf &&
+          marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        const numComponents = buffer[pos + 4];
+        switch (numComponents) {
+          case 1: colorSpace = "grayscale"; break;
+          case 3: colorSpace = "ycbcr"; break;
+          case 4: colorSpace = "ycck"; break;
+          default: colorSpace = "unknown";
+        }
+        height = buffer.readUInt16BE(pos + 5);
+        width = buffer.readUInt16BE(pos + 7);
+        break; // Found dimensions, stop scanning
+      }
+
+      pos += segmentSize + 2;
+      if (pos >= buffer.length) break;
+    }
+
+    if (width === 0) {
+      throw new Error("Could not find JPEG dimensions in available data");
+    }
+
+    return {
+      width,
+      height,
+      format: "jpeg",
+      frames: 1,
+      animated: false,
+      hasAlpha: false,
+      orientation: null,
+      aspectRatio: width / height,
+      colorSpace,
+      iccProfile: null,
+      exifDateTimeOriginal: null
+    };
+  }
+
+  private extractGIFFromBuffer(buffer: Buffer): ImageSpecs {
+    if (!this.isGIF(buffer) || buffer.length < 10) {
+      throw new Error("Invalid GIF header");
+    }
+
+    const width = buffer.readUInt16LE(6);
+    const height = buffer.readUInt16LE(8);
+
+    // For streaming, we can't count frames without reading entire file
+    // But we can detect if it's potentially animated
+    let potentiallyAnimated = false;
+    if (buffer.length > 13) {
+      // Check for graphics control extension (animation indicator)
+      for (let i = 13; i < Math.min(buffer.length - 2, 100); i++) {
+        if (buffer[i] === 0x21 && buffer[i + 1] === 0xf9) {
+          potentiallyAnimated = true;
+          break;
+        }
+      }
+    }
+
+    return {
+      width,
+      height,
+      format: "gif",
+      frames: potentiallyAnimated ? 2 : 1, // Estimate
+      animated: potentiallyAnimated,
+      hasAlpha: null,
+      orientation: null,
+      aspectRatio: width / height,
+      colorSpace: "indexed",
+      iccProfile: null,
+      exifDateTimeOriginal: null
+    };
+  }
+
+  private extractBMPFromBuffer(buffer: Buffer): ImageSpecs {
+    if (!this.isBMP(buffer) || buffer.length < 26) {
+      throw new Error("Invalid BMP header");
+    }
+
+    const width = buffer.readInt32LE(18);
+    const height = Math.abs(buffer.readInt32LE(22));
+    const bitDepth = buffer.readUInt16LE(28);
+    const colorSpace: ImageSpecs["colorSpace"] =
+      bitDepth <= 8 ? "indexed" : "rgb";
+
+    return {
+      width,
+      height,
+      format: "bmp",
+      frames: 1,
+      animated: false,
+      hasAlpha: null,
+      orientation: buffer.readInt32LE(22) < 0 ? 1 : 6,
+      aspectRatio: width / height,
+      colorSpace,
+      iccProfile: null,
+      exifDateTimeOriginal: null
+    };
+  }
+
+  private extractWebPFromBuffer(buffer: Buffer): ImageSpecs {
+    if (!this.isWebP(buffer) || buffer.length < 30) {
+      throw new Error("Invalid WebP header");
+    }
+
+    const chunkType = buffer.toString("ascii", 12, 16);
+    let width = 0;
+    let height = 0;
+    let hasAlpha = false;
+    let animated = false;
+    let colorSpace: ImageSpecs["colorSpace"] = "rgb";
+
+    if (chunkType === "VP8X") {
+      const flags = buffer[20];
+      if (flags !== undefined) {
+        hasAlpha = !!(flags & 0x02);
+        animated = !!(flags & 0x01);
+        colorSpace = hasAlpha ? "rgba" : "rgb";
+      }
+
+      const b24 = buffer[24], b25 = buffer[25], b26 = buffer[26];
+      const b27 = buffer[27], b28 = buffer[28], b29 = buffer[29];
+      if (b24 !== undefined && b25 !== undefined && b26 !== undefined &&
+          b27 !== undefined && b28 !== undefined && b29 !== undefined) {
+        const widthMinus1 = b24 | (b25 << 8) | (b26 << 16);
+        const heightMinus1 = b27 | (b28 << 8) | (b29 << 16);
+        width = widthMinus1 + 1;
+        height = heightMinus1 + 1;
+      }
+    } else if (chunkType === "VP8") {
+      // Lossy format
+      if (buffer.length < 30) throw new Error("VP8 data too short");
+      width = buffer.readUInt16LE(26) & 0x3fff;
+      height = buffer.readUInt16LE(28) & 0x3fff;
+    } else if (chunkType === "VP8L") {
+      // Lossless format
+      if (buffer.length < 25) throw new Error("VP8L data too short");
+      const bits = buffer.readUInt32LE(21);
+      hasAlpha = !!(bits & (1 << 8));
+      colorSpace = hasAlpha ? "rgba" : "rgb";
+      width = 1 + (bits & 0x3fff);
+      height = 1 + ((bits >> 14) & 0x3fff);
+    }
+
+    return {
+      width,
+      height,
+      format: "webp",
+      frames: animated ? 2 : 1, // Estimate
+      animated,
+      hasAlpha,
+      orientation: null,
+      aspectRatio: width / height,
+      colorSpace,
+      iccProfile: null,
+      exifDateTimeOriginal: null
+    };
+  }
+
+  private extractAVIFFromBuffer(buffer: Buffer): ImageSpecs {
+    if (!this.isAVIF(buffer)) {
+      throw new Error("Invalid AVIF header");
+    }
+
+    // For streaming, we do minimal parsing
+    // Real AVIF parsing requires more complex box navigation
+    // This is a simplified version that may not work for all AVIF files
+
+    // Try to find ispe box for dimensions
+    let width = 0;
+    let height = 0;
+
+    // Search for "ispe" box signature
+    for (let i = 0; i < buffer.length - 16; i++) {
+      if (buffer.toString("ascii", i, i + 4) === "ispe") {
+        // Found ispe box, dimensions follow
+        if (i + 12 < buffer.length) {
+          width = buffer.readUInt32BE(i + 8);
+          height = buffer.readUInt32BE(i + 12);
+          break;
+        }
+      }
+    }
+
+    if (width === 0 || height === 0) {
+      throw new Error("Could not find AVIF dimensions in available data");
+    }
+
+    return {
+      width,
+      height,
+      format: "avif",
+      frames: 1,
+      animated: false,
+      hasAlpha: null,
+      orientation: null,
+      aspectRatio: width / height,
+      colorSpace: "rgb",
+      iccProfile: null,
+      exifDateTimeOriginal: null
+    };
+  }
   private parseExif(
     buffer: Buffer,
     app1Pos: number,
@@ -103,10 +507,9 @@ export class ImageService extends MimeService {
       pos += 2; // item_protection_index (u16, skip)
       const itemType = buffer.toString("ascii", pos, pos + 4);
       pos += 4;
-      // item_name (null-terminated string)
+      // item_name (null-terminated string) - skip over it
       let nameEnd = pos;
       while (buffer[nameEnd] !== 0 && nameEnd < infeStart + infeSize) nameEnd++;
-      const _itemName = buffer.toString("ascii", pos, nameEnd);
       pos = nameEnd + 1;
       if (itemType === "mime") {
         // content_type (null-terminated)
@@ -249,6 +652,10 @@ export class ImageService extends MimeService {
     return null;
   }
 
+  /**
+   * Legacy method that processes entire buffer
+   * Use extractFromStream or extractFromPath for better memory efficiency
+   */
   public getImageSpecsWorkup(buffer: Buffer<ArrayBufferLike>) {
     // PNG: Signature is 89 50 4E 47 0D 0A 1A 0A, width/height in IHDR at offsets 16/20 (big-endian)
     if (

@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
   "author": {
     "email": "andrew@windycitydevs.io",
@@ -19,11 +19,32 @@
           "dist/*.d.ts",
           "dist/*/index.d.ts"
         ],
+       "fs": [
+          "dist/fs/index.d.ts"
+        ],
+       "fs-atomic": [
+          "dist/fs-atomic/index.d.ts"
+        ],
+       "fs-base": [
+          "dist/fs-base/index.d.ts"
+        ],
+       "fs-core": [
+          "dist/fs-core/index.d.ts"
+        ],
+       "fs-fetch": [
+          "dist/fs-fetch/index.d.ts"
+        ],
+       "fs-size": [
+          "dist/fs-size/index.d.ts"
+        ],
+       "fs-tmp": [
+          "dist/fs-tmp/index.d.ts"
+        ],
         "image": [
           "dist/image/index.d.ts"
         ],
-        "fs": [
-          "dist/fs/index.d.ts"
+       "ld": [
+          "dist/ld/index.d.ts"
         ],
         "mime": [
           "dist/mime/index.d.ts"
@@ -50,12 +71,33 @@
         "dist/*.d.ts",
         "dist/*/index.d.ts"
       ],
-      "fs": [
-        "dist/fs/index.d.ts"
-      ],
-      "image": [
-        "dist/image/index.d.ts"
-      ],
+       "fs": [
+          "dist/fs/index.d.ts"
+        ],
+       "fs-atomic": [
+          "dist/fs-atomic/index.d.ts"
+        ],
+       "fs-base": [
+          "dist/fs-base/index.d.ts"
+        ],
+       "fs-core": [
+          "dist/fs-core/index.d.ts"
+        ],
+       "fs-fetch": [
+          "dist/fs-fetch/index.d.ts"
+        ],
+       "fs-size": [
+          "dist/fs-size/index.d.ts"
+        ],
+       "fs-tmp": [
+          "dist/fs-tmp/index.d.ts"
+        ],
+        "image": [
+          "dist/image/index.d.ts"
+        ],
+       "ld": [
+          "dist/ld/index.d.ts"
+        ],
       "mime": [
         "dist/mime/index.d.ts"
       ],
@@ -85,7 +127,14 @@
     ".": "./dist/index.js",
     "./*": "./dist/*.js",
     "./fs": "./dist/fs/index.js",
+    "./fs-atomic": "./dist/fs-atomic/index.js",
+    "./fs-base": "./dist/fs-base/index.js",
+    "./fs-core": "./dist/fs-core/index.js",
+    "./fs-fetch": "./dist/fs-fetch/index.js",
+    "./fs-size": "./dist/fs-size/index.js",
+    "./fs-tmp": "./dist/fs-tmp/index.js",
     "./image": "./dist/image/index.js",
+    "./ld": "./dist/ld/index.js",
     "./mime": "./dist/mime/index.js",
     "./types": "./dist/types/index.js",
     "./types/stream": "./dist/types/stream.js",
