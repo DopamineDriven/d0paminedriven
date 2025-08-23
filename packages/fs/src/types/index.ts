@@ -186,7 +186,8 @@ export type WriteStreamOptions =
 
 export type WriteFileAsyncDataUnion =
   | WithImplicitCoercion<string>
-  | { [Symbol.toPrimitive](hint: "string"): string };
+  | { [Symbol.toPrimitive](hint: "string"): string }
+  | string;
 
 export interface ReadDirOptionsEntity extends ObjEncodingOptions {
   withFileTypes?: false | undefined;
@@ -201,24 +202,30 @@ export type WriteFileAsyncOptions =
   | (ObjEncodingOptions & {
       mode?: Mode | undefined;
       flag?: OpenMode | undefined;
+      flush?: boolean | undefined;
     } & Abortable)
   | BufferEncodingUnion
   | null;
 
 export type WriteFileAsyncProps<T extends string = string> = {
   path: T;
-  cwd: string;
   data: WriteFileAsyncDataUnion;
   options?:
     | (ObjEncodingOptions & {
         mode?: Mode | undefined;
         flag?: OpenMode | undefined;
+        flush?: boolean | undefined;
       } & Abortable)
     | BufferEncodingUnion
     | null;
 };
 
-export type RmDirOptions = {
+export type RmOptions = {
+  /**
+   * When `true`, exceptions will be ignored if `path` does not exist.
+   * @default true
+   */
+  force?: boolean | undefined;
   /**
    * If an `EBUSY`, `EMFILE`, `ENFILE`, `ENOTEMPTY`, or
    * `EPERM` error is encountered, Node.js will retry the operation with a linear
@@ -229,13 +236,9 @@ export type RmDirOptions = {
    */
   maxRetries?: number | undefined;
   /**
-   * @deprecated since v14.14.0 In future versions of Node.js and will trigger a warning
-   * `fs.rmdir(path, { recursive: true })` will throw if `path` does not exist or is a file.
-   * Use `fs.rm(path, { recursive: true, force: true })` instead.
-   *
    * If `true`, perform a recursive directory removal. In
    * recursive mode, operations are retried on failure.
-   * @default false
+   * @default true
    */
   recursive?: boolean | undefined;
   /**
@@ -246,9 +249,8 @@ export type RmDirOptions = {
   retryDelay?: number | undefined;
 };
 
-export type RmDirProps = {
-  options?: RmDirOptions;
-}["options"];
+export type NoParamCallback =(err: NodeJS.ErrnoException | null) => void
+
 
 export type ReadDirProps<T extends string> = {
   path: T;

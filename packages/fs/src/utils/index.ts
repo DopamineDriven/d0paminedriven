@@ -1,7 +1,7 @@
 import type { RemoveFields, Unenumerate } from "@/types/index.ts";
+import { LevenshteinDistance } from "@/ld/index.ts";
 
-
-export class UtilsService {
+export class UtilsService extends LevenshteinDistance {
   public chunkArray<T extends number>(
     arr: string[],
     maxChunkLength: T
@@ -208,41 +208,3 @@ export class UtilsService {
       .reverse()
       .filter(this.isPrimeNumber);
 }
-
-// function XOOOOO(p: "mime" | "ext" = "mime") {
-//   let a: Record<string, number> = {};
-//   if (p === "mime") {
-//     for (const [_key, vals] of Object.entries(extMimeMap)) {
-//       for (const val of vals) {
-//         a[val] = (a[val] ?? 0) + 1;
-//       }
-//     }
-//     for (const [key, _val] of Object.entries(mimeToExt)) {
-//       a[key] = (a[key] ?? 0) + 1;
-//     }
-//     return Object.fromEntries(
-//       Object.entries(a).sort(([_a, aa], [_b, bb]) => bb - aa)
-//     );
-//   } else {
-//     for (const [_key, vals] of Object.entries(mimeToExt)) {
-//       for (const val of vals) {
-//         a[val] = (a[val] ?? 0) + 1;
-//       }
-//     }
-//     for (const [key, _val] of Object.entries(extMimeMap)) {
-//       a[key] = (a[key] ?? 0) + 1;
-//     }
-//     return Object.fromEntries(
-//       Object.entries(a).sort(([_a, aa], [_b, bb]) => bb - aa)
-//     );
-//   }
-// }
-
-
-// console.log(relative(process.cwd(),homedir()))
-// console.log(homedir());
-// const _fs = new Fs(process.cwd());
-// console.log(tmpdir());
-// console.log(homedir());
-// console.log(process.cwd());
-// console.log(new URL(import.meta.url));

@@ -1,5 +1,12 @@
 export { default as Fs } from "@/fs/index.ts";
+export { FsAtomic } from "@/fs-atomic/index.ts";
+export { FsBase } from "@/fs-base/index.ts";
+export { FsCore } from "@/fs-core/index.ts";
+export { FsFetch } from "@/fs-fetch/index.ts";
+export { FsSize } from "@/fs-size/index.ts";
+export { FsTmp } from "@/fs-tmp/index.ts";
 export { ImageService } from "@/image/index.ts";
+export { LevenshteinDistance } from "@/ld/index.ts";
 export type {
   AllMimeTypes,
   FileExtension,
@@ -33,8 +40,6 @@ export type {
   Dict,
   Equal,
   ExcludeFieldEnumerable,
-  RmDirOptions,
-  RmDirProps,
   ExecSyncOptions,
   ExecSyncOptionsWithBufferEncoding,
   ExecSyncOptionsWithStringEncoding,
@@ -52,6 +57,7 @@ export type {
   MkDirSyncOptions,
   MkDirSyncProps,
   Mode,
+  NoParamCallback,
   ObjEncodingOptions,
   OmitSrc,
   OnlyOptional,
@@ -68,6 +74,7 @@ export type {
   RequireNested,
   RequiredToConditional,
   Rm,
+  RmOptions,
   Signals,
   SizeOpts,
   StdioOptions,
@@ -86,6 +93,7 @@ export type {
   XOR
 } from "@/types/index.ts";
 export { unitsObj } from "@/types/index.ts";
+export type { AsyncIter, Bin, Streamable, WebRS } from "@/types/stream.ts";
 export type {
   HandleQueryParamsOrHash,
   InferExtensionIfPresent,
