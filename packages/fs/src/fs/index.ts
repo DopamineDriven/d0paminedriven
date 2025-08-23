@@ -2,7 +2,9 @@ import { execSync } from "child_process";
 import fsSync from "fs";
 import fsAsync from "fs/promises";
 import { tmpdir } from "node:os";
+import { Readable } from "node:stream";
 import { join, relative, resolve } from "path";
+import { ReadableStream as WebReadableStream } from "stream/web";
 import * as dotenv from "dotenv";
 import expand from "dotenv-expand";
 import sharp from "sharp";
@@ -18,6 +20,7 @@ import type {
   WriteStreamDataShape,
   WriteStreamOptions
 } from "@/types/index.ts";
+import type { AsyncIter, Streamable } from "@/types/stream.ts";
 import { ImageService } from "@/image/index.ts";
 import { unitsObj } from "@/types/index.ts";
 
@@ -39,6 +42,151 @@ export default class Fs extends ImageService {
     return this.getImageSpecsWorkup(buffer);
   }
 
+  /**
+   * Async version of withWs with atomic write support and progress tracking
+   * @param path Target file path
+   * @param data Streamable data to write
+   * @param options Optional atomic write and abort signal
+   * @returns Promise with path and bytes written
+   * @example
+   * ```ts
+   * const fs = new Fs(process.cwd());
+   * // Simple async write
+   * const result = await fs.asyncWithWs("output.txt", "Hello World");
+   * console.log(`Wrote ${result.bytes} bytes to ${result.path}`);
+   *
+   * // Atomic write with temp file
+   * const { path, bytes } = await fs.asyncWithWs(
+   *   "critical-data.json",
+   *   JSON.stringify(data),
+   *   { atomic: true }
+   * );
+   * ```
+   */
+  public async asyncWithWs(
+    path: string,
+    data: Streamable,
+    options?: { atomic?: boolean; signal?: AbortSignal }
+  ) {
+    const { atomic = false, signal: _signal = AbortSignal } = options ?? {};
+    let bytes = 0;
+
+    // Non-atomic write path
+    if (!atomic) {
+      try {
+        if (/\//g.test(path)) {
+          return this.generateDirIfDNETmp(this.pathHandler(path), {
+            recursive: true
+          });
+        } else return path;
+      } catch (error) {
+        console.error(
+          `[asyncWithWs non-atomic error]: `.concat(
+            error instanceof Error
+              ? error.message
+              : typeof error === "string"
+                ? error
+                : JSON.stringify(error, null, 2)
+          )
+        );
+      } finally {
+        // Convert streamable to buffer and write
+        const readable = this.toReadable(data);
+        const chunks = [];
+        for await (const chunk of readable) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        const buffer = Buffer.concat(chunks);
+
+        try {
+          // Write directly to target path (not tmp!)
+          this.withWs(path, buffer);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          return { path, bytes: buffer.length };
+        }
+      }
+    }
+
+    // Atomic write path
+    let tmpName: string | undefined;
+    try {
+      // Ensure directory exists
+      if (/\//g.test(path)) {
+        this.generateDirIfDNETmp(this.pathHandler(path), {
+          recursive: true
+        });
+      }
+
+      // Setup temp file name
+      tmpName = this.uniqueTmpName("atomic", "tmp");
+    } catch (error) {
+      console.error(
+        `[asyncWithWs atomic setup error]: `.concat(
+          error instanceof Error
+            ? error.message
+            : typeof error === "string"
+              ? error
+              : JSON.stringify(error, null, 2)
+        )
+      );
+      // Clean up temp file if it exists
+      if (tmpName) {
+        try {
+          this.rmTmpFile(tmpName);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    } finally {
+      // Atomic write execution using your existing tmp methods!
+      if (tmpName) {
+        let newPath: string | null = null;
+        let newBytes = 0;
+        // Convert streamable to buffer
+        const readable = this.toReadable(data);
+        const chunks = [];
+        for await (const chunk of readable) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        const buffer = Buffer.concat(chunks);
+        bytes = buffer.length;
+        try {
+          // Write to tmp first
+          await this.writeTmpAsync(tmpName, buffer.toString());
+
+          // Atomic rename from tmp to final destination (not tmp to tmp!)
+          const tmpPath = resolve(this.tmpDir, tmpName);
+          const finalPath = resolve(this.cwd, path);
+
+          await fsAsync.rename(tmpPath, finalPath);
+
+          // Set success values
+          newPath = path;
+          newBytes = bytes;
+
+        } catch (err) {
+          console.error(`[asyncWithWs atomic rename error]:`, err);
+          // If rename failed, try to clean up tmp file
+          if (this.existsTmp(tmpName)) {
+            try {
+              this.rmTmpFile(tmpName);
+            } catch (err) {
+              console.error(err);
+            }
+          }
+          throw err; // Re-throw to let caller handle
+        }
+
+        return { path, bytes, newPath, newBytes };
+      }
+    }
+
+    // Fallback (shouldn't reach)
+    return { path, bytes: 0 };
+  }
+
   private get myEnv() {
     return dotenv.config({ processEnv: {} });
   }
@@ -53,6 +201,36 @@ export default class Fs extends ImageService {
 
   public parseDotEnv() {
     return expand.expand(this.myEnv);
+  }
+
+  public isUint8Array(v: unknown) {
+    return v instanceof Uint8Array;
+  }
+
+  public isBuffer(v: unknown) {
+    return Buffer.isBuffer(v);
+  }
+
+  public isWebReadableStream(v: unknown) {
+    return v instanceof WebReadableStream;
+  }
+
+  public isAsyncIterable(v: unknown): v is AsyncIter {
+    return (
+      typeof v === "object" &&
+      v !== null &&
+      Symbol.asyncIterator in (v as object)
+    );
+  }
+
+  public toReadable(data: Streamable) {
+    if (typeof data === "string") return Readable.from([Buffer.from(data)]);
+    if (this.isBuffer(data) || this.isUint8Array(data))
+      return Readable.from([data]);
+    if (this.isWebReadableStream(data)) return Readable.fromWeb(data);
+    if (this.isAsyncIterable(data)) return Readable.from(data);
+    // If you later add Node Readable input, add an `instanceof Readable` branch here.
+    throw new TypeError("Unsupported data type for toReadable()");
   }
 
   /**
@@ -351,7 +529,7 @@ export default class Fs extends ImageService {
       return await fsAsync.writeFile(
         relative(this.cwd ?? process.cwd(), path),
         Buffer.from(Buffer.from(data).toJSON().data),
-        options
+        typeof options === "object" ? { ...options } : options
       );
     }
   };
@@ -670,6 +848,27 @@ export default class Fs extends ImageService {
     }
   }
 
+  public existsTmp(path: string) {
+    return this.exists(resolve(this.tmpDir, path));
+  }
+
+  public mkdirTmp(
+    path: string,
+    options: MkDirSyncOptions = { mode: 0o777, recursive: true }
+  ) {
+    return this.mkdirSync(resolve(this.tmpDir, path), options);
+  }
+
+  public generateDirIfDNETmp<const T extends string>(
+    path: T,
+    options?: MkDirSyncOptions
+  ) {
+    if (this.existsTmp(path)) return;
+    else {
+      return this.mkdirTmp(path, options);
+    }
+  }
+
   /**
    * Write data to a file in the system's tmp directory
    * @param filename The filename (can include subdirectories like "img-probe/file.txt")
@@ -697,9 +896,22 @@ export default class Fs extends ImageService {
     // }
   }
 
+  public async writeTmpAsync<const F extends string>(
+    filename: F,
+    data: string,
+    options?: WriteFileAsyncOptions
+  ) {
+    const fullPath = resolve(this.tmpDir, filename);
+    return await this.writeFileAsync(
+      fullPath,
+      data,
+      typeof options === "object" ? { ...options, mode: 0o777 } : options
+    );
+  }
+
   public async readTmpAsync<const F extends string>(filename: F) {
     const fullPath = resolve(this.tmpDir, filename);
-    if (!this.exists(fullPath)) {
+    if (!this.existsTmp(filename)) {
       throw new Error(`Tmp file not found: ${filename}`);
     }
     return await this.fileToBufferAsync(fullPath);

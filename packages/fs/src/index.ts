@@ -86,6 +86,7 @@ export type {
   XOR
 } from "@/types/index.ts";
 export { unitsObj } from "@/types/index.ts";
+export type { AsyncIter, Bin, Streamable, WebRS } from "@/types/stream.ts";
 export type {
   HandleQueryParamsOrHash,
   InferExtensionIfPresent,

@@ -186,7 +186,8 @@ export type WriteStreamOptions =
 
 export type WriteFileAsyncDataUnion =
   | WithImplicitCoercion<string>
-  | { [Symbol.toPrimitive](hint: "string"): string };
+  | { [Symbol.toPrimitive](hint: "string"): string }
+  | string;
 
 export interface ReadDirOptionsEntity extends ObjEncodingOptions {
   withFileTypes?: false | undefined;
@@ -198,12 +199,12 @@ export type ReadDirOptions = {
 };
 
 export type WriteFileAsyncOptions =
-  | (ObjEncodingOptions & {
+ ( | (ObjEncodingOptions & {
       mode?: Mode | undefined;
       flag?: OpenMode | undefined;
     } & Abortable)
   | BufferEncodingUnion
-  | null;
+  | null);
 
 export type WriteFileAsyncProps<T extends string = string> = {
   path: T;

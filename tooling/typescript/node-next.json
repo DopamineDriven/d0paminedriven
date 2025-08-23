@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "importHelpers": false,
+    "incremental": true,
+    "lib": ["ES2022", "ESNext", "ScriptHost", "DOM.AsyncIterable", "DOM.Iterable", "DOM"],
+    "module": "node20",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "sourceMap": true,
+    "target": "esnext",
+    "useDefineForClassFields": true
+  }
+}
