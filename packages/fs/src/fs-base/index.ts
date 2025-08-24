@@ -57,6 +57,8 @@ export class FsBase extends ImageService {
       return true;
     } else if (path.includes(this.homeDir)) {
       return true;
+    } else {
+      return false;
     }
   }
 
@@ -115,7 +117,7 @@ export class FsBase extends ImageService {
       return Readable.from([data]);
     if (this.isWebReadableStream(data)) return Readable.fromWeb(data);
     if (this.isAsyncIterable(data)) return Readable.from(data);
-    // add an `instanceof Readable` branch here for node reaable
+    if (data instanceof Readable) return data;
     throw new TypeError("Unsupported data type for toReadable()");
   }
 

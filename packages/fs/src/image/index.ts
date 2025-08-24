@@ -55,9 +55,9 @@ export class ImageService extends MimeService {
    * Extract image metadata from a stream, reading only ~4KB for most formats
    * Automatically handles PNG, JPEG, GIF, BMP, WebP, and AVIF
    */
-  public async extractFromStream(stream: Readable): Promise<ImageSpecs> {
+  public async extractFromStream(stream: Readable,size=4096): Promise<ImageSpecs> {
     // Read first 4KB - enough for most image headers
-    const headerSize = 4096;
+    const headerSize = size;
     const header = await this.readBytes(stream, headerSize);
 
     // PNG: Complete metadata in first 24-33 bytes
@@ -96,9 +96,9 @@ export class ImageService extends MimeService {
   /**
    * Extract metadata from file path using streaming (memory efficient)
    */
-  public async extractFromPath(filePath: string): Promise<ImageSpecs> {
-    const stream = createReadStream(relative(this.cwd, filePath), { highWaterMark: 4096 });
-    return this.extractFromStream(stream);
+  public async extractFromPath(filePath: string, size=4096): Promise<ImageSpecs> {
+    const stream = createReadStream(relative(this.cwd, filePath), { highWaterMark: size });
+    return this.extractFromStream(stream, size);
   }
 
   // Format detection helpers
@@ -656,7 +656,11 @@ export class ImageService extends MimeService {
    * Legacy method that processes entire buffer
    * Use extractFromStream or extractFromPath for better memory efficiency
    */
-  public getImageSpecsWorkup(buffer: Buffer<ArrayBufferLike>) {
+  public getImageSpecsWorkup(rawbuffer: Buffer<ArrayBufferLike>,size=8192) {
+    // 8KB handles most JPEGs with metadata while minimizing memory usage
+    // Professional photos with EXIF + Photoshop data typically need 6-7KB
+    const MAX_HEADER_SIZE = size;
+    const buffer = rawbuffer.subarray(0, Math.min(rawbuffer.length, MAX_HEADER_SIZE));
     // PNG: Signature is 89 50 4E 47 0D 0A 1A 0A, width/height in IHDR at offsets 16/20 (big-endian)
     if (
       buffer?.length >= 24 &&
@@ -823,6 +827,11 @@ export class ImageService extends MimeService {
           }
         }
         pos += segmentSize + 2;
+
+        // Skip any padding bytes (0x00 or fill bytes) after segments
+        while (pos < buffer.length - 1 && buffer[pos] === 0x00) {
+          pos++;
+        }
       }
 
       if (width === 0) throw new Error("No dimensions found in JPEG file");
