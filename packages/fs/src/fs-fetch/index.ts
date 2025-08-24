@@ -1,6 +1,6 @@
 import fsSync from "fs";
-import { relative } from "path";
 import { FsTmp } from "@/fs-tmp/index.ts";
+import { relative } from "path";
 
 export class FsFetch extends FsTmp {
   constructor(public override cwd: string) {
@@ -154,7 +154,7 @@ export class FsFetch extends FsTmp {
         }
 
         const writeStream = fsSync.createWriteStream(
-          relative(this.cwd ?? process.cwd(), formattedPath)
+          relative(this.cwd, formattedPath)
         );
         const reader = res.body.getReader();
 

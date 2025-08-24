@@ -1,4 +1,5 @@
-import { resolve } from "node:path";
+import { createReadStream } from "node:fs";
+import { relative, resolve } from "node:path";
 import sharp from "sharp";
 import { FsFetch } from "@/fs-fetch/index.ts";
 
@@ -8,22 +9,27 @@ export default class Fs extends FsFetch {
     cwd ??= process.cwd();
   }
 
-  public async getImageSpecs(filePath: string) {
-    const buffer = await this.fileToBufferAsync(filePath);
-    return this.getImageSpecsWorkup(buffer);
+  public async getImageSpecs(filePath: string, size = 4096 * 6) {
+    const stream = createReadStream(relative(this.cwd, filePath), {
+      highWaterMark: size
+    });
+    return this.extractFromStream(stream, size);
   }
 
-  public async getImageSpecsTmp(target: string) {
-    const buffer = await this.readTmpAsync(target);
-    return this.getImageSpecsWorkup(buffer);
+  public async getImageSpecsTmp(filepath: string, size = 4096 * 6) {
+    const stream = createReadStream(
+      relative(this.cwd, resolve(this.tmpDir, filepath)),
+      { highWaterMark: size }
+    );
+    return this.extractFromStream(stream);
   }
 
   /**
    * Extract image metadata using streaming (only reads ~4KB)
    * Much more memory efficient for large images
    */
-  public async getImageSpecsStream(filePath: string) {
-    return this.extractFromPath(filePath);
+  public async getImageSpecsStream(filePath: string, size = 4096) {
+    return this.extractFromPath(filePath, size);
   }
 
   public async getImageSpecsStreamTmp(filePath: string) {
@@ -44,6 +50,8 @@ export default class Fs extends FsFetch {
       | "webp"
       | "avif"
       | "jpg"
+      | "gif"
+      | "svg"
       | "png"
       | "tif"
       | "tiff"
@@ -75,7 +83,7 @@ export default class Fs extends FsFetch {
   }) {
     if (tint && !resize) {
       return await sharp(target)
-        .toFormat(format, { quality })
+        .toFormat(format, { quality  })
         .tint(tint)
         .toBuffer();
     } else if (!tint && resize) {

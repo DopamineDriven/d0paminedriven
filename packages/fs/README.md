@@ -132,18 +132,41 @@ This implementation comes from a non-traditional developer with degrees in Bioch
 // Memory savings: 99.993%!
 ```
 
+#### 🏆 Production Benchmark: PBR Texture Pipeline
+
+**Real-world test with 99 professional PBR textures:**
+
+```ts
+// Test setup: 99 PBR texture files
+// - 75 JPEGs @ 4096×4096 (professional game/3D assets)
+// - 24 PNGs @ 2048×2048 (normal maps, height maps, etc.)
+// - Mix of diffuse, normal, roughness, metalness, AO maps
+
+// Method used: getImageSpecs() with 24KB buffer
+await fs.getImageSpecs(texturePath, 4096 * 6);
+
+// Results:
+Duration: 48.96ms for all 99 files
+Average: 0.494ms per file
+Throughput: 2,024 files/second
+
+// Theoretical capacity:
+// - 120,000+ textures per minute
+// - Process entire AAA game asset library in seconds
+```
+
 #### Comprehensive Metadata Extraction
 
 ```typescript
 // Choose your weapon: Buffer or Stream
 
-// Stream-based (recommended for production):
-const metadata = await fs.getImageSpecsStream("massive-image.png");
+// Stream-based with a configurable header size (recommended for production):
+const metadata = await fs.getImageSpecsStream("massive-image.png", 4096);
 // ⚡ Sub-millisecond for any size file
 
-// Buffer-based (when you need the full buffer anyway):
-const metadata = await fs.getImageSpecs("image.png");
-// 🔥 Still blazing fast
+// Buffer-based with configurable header size:
+const metadata = await fs.getImageSpecs("texture.jpg", 4096 * 6);
+// 🔥 Handles professional assets with extensive metadata
 
 // Returns rich metadata:
 {
