@@ -1,8 +1,9 @@
+import { createReadStream } from "node:fs";
+import { relative } from "node:path";
+import type { Readable } from "node:stream";
+import { inflateSync } from "fflate";
 import type { BoxInfo, ImageSpecs } from "@/types/index.ts";
 import { MimeService } from "@/mime/index.ts";
-import { createReadStream } from "node:fs";
-import type { Readable } from "node:stream";
-import { relative } from "node:path";
 
 export class ImageService extends MimeService {
   constructor(public cwd: string) {
@@ -12,7 +13,7 @@ export class ImageService extends MimeService {
    * Read exactly N bytes from a stream, returning a Buffer
    * Closes stream after reading or on error
    */
-  private async readBytes(stream: Readable, bytes: number): Promise<Buffer> {
+  public async readBytes(stream: Readable, bytes: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];
       let totalBytes = 0;
@@ -22,12 +23,12 @@ export class ImageService extends MimeService {
         stream.destroy();
       };
 
-      stream.on('error', (err) => {
+      stream.on("error", err => {
         cleanup();
         reject(err);
       });
 
-      stream.on('data', (chunk: Buffer) => {
+      stream.on("data", (chunk: Buffer) => {
         const remaining = bytes - totalBytes;
         if (chunk.length <= remaining) {
           chunks.push(chunk);
@@ -44,7 +45,7 @@ export class ImageService extends MimeService {
         }
       });
 
-      stream.on('end', () => {
+      stream.on("end", () => {
         cleanup();
         resolve(Buffer.concat(chunks));
       });
@@ -55,7 +56,10 @@ export class ImageService extends MimeService {
    * Extract image metadata from a stream, reading only ~4KB for most formats
    * Automatically handles PNG, JPEG, GIF, BMP, WebP, and AVIF
    */
-  public async extractFromStream(stream: Readable,size=4096): Promise<ImageSpecs> {
+  public async extractFromStream(
+    stream: Readable,
+    size = 4096
+  ): Promise<ImageSpecs> {
     // Read first 4KB - enough for most image headers
     const headerSize = size;
     const header = await this.readBytes(stream, headerSize);
@@ -96,14 +100,20 @@ export class ImageService extends MimeService {
   /**
    * Extract metadata from file path using streaming (memory efficient)
    */
-  public async extractFromPath(filePath: string, size=4096): Promise<ImageSpecs> {
-    const stream = createReadStream(relative(this.cwd, filePath), { highWaterMark: size });
+  public async extractFromPath(
+    filePath: string,
+    size = 4096
+  ): Promise<ImageSpecs> {
+    const stream = createReadStream(relative(this.cwd, filePath), {
+      highWaterMark: size
+    });
     return this.extractFromStream(stream, size);
   }
 
   // Format detection helpers
   private isPNG(buffer: Buffer): boolean {
-    return buffer?.length >= 8 &&
+    return (
+      buffer?.length >= 8 &&
       buffer[0] === 0x89 &&
       buffer[1] === 0x50 &&
       buffer[2] === 0x4e &&
@@ -111,31 +121,29 @@ export class ImageService extends MimeService {
       buffer[4] === 0x0d &&
       buffer[5] === 0x0a &&
       buffer[6] === 0x1a &&
-      buffer[7] === 0x0a;
+      buffer[7] === 0x0a
+    );
   }
 
   private isJPEG(buffer: Buffer): boolean {
-    return buffer.length >= 2 &&
-      buffer[0] === 0xff &&
-      buffer[1] === 0xd8;
+    return buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0xd8;
   }
 
   private isGIF(buffer: Buffer): boolean {
     const header = buffer.toString("ascii", 0, 6);
-    return buffer.length >= 6 &&
-      (header === "GIF87a" || header === "GIF89a");
+    return buffer.length >= 6 && (header === "GIF87a" || header === "GIF89a");
   }
 
   private isBMP(buffer: Buffer): boolean {
-    return buffer.length >= 2 &&
-      buffer[0] === 0x42 &&
-      buffer[1] === 0x4d;
+    return buffer.length >= 2 && buffer[0] === 0x42 && buffer[1] === 0x4d;
   }
 
   private isWebP(buffer: Buffer): boolean {
-    return buffer.length >= 12 &&
+    return (
+      buffer.length >= 12 &&
       buffer.toString("ascii", 0, 4) === "RIFF" &&
-      buffer.toString("ascii", 8, 12) === "WEBP";
+      buffer.toString("ascii", 8, 12) === "WEBP"
+    );
   }
 
   private isAVIF(buffer: Buffer): boolean {
@@ -157,16 +165,29 @@ export class ImageService extends MimeService {
     const height = buffer.readUInt32BE(20);
     const colorType = buffer[25];
 
-    let colorSpace: ImageSpecs["colorSpace"];
+    let colorModel: ImageSpecs["colorModel"];
     let hasAlpha = false;
 
     switch (colorType) {
-      case 0: colorSpace = "grayscale"; break;
-      case 2: colorSpace = "rgb"; break;
-      case 3: colorSpace = "indexed"; break;
-      case 4: colorSpace = "grayscale-alpha"; hasAlpha = true; break;
-      case 6: colorSpace = "rgba"; hasAlpha = true; break;
-      default: colorSpace = "unknown";
+      case 0:
+        colorModel = "grayscale";
+        break;
+      case 2:
+        colorModel = "rgb";
+        break;
+      case 3:
+        colorModel = "indexed";
+        break;
+      case 4:
+        colorModel = "grayscale-alpha";
+        hasAlpha = true;
+        break;
+      case 6:
+        colorModel = "rgba";
+        hasAlpha = true;
+        break;
+      default:
+        colorModel = "unknown";
     }
 
     // For streaming, we skip chunk scanning (would need more bytes)
@@ -179,7 +200,8 @@ export class ImageService extends MimeService {
       hasAlpha,
       orientation: null,
       aspectRatio: width / height,
-      colorSpace,
+      colorSpace: "unknown",
+      colorModel,
       iccProfile: null,
       exifDateTimeOriginal: null
     };
@@ -193,7 +215,7 @@ export class ImageService extends MimeService {
     let pos = 2;
     let width = 0;
     let height = 0;
-    let colorSpace: ImageSpecs["colorSpace"] = "unknown";
+    let colorModel = "unknown" as ImageSpecs["colorModel"];
 
     // Scan for SOF marker within available buffer
     while (pos < buffer.length - 10) {
@@ -205,14 +227,27 @@ export class ImageService extends MimeService {
       const segmentSize = buffer.readUInt16BE(pos + 2);
 
       // SOF markers
-      if (marker && marker >= 0xc0 && marker <= 0xcf &&
-          marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      if (
+        marker &&
+        marker >= 0xc0 &&
+        marker <= 0xcf &&
+        marker !== 0xc4 &&
+        marker !== 0xc8 &&
+        marker !== 0xcc
+      ) {
         const numComponents = buffer[pos + 4];
         switch (numComponents) {
-          case 1: colorSpace = "grayscale"; break;
-          case 3: colorSpace = "ycbcr"; break;
-          case 4: colorSpace = "ycck"; break;
-          default: colorSpace = "unknown";
+          case 1:
+            colorModel = "grayscale";
+            break;
+          case 3:
+            colorModel = "ycbcr";
+            break;
+          case 4:
+            colorModel = "ycck";
+            break;
+          default:
+            colorModel = "unknown";
         }
         height = buffer.readUInt16BE(pos + 5);
         width = buffer.readUInt16BE(pos + 7);
@@ -236,7 +271,8 @@ export class ImageService extends MimeService {
       hasAlpha: false,
       orientation: null,
       aspectRatio: width / height,
-      colorSpace,
+      colorSpace: "unknown",
+      colorModel,
       iccProfile: null,
       exifDateTimeOriginal: null
     };
@@ -266,13 +302,14 @@ export class ImageService extends MimeService {
     return {
       width,
       height,
+      colorModel: "unknown",
       format: "gif",
       frames: potentiallyAnimated ? 2 : 1, // Estimate
       animated: potentiallyAnimated,
       hasAlpha: null,
       orientation: null,
       aspectRatio: width / height,
-      colorSpace: "indexed",
+      colorSpace: "unknown",
       iccProfile: null,
       exifDateTimeOriginal: null
     };
@@ -286,8 +323,9 @@ export class ImageService extends MimeService {
     const width = buffer.readInt32LE(18);
     const height = Math.abs(buffer.readInt32LE(22));
     const bitDepth = buffer.readUInt16LE(28);
-    const colorSpace: ImageSpecs["colorSpace"] =
-      bitDepth <= 8 ? "indexed" : "rgb";
+    const colorModel = (
+      bitDepth <= 8 ? "indexed" : "rgb"
+    ) as ImageSpecs["colorModel"];
 
     return {
       width,
@@ -298,7 +336,8 @@ export class ImageService extends MimeService {
       hasAlpha: null,
       orientation: buffer.readInt32LE(22) < 0 ? 1 : 6,
       aspectRatio: width / height,
-      colorSpace,
+      colorSpace: "unknown",
+      colorModel,
       iccProfile: null,
       exifDateTimeOriginal: null
     };
@@ -314,20 +353,30 @@ export class ImageService extends MimeService {
     let height = 0;
     let hasAlpha = false;
     let animated = false;
-    let colorSpace: ImageSpecs["colorSpace"] = "rgb";
+    let colorModel = "rgb" as ImageSpecs["colorModel"];
 
     if (chunkType === "VP8X") {
       const flags = buffer[20];
       if (flags !== undefined) {
         hasAlpha = !!(flags & 0x02);
         animated = !!(flags & 0x01);
-        colorSpace = hasAlpha ? "rgba" : "rgb";
+        colorModel = hasAlpha ? "rgba" : "rgb";
       }
 
-      const b24 = buffer[24], b25 = buffer[25], b26 = buffer[26];
-      const b27 = buffer[27], b28 = buffer[28], b29 = buffer[29];
-      if (b24 !== undefined && b25 !== undefined && b26 !== undefined &&
-          b27 !== undefined && b28 !== undefined && b29 !== undefined) {
+      const b24 = buffer[24],
+        b25 = buffer[25],
+        b26 = buffer[26];
+      const b27 = buffer[27],
+        b28 = buffer[28],
+        b29 = buffer[29];
+      if (
+        b24 !== undefined &&
+        b25 !== undefined &&
+        b26 !== undefined &&
+        b27 !== undefined &&
+        b28 !== undefined &&
+        b29 !== undefined
+      ) {
         const widthMinus1 = b24 | (b25 << 8) | (b26 << 16);
         const heightMinus1 = b27 | (b28 << 8) | (b29 << 16);
         width = widthMinus1 + 1;
@@ -343,13 +392,14 @@ export class ImageService extends MimeService {
       if (buffer.length < 25) throw new Error("VP8L data too short");
       const bits = buffer.readUInt32LE(21);
       hasAlpha = !!(bits & (1 << 8));
-      colorSpace = hasAlpha ? "rgba" : "rgb";
+      colorModel = hasAlpha ? "rgba" : "rgb";
       width = 1 + (bits & 0x3fff);
       height = 1 + ((bits >> 14) & 0x3fff);
     }
 
     return {
       width,
+      colorModel,
       height,
       format: "webp",
       frames: animated ? 2 : 1, // Estimate
@@ -357,7 +407,7 @@ export class ImageService extends MimeService {
       hasAlpha,
       orientation: null,
       aspectRatio: width / height,
-      colorSpace,
+      colorSpace: "unknown",
       iccProfile: null,
       exifDateTimeOriginal: null
     };
@@ -401,7 +451,8 @@ export class ImageService extends MimeService {
       hasAlpha: null,
       orientation: null,
       aspectRatio: width / height,
-      colorSpace: "rgb",
+      colorModel: "rgb",
+      colorSpace: "unknown",
       iccProfile: null,
       exifDateTimeOriginal: null
     };
@@ -652,15 +703,348 @@ export class ImageService extends MimeService {
     return null;
   }
 
+  private mapChrmToColorSpace(
+    chrm: {
+      white_x: number;
+      white_y: number;
+      red_x: number;
+      red_y: number;
+      green_x: number;
+      green_y: number;
+      blue_x: number;
+      blue_y: number;
+    },
+    fallback: ImageSpecs["colorSpace"]
+  ) {
+    const tol = 100; // Small tolerance for int rounding (out of 100000)
+    // sRGB / Rec.709
+    if (
+      Math.abs(chrm.white_x - 31270) < tol &&
+      Math.abs(chrm.white_y - 32900) < tol &&
+      Math.abs(chrm.red_x - 64000) < tol &&
+      Math.abs(chrm.red_y - 33000) < tol &&
+      Math.abs(chrm.green_x - 30000) < tol &&
+      Math.abs(chrm.green_y - 60000) < tol &&
+      Math.abs(chrm.blue_x - 15000) < tol &&
+      Math.abs(chrm.blue_y - 6000) < tol
+    )
+      return "srgb";
+    // Adobe RGB
+    if (
+      Math.abs(chrm.white_x - 31270) < tol &&
+      Math.abs(chrm.white_y - 32900) < tol &&
+      Math.abs(chrm.red_x - 64000) < tol &&
+      Math.abs(chrm.red_y - 33000) < tol &&
+      Math.abs(chrm.green_x - 21000) < tol &&
+      Math.abs(chrm.green_y - 71000) < tol &&
+      Math.abs(chrm.blue_x - 15000) < tol &&
+      Math.abs(chrm.blue_y - 6000) < tol
+    )
+      return "adobe_rgb";
+    // Display P3
+    if (
+      Math.abs(chrm.white_x - 31270) < tol &&
+      Math.abs(chrm.white_y - 32900) < tol &&
+      Math.abs(chrm.red_x - 68000) < tol &&
+      Math.abs(chrm.red_y - 32000) < tol &&
+      Math.abs(chrm.green_x - 26500) < tol &&
+      Math.abs(chrm.green_y - 69000) < tol &&
+      Math.abs(chrm.blue_x - 15000) < tol &&
+      Math.abs(chrm.blue_y - 6000) < tol
+    )
+      return "display_p3";
+    // ProPhoto RGB
+    if (
+      Math.abs(chrm.white_x - 34590) < tol &&
+      Math.abs(chrm.white_y - 35850) < tol && // D50 white point
+      Math.abs(chrm.red_x - 73470) < tol &&
+      Math.abs(chrm.red_y - 26530) < tol &&
+      Math.abs(chrm.green_x - 15960) < tol &&
+      Math.abs(chrm.green_y - 85040) < tol &&
+      Math.abs(chrm.blue_x - 3600) < tol &&
+      Math.abs(chrm.blue_y - 1000) < tol
+    )
+      return "prophoto_rgb";
+    // Rec.2020
+    if (
+      Math.abs(chrm.white_x - 31270) < tol &&
+      Math.abs(chrm.white_y - 32900) < tol &&
+      Math.abs(chrm.red_x - 70800) < tol &&
+      Math.abs(chrm.red_y - 29200) < tol &&
+      Math.abs(chrm.green_x - 17000) < tol &&
+      Math.abs(chrm.green_y - 79700) < tol &&
+      Math.abs(chrm.blue_x - 13100) < tol &&
+      Math.abs(chrm.blue_y - 4600) < tol
+    )
+      return "rec2020";
+    return fallback; // No match, keep default
+  }
+
+  private xmpToColorSpaceWorkup<
+    const T extends
+      | ImageSpecs["colorSpace"]
+      | "prophoto rgb"
+      | "display p3"
+      | "adobe rgb (1998)"
+      | "rgb"
+      | "grayscale",
+    const V extends "iccprofile" | "colormode"
+  >(space: T, target: V) {
+    return `<photoshop:${target}>${space}</photoshop:${target}>` as const;
+  }
+  private mapXmpToColorSpace(
+    xmpText: string,
+    fallback: ImageSpecs["colorSpace"]
+  ) {
+    const lower = xmpText.toLowerCase();
+    // Look for common tags like <photoshop:ICCProfile> or <xmpG:icc-profile-name>
+    if (lower.includes(this.xmpToColorSpaceWorkup("srgb", "iccprofile")))
+      return "srgb";
+    if (
+      lower.includes(
+        this.xmpToColorSpaceWorkup("adobe rgb (1998)", "iccprofile")
+      )
+    )
+      return "adobe_rgb";
+    if (lower.includes(this.xmpToColorSpaceWorkup("display p3", "iccprofile")))
+      return "display_p3";
+    if (
+      lower.includes(this.xmpToColorSpaceWorkup("prophoto rgb", "iccprofile"))
+    )
+      return "prophoto_rgb";
+    // Or color mode hints
+    if (
+      lower.includes(this.xmpToColorSpaceWorkup("rgb", "colormode")) &&
+      lower.includes("adobe rgb")
+    )
+      return "adobe_rgb";
+    if (lower.includes(this.xmpToColorSpaceWorkup("grayscale", "colormode")))
+      return "gray";
+    return fallback;
+  }
+  private mapProfileToColorSpace(
+    profileName: string | null,
+    fallback: ImageSpecs["colorSpace"]
+  ) {
+    if (
+      !profileName ||
+      profileName === "embedded" ||
+      profileName.toLowerCase().includes("icc profile")
+    )
+      return fallback; // Generic names preserve default
+    const lower = profileName.toLowerCase();
+    if (
+      lower.includes("srgb") ||
+      lower.includes("iec61966") ||
+      lower.includes("srgb2014")
+    )
+      return "srgb";
+    if (
+      lower.includes("display p3") ||
+      lower.includes("display-p3") ||
+      lower.includes("dci-p3") ||
+      lower.includes("p3")
+    )
+      return "display_p3";
+    if (
+      lower.includes("adobe rgb") ||
+      lower.includes("adobergb") ||
+      lower.includes("adobe rgb (1998)")
+    )
+      return "adobe_rgb";
+    if (
+      lower.includes("prophoto rgb") ||
+      lower.includes("prophoto") ||
+      lower.includes("romm rgb") ||
+      lower.includes("romm") ||
+      lower.includes("iso 22028")
+    )
+      return "prophoto_rgb";
+    if (
+      lower.includes("rec2020") ||
+      lower.includes("bt.2020") ||
+      lower.includes("bt2020") ||
+      lower.includes("bt.2100") ||
+      lower.includes("itur_2100")
+    )
+      return "rec2020";
+    if (
+      lower.includes("rec709") ||
+      lower.includes("bt.709") ||
+      lower.includes("bt709")
+    )
+      return "rec709";
+    if (lower.includes("cmyk")) return "cmyk";
+    if (lower.includes("lab")) return "lab";
+    if (lower.includes("xyz")) return "xyz";
+    if (
+      lower.includes("gray") ||
+      lower.includes("grey") ||
+      lower.includes("monochrome") ||
+      lower.includes("gamma") ||
+      lower.includes("gamma 2.2") ||
+      lower.includes("dot gain")
+    )
+      return "gray";
+    return fallback; // Preserve d
+  }
+
+  public async extractViaStream(stream: Readable, size = 4096) {
+    // Read first 4KB - enough for most image headers
+    const headerSize = size;
+    const header = await this.readBytes(stream, headerSize);
+    return this.getImageSpecsWorkup(header, size);
+  }
+  public async extractViaPath(filePath: string, size = 4096) {
+    const stream = createReadStream(relative(this.cwd, filePath), {
+      highWaterMark: size
+    });
+    return await this.extractViaStream(stream, size);
+  }
+
+  // Magic bytes for image format detection
+  private readonly signatures = {
+    PNG: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+    JPEG: [0xff, 0xd8, 0xff],
+    GIF87a: [0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
+    GIF89a: [0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
+    WEBP: [0x52, 0x49, 0x46, 0x46], // RIFF
+    BMP: [0x42, 0x4d],
+    TIFF_LE: [0x49, 0x49, 0x2a, 0x00],
+    TIFF_BE: [0x4d, 0x4d, 0x00, 0x2a],
+    AVIF: [
+      0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66
+    ],
+    HEIC: [0x66, 0x74, 0x79, 0x70] // ftyp at offset 4
+  } as const;
+
   /**
-   * Legacy method that processes entire buffer
-   * Use extractFromStream or extractFromPath for better memory efficiency
+   * Probe image from various sources
+   * Handles local Buffer, remote URL, or S3 object
    */
-  public getImageSpecsWorkup(rawbuffer: Buffer<ArrayBufferLike>,size=8192) {
+  public async extractRemote(
+    source: Buffer | string,
+    size = 16384,
+    timeout=5000
+  ): Promise<ImageSpecs> {
+    let buffer: Buffer;
+
+    if (Buffer.isBuffer(source)) {
+      buffer = source;
+      return this.getImageSpecsWorkup(buffer, size);
+    } else {
+      // Remote URL - smart fetch with Range
+      buffer = await this.fetchMinimalBuffer(source, size, timeout);
+      return this.getImageSpecsWorkup(buffer, size);
+    }
+  }
+
+  /**
+   * Fetch minimal bytes from remote URL using Range header
+   * This is the KEY optimization - only fetch what we need!
+   */
+  private knownToBlock(inputUrl: string) {
+    if (inputUrl.startsWith("https://github.com")) {
+      return "GET" as const;
+    } else if (inputUrl.startsWith("https://raw.githubusercontent.com")) {
+      return "GET" as const;
+    } else {
+      return "HEAD" as const;
+    }
+  }
+  private async fetchMinimalBuffer(
+    url: string,
+    size = 16384,
+    timeout = 5000
+  ): Promise<Buffer> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      // 1. Try HEAD request to check if Range is supported
+      const headResponse = await fetch(url, {
+        method: this.knownToBlock(url),
+        signal: controller.signal
+      });
+
+      const acceptsRange =
+        headResponse.headers.get("accept-ranges") === "bytes";
+      const contentLength = parseInt(
+        headResponse.headers.get("content-length") ?? "0"
+      );
+
+      clearTimeout(timeoutId);
+
+      // 2. Fetch with Range header if supported
+      if (acceptsRange) {
+        // We only need first 16KB for metadata (even less for most formats)
+        const rangeResponse = await fetch(url, {
+          headers: {
+            Range: `bytes=0-${size}` // First 16KB
+          },
+          signal: AbortSignal.timeout(timeout)
+        });
+
+        if (rangeResponse.status === 206) {
+          // Partial Content
+          const arrayBuffer = await rangeResponse.arrayBuffer();
+          return Buffer.from(arrayBuffer);
+        }
+      }
+
+      // 3. Fallback: Fetch entire file if small, or first chunk if streaming
+      if (contentLength && contentLength < 1024 * 1024) {
+        // < 1MB
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(timeout)
+        });
+        const arrayBuffer = await response.arrayBuffer();
+        return Buffer.from(arrayBuffer);
+      }
+
+      // 4. For large files without Range support, read partial stream
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(timeout)
+      });
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      // Read only first 16KB from stream
+      const reader = response.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let totalBytes = 0;
+      const maxBytes = size;
+
+      while (totalBytes < maxBytes) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const bytesToAdd = Math.min(value.length, maxBytes - totalBytes);
+        chunks.push(value.slice(0, bytesToAdd));
+        totalBytes += bytesToAdd;
+
+        if (totalBytes >= maxBytes) {
+          reader.cancel(); // Stop reading
+          break;
+        }
+      }
+
+      return Buffer.concat(chunks);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  public getImageSpecsWorkup(rawbuffer: Buffer<ArrayBufferLike>, size = 4096) {
     // 8KB handles most JPEGs with metadata while minimizing memory usage
     // Professional photos with EXIF + Photoshop data typically need 6-7KB
     const MAX_HEADER_SIZE = size;
-    const buffer = rawbuffer.subarray(0, Math.min(rawbuffer.length, MAX_HEADER_SIZE));
+    const buffer = rawbuffer.subarray(
+      0,
+      Math.min(rawbuffer.length, MAX_HEADER_SIZE)
+    );
     // PNG: Signature is 89 50 4E 47 0D 0A 1A 0A, width/height in IHDR at offsets 16/20 (big-endian)
     if (
       buffer?.length >= 24 &&
@@ -683,29 +1067,35 @@ export class ImageService extends MimeService {
         throw new Error("IHDR Chunk of png not found or incorrect.");
       }
       const colorType = buffer[25]; // Offset 16 (width) + 4 (height) + 4 (bit depth) + 1 = 25
-      let colorSpace: ImageSpecs["colorSpace"];
-      let hasAlpha = false;
+      let colorModel = "unknown" as ImageSpecs["colorModel"],
+        colorSpace = "unknown" as ImageSpecs["colorSpace"],
+        hasAlpha = false;
 
       switch (colorType) {
         case 0:
-          colorSpace = "grayscale";
+          colorModel = "grayscale";
+          colorSpace = "gray";
           break;
         case 2:
-          colorSpace = "rgb";
+          colorModel = "rgb";
+          colorSpace = "srgb";
           break;
         case 3:
-          colorSpace = "indexed";
+          colorModel = "indexed";
+          colorSpace = "srgb";
           break;
         case 4:
-          colorSpace = "grayscale-alpha";
+          colorModel = "grayscale-alpha";
+          colorSpace = "gray";
           hasAlpha = true;
           break;
         case 6:
-          colorSpace = "rgba";
+          colorModel = "rgba";
+          colorSpace = "srgb";
           hasAlpha = true;
           break;
         default:
-          colorSpace = "unknown";
+          colorModel = "unknown";
       }
       const width = buffer.readUInt32BE(16);
       const height = buffer.readUInt32BE(20);
@@ -719,8 +1109,8 @@ export class ImageService extends MimeService {
       let pos = 33; // After IHDR (8 sig + 4 len + 4 type + 13 data + 4 crc)
       while (pos < buffer.length - 12) {
         const chunkLen = buffer.readUInt32BE(pos);
-        const chunkType = buffer.toString("ascii", pos + 4, pos + 8);
-        const chunkData = pos + 8;
+        let chunkType = buffer.toString("ascii", pos + 4, pos + 8);
+        let chunkData = pos + 8;
         if (chunkType === "acTL") {
           animated = true;
           frames = buffer.readUInt32BE(chunkData); // num_frames
@@ -729,12 +1119,73 @@ export class ImageService extends MimeService {
           const nameEnd = buffer.indexOf(0, chunkData);
           const profileName = buffer.toString("ascii", chunkData, nameEnd);
           iccProfile = profileName || "embedded";
+          colorSpace = this.mapProfileToColorSpace(profileName, colorSpace);
+        } else if (chunkType === "sRGB") {
+          if (iccProfile === null) {
+            iccProfile = "sRGB";
+            colorSpace = "srgb";
+          }
+        } else if (chunkType === "cHRM") {
+          if (
+            iccProfile === null &&
+            colorModel !== "grayscale" &&
+            colorModel !== "grayscale-alpha"
+          ) {
+            const white_x = buffer.readUInt32BE(chunkData),
+              white_y = buffer.readUInt32BE(chunkData + 4),
+              red_x = buffer.readUInt32BE(chunkData + 8),
+              red_y = buffer.readUInt32BE(chunkData + 12),
+              green_x = buffer.readUInt32BE(chunkData + 16),
+              green_y = buffer.readUInt32BE(chunkData + 20),
+              blue_x = buffer.readUInt32BE(chunkData + 24),
+              blue_y = buffer.readUInt32BE(chunkData + 28);
+            colorSpace = this.mapChrmToColorSpace(
+              {
+                white_x,
+                white_y,
+                red_x,
+                red_y,
+                green_x,
+                green_y,
+                blue_x,
+                blue_y
+              },
+              colorSpace
+            );
+          }
+        } else if (chunkType === "iTXt") {
+          // Parse iTXt: keyword\0 compression_flag compression_method language\0 translated_keyword\0 text
+          let offset = chunkData;
+          const keywordEnd = buffer.indexOf(0, offset);
+          const keyword = buffer.toString("ascii", offset, keywordEnd);
+          offset = keywordEnd + 1;
+          const compressionFlag = buffer[offset];
+          const _compressionMethod = buffer[offset + 1]; // Always 0 (zlib) if compressed
+          offset += 2;
+          const langEnd = buffer.indexOf(0, offset);
+          offset = langEnd + 1; // Skip lang and translated keyword
+          const transEnd = buffer.indexOf(0, offset);
+          offset = transEnd + 1;
+          let textBuffer = buffer.subarray(offset, chunkData + chunkLen - 8); // Text starts here
+          if (compressionFlag === 1) {
+            try {
+              textBuffer = Buffer.from(inflateSync(textBuffer));
+            } catch (e) {
+              console.error("Failed to decompress iTXt:", e);
+              // Skip if decompression fails
+            }
+          }
+          const text = textBuffer.toString("utf8");
+          if (keyword === "XML:com.adobe.xmp" && !iccProfile) {
+            colorSpace = this.mapXmpToColorSpace(text, colorSpace);
+          }
         } else if (chunkType === "tIME") {
-          const month = buffer?.[chunkData + 2],
+          let month = buffer?.[chunkData + 2],
             day = buffer?.[chunkData + 3],
             hour = buffer?.[chunkData + 4],
             minute = buffer?.[chunkData + 5],
             second = buffer?.[chunkData + 6];
+
           // Last modification time, but not DateTimeOriginal; approximate if no EXIF
           if (
             typeof month !== "undefined" &&
@@ -743,7 +1194,7 @@ export class ImageService extends MimeService {
             typeof minute !== "undefined" &&
             typeof second !== "undefined"
           ) {
-            const year = buffer.readUInt16BE(chunkData);
+            let year = buffer.readUInt16BE(chunkData);
             exifDateTimeOriginal = `${year}:${month.toString().padStart(2, "0")}:${day.toString().padStart(2, "0")} ${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:${second.toString().padStart(2, "0")}`;
           }
         } else if (chunkType === "IDAT") {
@@ -754,10 +1205,11 @@ export class ImageService extends MimeService {
       return {
         width,
         height,
-        format: "png",
+        format: animated === true ? "apng" : "png",
         frames,
         animated,
         hasAlpha,
+        colorModel,
         orientation,
         aspectRatio: width / height,
         colorSpace,
@@ -769,7 +1221,8 @@ export class ImageService extends MimeService {
     // JPEG: Starts with FF D8, dimensions in SOF marker (FF C0-FF CF, excluding some)
     if (buffer.length >= 10 && buffer[0] === 0xff && buffer[1] === 0xd8) {
       let pos = 2,
-        colorSpace: ImageSpecs["colorSpace"] = "unknown",
+        colorSpace = "unknown" as ImageSpecs["colorSpace"],
+        colorModel = "unknown" as ImageSpecs["colorModel"],
         hasAlpha = false,
         width = 0,
         height = 0,
@@ -797,16 +1250,16 @@ export class ImageService extends MimeService {
           const numComponents = buffer[pos + 4]; // After length (2 bytes) + precision (1) = pos + 4
           switch (numComponents) {
             case 1:
-              colorSpace = "grayscale";
+              colorModel = "grayscale";
               break;
             case 3:
-              colorSpace = "ycbcr";
+              colorModel = "ycbcr";
               break; // Most common for RGB JPEGs (stored as YCbCr)
             case 4:
-              colorSpace = "ycck";
+              colorModel = "ycck";
               break; // YCCK for CMYK with alpha-like, but no true alpha
             default:
-              colorSpace = "unknown";
+              colorModel = "unknown";
           }
           width = buffer.readUInt16BE(pos + 7);
           height = buffer.readUInt16BE(pos + 5);
@@ -845,6 +1298,7 @@ export class ImageService extends MimeService {
         orientation,
         aspectRatio: width / height,
         colorSpace,
+        colorModel,
         iccProfile,
         exifDateTimeOriginal
       } satisfies ImageSpecs;
@@ -905,7 +1359,8 @@ export class ImageService extends MimeService {
         hasAlpha: null, // GIF transparency is per-pixel binary, not full alpha; set null or true if transparent color exists, but complex
         orientation: null, // No orientation in GIF
         aspectRatio: width / height,
-        colorSpace: "indexed",
+        colorModel: "indexed",
+        colorSpace: "unknown",
         iccProfile: null, // No ICC in GIF
         exifDateTimeOriginal: null // No EXIF in GIF
       } satisfies ImageSpecs;
@@ -916,8 +1371,9 @@ export class ImageService extends MimeService {
       const width = buffer.readInt32LE(18);
       const height = Math.abs(buffer.readInt32LE(22));
       const bitDepth = buffer.readUInt16LE(28);
-      let colorSpace: ImageSpecs["colorSpace"] =
-        bitDepth <= 8 ? "indexed" : "rgb";
+      let colorModel = (
+        bitDepth <= 8 ? "indexed" : "rgb"
+      ) as ImageSpecs["colorModel"];
       return {
         width,
         height,
@@ -927,7 +1383,8 @@ export class ImageService extends MimeService {
         hasAlpha: null, // Some BMP have alpha in 32bpp, check if bitDepth===32 && compression===3 (bitfields with alpha)
         orientation: buffer.readInt32LE(22) < 0 ? 1 : 6, // Negative height means top-down (orientation 1), positive bottom-up (like 6, but simplified)
         aspectRatio: width / height,
-        colorSpace,
+        colorModel,
+        colorSpace: "unknown",
         iccProfile: null, // Rare in BMP
         exifDateTimeOriginal: null
       } satisfies ImageSpecs;
@@ -940,16 +1397,17 @@ export class ImageService extends MimeService {
       buffer.toString("ascii", 8, 12) === "WEBP"
     ) {
       const chunkType = buffer.toString("ascii", 12, 16);
-      let colorSpace: ImageSpecs["colorSpace"] = "unknown";
-      let hasAlpha = false;
-      let width = 0;
-      let height = 0;
-      let frames = 1;
-      let animated = false;
-      let iccProfile: string | null = null;
+      let colorSpace = "unknown" as ImageSpecs["colorSpace"],
+        colorModel = "unknown" as ImageSpecs["colorModel"],
+        hasAlpha = false,
+        width = 0,
+        height = 0,
+        frames = 1,
+        animated = false,
+        iccProfile: string | null = null;
       if (chunkType === "VP8X") {
         const flags = buffer?.[20]; // Feature flags
-        colorSpace = flags ? (flags & 0x02 ? "rgba" : "rgb") : "unknown"; // Bit 1 alpha
+        colorModel = flags ? (flags & 0x02 ? "rgba" : "rgb") : "unknown"; // Bit 1 alpha
         hasAlpha = flags ? !!(flags & 0x02) : false;
         animated = flags ? !!(flags & 0x01) : false; // Bit 0 animation
         let widthSubtractOne = 0;
@@ -981,7 +1439,7 @@ export class ImageService extends MimeService {
         }
       } else if (chunkType === "VP8 ") {
         // Lossy simple: Always RGB (no alpha in simple VP8)
-        colorSpace = "rgb";
+        colorModel = "rgb";
         hasAlpha = false;
         const dataStart = 20;
         if (
@@ -1003,7 +1461,7 @@ export class ImageService extends MimeService {
         if (bits >>> 29 !== 0) {
           throw new Error("Invalid VP8L version");
         }
-        colorSpace = bits & (1 << 8) ? "rgba" : "rgb"; // Bit 8 indicates alpha
+        colorModel = bits & (1 << 8) ? "rgba" : "rgb"; // Bit 8 indicates alpha
         hasAlpha = !!(bits & (1 << 8));
         width = 1 + (bits & 0x3fff);
         height = 1 + ((bits >> 14) & 0x3fff);
@@ -1017,6 +1475,7 @@ export class ImageService extends MimeService {
         frames,
         animated,
         hasAlpha,
+        colorModel,
         orientation: null, // No standard orientation in WebP
         aspectRatio: width / height,
         colorSpace,
@@ -1051,9 +1510,10 @@ export class ImageService extends MimeService {
       const height = buffer.readUInt32BE(ispe.pos + 8);
 
       // For color space, look for 'colr' box in ipco (simple color info) or assume RGB if no ICC
-      let colorSpace = "rgb" as ImageSpecs["colorSpace"]; // Default for most AVIF
-      let hasAlpha = false;
-      let iccProfile: string | null = null;
+      let colorSpace = "rgb" as ImageSpecs["colorSpace"],
+        colorModel = "rgb" as ImageSpecs["colorModel"],
+        hasAlpha = false,
+        iccProfile: string | null = null;
       const colr = this.findBox(buffer, "colr", ipco.pos, ipco.pos + ipco.size);
       if (colr) {
         const colrType = buffer.toString("ascii", colr.pos, colr.pos + 4);
@@ -1061,7 +1521,7 @@ export class ImageService extends MimeService {
           // nclx profile: color primaries, transfer, matrix
           // Simplified: We can check matrix coefficient for YUV vs RGB, but for now, flag as ycbcr if not RGB
           const matrix = buffer.readUInt16BE(colr.pos + 6);
-          colorSpace = matrix === 2 ? "rgb" : "ycbcr"; // 2 is RGB identity
+          colorModel = matrix === 2 ? "rgb" : "ycbcr"; // 2 is RGB identity
         } else if (colrType === "rICC" || colrType === "prof") {
           colorSpace = "unknown"; // ICC profile present
           iccProfile = "embedded";
@@ -1076,12 +1536,12 @@ export class ImageService extends MimeService {
           .includes("alpha")
       ) {
         hasAlpha = true;
-        if (colorSpace === "rgb") {
-          colorSpace = "rgba";
-        } else if (colorSpace === "ycbcr") {
-          colorSpace = "ycck";
-        } else if (colorSpace === "grayscale" || colorSpace === "unknown") {
-          colorSpace = "grayscale-alpha";
+        if (colorModel === "rgb") {
+          colorModel = "rgba";
+        } else if (colorModel === "ycbcr") {
+          colorModel = "ycck";
+        } else if (colorModel === "grayscale" || colorModel === "unknown") {
+          colorModel = "grayscale-alpha";
         }
       }
       const xmpXml = this.parseXmpFromAvif(buffer, meta, ipco);
@@ -1122,6 +1582,7 @@ export class ImageService extends MimeService {
         format: "avif",
         frames,
         animated,
+        colorModel,
         hasAlpha: hasAlpha ? true : null,
         orientation: null, // Can have 'irot' or 'imir' transforms, but rare
         aspectRatio: width / height,

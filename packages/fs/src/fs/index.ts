@@ -1,5 +1,4 @@
-import { createReadStream } from "node:fs";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 import sharp from "sharp";
 import { FsFetch } from "@/fs-fetch/index.ts";
 
@@ -10,18 +9,22 @@ export default class Fs extends FsFetch {
   }
 
   public async getImageSpecs(filePath: string, size = 4096 * 6) {
-    const stream = createReadStream(relative(this.cwd, filePath), {
-      highWaterMark: size
-    });
-    return this.extractFromStream(stream, size);
+    if (filePath.startsWith("https")) {
+      return await this.extractRemote(filePath, size);
+    }
+    return await this.extractViaPath(filePath, size);
+  }
+
+  public async getImageSpecsFlexi(target: Buffer | string, size = 4096 * 6) {
+    if (Buffer.isBuffer(target)) {
+      return this.getImageSpecsWorkup(target, size);
+    } else {
+      return await this.getImageSpecs(target, size);
+    }
   }
 
   public async getImageSpecsTmp(filepath: string, size = 4096 * 6) {
-    const stream = createReadStream(
-      relative(this.cwd, resolve(this.tmpDir, filepath)),
-      { highWaterMark: size }
-    );
-    return this.extractFromStream(stream);
+    return this.extractViaPath(resolve(this.tmpDir, filepath), size);
   }
 
   /**
@@ -83,7 +86,7 @@ export default class Fs extends FsFetch {
   }) {
     if (tint && !resize) {
       return await sharp(target)
-        .toFormat(format, { quality  })
+        .toFormat(format, { quality })
         .tint(tint)
         .toBuffer();
     } else if (!tint && resize) {

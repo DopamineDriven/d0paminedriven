@@ -513,13 +513,13 @@ export type SizeOpts = { decimals?: number; includeUnits?: boolean };
 export interface ImageSpecs {
   width: number;
   height: number;
-  format: "png" | "jpeg" | "gif" | "bmp" | "webp" | "avif" | "unknown";
+  format: "apng" | "png" | "jpeg" | "gif" | "bmp" | "webp" | "avif" | "unknown";
   frames: number;
   animated: boolean;
   hasAlpha: boolean | null;
   orientation: number | null; // EXIF orientation (1-8) or null
   aspectRatio: number;
-  colorSpace:
+  colorModel:
     | "rgb"
     | "rgba"
     | "grayscale"
@@ -529,6 +529,17 @@ export interface ImageSpecs {
     | "ycbcr"
     | "ycck"
     | "unknown";
+    colorSpace:| "unknown"
+  | "srgb"
+  | "display_p3"
+  | "adobe_rgb"
+  | "prophoto_rgb"
+  | "rec2020"
+  | "rec709"
+  | "cmyk"
+  | "lab"
+  | "xyz"
+  | "gray";
   iccProfile: string | null; // Profile name/description if available, or 'embedded' if present but unnamed, null otherwise
   exifDateTimeOriginal: string | null; // ISO-like string or null
 }
