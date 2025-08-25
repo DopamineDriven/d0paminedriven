@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "7.4.0",
+  "version": "7.5.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
   "author": {
     "email": "andrew@windycitydevs.io",
@@ -151,6 +151,7 @@
   "dependencies": {
     "dotenv": "^17.2.1",
     "dotenv-expand": "^12.0.2",
+    "fflate": "^0.8.2",
     "sharp": "^0.34.3"
   },
   "devDependencies": {
