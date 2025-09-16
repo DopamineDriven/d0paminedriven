@@ -249,8 +249,7 @@ export type RmOptions = {
   retryDelay?: number | undefined;
 };
 
-export type NoParamCallback =(err: NodeJS.ErrnoException | null) => void
-
+export type NoParamCallback = (err: NodeJS.ErrnoException | null) => void;
 
 export type ReadDirProps<T extends string> = {
   path: T;
@@ -513,7 +512,19 @@ export type SizeOpts = { decimals?: number; includeUnits?: boolean };
 export interface ImageSpecs {
   width: number;
   height: number;
-  format: "apng" | "png" | "jpeg" | "gif" | "bmp" | "webp" | "avif" | "unknown";
+  format:
+    | "apng"
+    | "png"
+    | "jpeg"
+    | "gif"
+    | "bmp"
+    | "webp"
+    | "avif"
+    | "svg"
+    | "ico"
+    | "heic"
+    | "tiff"
+    | "unknown";
   frames: number;
   animated: boolean;
   hasAlpha: boolean | null;
@@ -528,18 +539,21 @@ export interface ImageSpecs {
     | "cmyk"
     | "ycbcr"
     | "ycck"
+    | "vector"
+    | "lab"
     | "unknown";
-    colorSpace:| "unknown"
-  | "srgb"
-  | "display_p3"
-  | "adobe_rgb"
-  | "prophoto_rgb"
-  | "rec2020"
-  | "rec709"
-  | "cmyk"
-  | "lab"
-  | "xyz"
-  | "gray";
+  colorSpace:
+    | "unknown"
+    | "srgb"
+    | "display_p3"
+    | "adobe_rgb"
+    | "prophoto_rgb"
+    | "rec2020"
+    | "rec709"
+    | "cmyk"
+    | "lab"
+    | "xyz"
+    | "gray";
   iccProfile: string | null; // Profile name/description if available, or 'embedded' if present but unnamed, null otherwise
   exifDateTimeOriginal: string | null; // ISO-like string or null
 }

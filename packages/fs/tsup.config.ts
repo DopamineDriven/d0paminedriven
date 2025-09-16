@@ -14,7 +14,7 @@ const tsupConfig = (options: Options) =>
       "src/fs-size/index.ts",
       "src/fs-tmp/index.ts",
       "src/image/index.ts",
-      "!src/image/notes.md",
+      "src/image/workup.ts",
       "src/ld/index.ts",
       "src/mime/index.ts",
       "src/types/index.ts",

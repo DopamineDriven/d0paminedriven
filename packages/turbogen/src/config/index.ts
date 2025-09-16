@@ -64,7 +64,7 @@ auto-install-peers=true
   }
 
   public hasNpmrcConfig() {
-    return this.existsSync(".gitignore");
+    return this.exists(".gitignore");
   }
 
   public isPlainObject(obj: unknown): obj is Record<string, unknown> {

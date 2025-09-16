@@ -6,6 +6,7 @@ export { FsFetch } from "@/fs-fetch/index.ts";
 export { FsSize } from "@/fs-size/index.ts";
 export { FsTmp } from "@/fs-tmp/index.ts";
 export { ImageService } from "@/image/index.ts";
+export { ImageServiceWorkup } from "@/image/workup.ts";
 export { LevenshteinDistance } from "@/ld/index.ts";
 export type {
   AllMimeTypes,
