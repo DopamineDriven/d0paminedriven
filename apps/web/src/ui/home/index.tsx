@@ -6,8 +6,8 @@ import { motion } from "motion/react";
 
 export function LandingPage() {
   return (
-    <>
-      <section className="font-cal-sans mx-auto flex justify-center space-y-6 pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
+    <div className="relative isolate overflow-y-scroll">
+      <section className="font-cal-sans mx-auto flex justify-center space-y-6 pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32 overflow-y-scroll">
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -214,6 +214,6 @@ pnpm run:web`}</code>
           </motion.div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

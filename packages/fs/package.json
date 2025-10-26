@@ -1,15 +1,13 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "7.6.0",
+  "version": "8.0.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
-  "author": {
-    "email": "andrew@windycitydevs.io",
-    "name": "Andrew Ross"
-  },
+  "author": "Andrew Ross",
   "description": "convenient fs helpers",
   "repository": {
-    "url": "https://github.com/DopamineDriven/d0paminedriven/tree/master",
-    "directory": "./packages/fs"
+    "type": "git",
+    "url": "https://github.com/DopamineDriven/d0paminedriven",
+    "directory": "packages/fs"
   },
   "publishConfig": {
     "access": "public",
@@ -43,7 +41,7 @@
         "image": [
           "dist/image/index.d.ts"
         ],
-                "image/workup": [
+        "image/workup": [
           "dist/image/workup.d.ts"
         ],
        "ld": [
@@ -98,7 +96,7 @@
         "image": [
           "dist/image/index.d.ts"
         ],
-                        "image/workup": [
+        "image/workup": [
           "dist/image/workup.d.ts"
         ],
        "ld": [
@@ -140,7 +138,7 @@
     "./fs-size": "./dist/fs-size/index.js",
     "./fs-tmp": "./dist/fs-tmp/index.js",
     "./image": "./dist/image/index.js",
-        "./image/workup": "./dist/image/workup.js",
+    "./image/workup": "./dist/image/workup.js",
     "./ld": "./dist/ld/index.js",
     "./mime": "./dist/mime/index.js",
     "./types": "./dist/types/index.js",
@@ -156,27 +154,28 @@
     "fix": "npm pkg fix"
   },
   "dependencies": {
-    "dotenv": "^17.2.2",
+    "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "fflate": "^0.8.2",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.4"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@types/node": "^24.5.0",
+    "@types/node": "^24.9.1",
     "chokidar": "^4.0.3",
     "dotenv-cli": "^10.0.0",
-    "eslint": "^9.35.0",
-    "jiti": "^2.5.1",
+    "eslint": "^9.38.0",
+    "jiti": "^2.6.1",
     "prettier": "^3.6.2",
     "terser": "^5.44.0",
+    "tsdown": "^0.15.10",
     "tslib": "^2.8.1",
     "tsup": "^8.5.0",
-    "tsx": "^4.20.5",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.0"
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }
