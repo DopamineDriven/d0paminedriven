@@ -1,25 +1,13 @@
-import type { ComponentPropsWithRef } from "react";
+import type { BaseSVGProps } from "@/icons/index";
 
-export function Moon({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Moon({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      role="img"
+      role={role}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"

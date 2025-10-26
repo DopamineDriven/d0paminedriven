@@ -48,6 +48,18 @@ export function Nav() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-6">
             <Link
+              href="/assets"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+            >
+              Assets
+            </Link>
+            <Link
+              href="/assets/swr"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+            >
+              Assets (SWR)
+            </Link>
+            <Link
               href="https://github.com/DopamineDriven/d0paminedriven"
               target="_blank"
               rel="noreferrer"

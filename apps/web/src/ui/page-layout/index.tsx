@@ -8,7 +8,7 @@ export function PageLayout({ children }: { children: ReactNode }) {
   return (
     <div className="@max-9xl:mx-auto flex min-h-screen flex-col justify-center">
       <Nav />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1  overflow-y-scroll">{children}</main>
       <Footer />
     </div>
   );

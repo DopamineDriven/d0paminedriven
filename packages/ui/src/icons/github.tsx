@@ -1,13 +1,11 @@
-import type { ComponentPropsWithRef } from "react";
+import type { BaseSVGProps } from "@/icons/index";
 
-export function Github({
-  ...svg
-}: Omit<ComponentPropsWithRef<"svg">, "xmlns" | "viewBox" | "role">) {
+export function Github({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       viewBox="0 0 96 96"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       {...svg}>
       <path
         fillRule="evenodd"
