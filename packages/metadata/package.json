@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/DopamineDriven/d0paminedriven",
-    "directory": "packages/metadata"
+    "directory": "./packages/metadata"
   },
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/metadata/README.md",
   "files": [
