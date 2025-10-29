@@ -1,12 +1,12 @@
 {
   "name": "@d0paminedriven/metadata",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "convenient metadata extraction helpers",
   "author": "Andrew Ross",
   "repository": {
     "type": "git",
     "url": "https://github.com/DopamineDriven/d0paminedriven",
-    "directory": "packages/metadata"
+    "directory": "./packages/metadata"
   },
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/metadata/README.md",
   "files": [

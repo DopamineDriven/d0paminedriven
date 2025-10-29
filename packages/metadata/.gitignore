@@ -1,2 +1,2 @@
 src/test/**out**/batch
-src/test/**local**
+src/test/**local/*
