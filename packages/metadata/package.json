@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/metadata",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "convenient metadata extraction helpers",
   "author": "Andrew Ross",
   "repository": {
@@ -85,7 +85,8 @@
     "build": "tsdown",
     "clean": "git clean -xdf dist node_modules",
     "types": "tsc --emitDeclarationOnly",
-    "test": "tsx src/test/workup.ts"
+    "pretest":"tsx src/test/output-local.ts",
+    "test": "tsx src/test/index.test.ts"
   },
   "dependencies": {
     "fflate": "^0.8.2"

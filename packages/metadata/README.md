@@ -52,6 +52,22 @@ if (result1.type === "IMAGE") {
 }
 ```
 
+## Update: Buffer byteSize Parity
+
+- Fix: `extractRemote(Buffer)` now sets `byteSize` to the detected total size (the Buffer length), matching how remote URLs report total size via `Content-Length`/`Content-Range`.
+- Result: URL and Buffer inputs now return consistent `byteSize` values across images and documents.
+
+Example parity check:
+
+```ts
+const extract = new Extract();
+const url = "https://assets.example.com/1758473273940-dogespace.jpg";
+const r1 = await extract.extractRemote(url, 96 * 1024);
+const buf = await fs.promises.readFile("src/test/local/1758473273940-dogespace.jpg");
+const r2 = await extract.extractRemote(buf);
+console.log(r1.byteSize, r2.byteSize); // identical
+```
+
 ## When To Use Which API
 
 - Unified flow for URLs or Buffers: `new Extract(opts).extractRemote(source, size?, timeout?)`
@@ -74,13 +90,13 @@ Image results (`ExpandedImgSpecs`):
 - Core: `type: "IMAGE"`, `width`, `height`, `format`, `frames`, `animated`, `hasAlpha`, `orientation`, `aspectRatio`
 - Color: `colorModel`, `colorSpace`, `iccProfile`
 - EXIF: `exifDateTimeOriginal`
-- Source: `source?`, `byteSize?` (reported total), `fetchedBytes?`, `contentType?`
+- Source: `source?`, `byteSize?` (remote: Content-Length/Range; buffer: `Buffer.length`), `fetchedBytes?`, `contentType?`
 
 Doc results (`ExpandedDocSpecs`):
 - Core: `type: "DOCUMENT"`, `format`, `mimeType`, `pageCount`, `wordCount`, `lineCount`, `textPreview`
 - PDF: `pdfVersion`, `isEncrypted`, `isSearchable`, `isLinearized`
 - Common: `author`, `subject`, `keywords`, `createdDate`, `modifiedDate`
-- Source: `source?`, `byteSize?`, `fetchedBytes?`, `contentType?`
+- Source: `source?`, `byteSize?` (remote: Content-Length/Range; buffer: `Buffer.length`), `fetchedBytes?`, `contentType?`
 
 See `src/types/index.ts` for full type definitions.
 
@@ -187,6 +203,27 @@ const { buffer, mime, filename } = await readUpload();
 const specs = docs.getDocumentSpecsWorkup(buffer, mime, filename);
 console.log(specs.format, specs.pageCount, specs.textPreview);
 ```
+
+## Verification
+
+- Comprehensive test: 629 remote URLs mapped 1:1 to local files across a dozen+ MIME types (JPEG, PNG, WebP, GIF, HEIC/AVIF/ICO/TIFF, PDF, DOCX/PPTX/XLSX, RTF/TXT).
+- Each pair is compared for exact `byteSize` equality using the unified `extractRemote` API.
+- Result: 629/629 passed remote vs local `byteSize` comparisons.
+
+How to run:
+
+```bash
+pnpm test
+```
+
+The first time you run `pnpm test` a `pretest` script will probe the generation of the required `src/test/local/*` directory containing all 629 remote assets pulled locally for direct comparison. Once this dir and its contents exists all subsequent tests bypass this step via an `exists` checker in the `src/test/output-local.ts` file that is executed via the `pretest` script.
+
+Artifacts and helpers:
+
+- Remote URL list: `src/test/data.ts`
+- Local assets (fetched once via the fs helper): `src/test/local/*`
+- Generated tuples mapping remote → local: `src/test/tuples.ts` (built by `pnpm tsx src/test/workup.ts`)
+- Full sample output: `src/test/test-results.md`
 
 ## Runtime Notes
 

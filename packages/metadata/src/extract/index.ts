@@ -563,6 +563,8 @@ export class Extract extends Unified {
     if (Buffer.isBuffer(source)) {
       buffer = source;
       contentType = this.sniffMime(buffer);
+      fetchedBytes = buffer.length;
+      reportedTotalBytes = buffer.length;
     } else {
       this.dlog("extractRemote:start", { url: source, size, timeout });
       const out = await this.fetchMinimalBuffer(source, size, timeout);
