@@ -144,7 +144,7 @@ export class Extract extends Unified {
     | { ok: false; reason: string; status?: number }
   > {
     const ctrl = new AbortController();
-    const deadline = setTimeout(() => ctrl.abort(), deadlineMs).unref();
+    const deadline = setTimeout(() => ctrl.abort(), deadlineMs);
 
     try {
       this.dlog("probeFirstChunk:start", { url, bytes, deadlineMs, idleMs });
@@ -240,7 +240,7 @@ export class Extract extends Unified {
     deadlineMs: number
   ): Promise<Response> {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), deadlineMs).unref();
+    const timer = setTimeout(() => ctrl.abort(), deadlineMs);
     try {
       const method = (init.method ?? "GET").toString();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

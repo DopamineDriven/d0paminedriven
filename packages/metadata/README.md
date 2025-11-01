@@ -92,11 +92,98 @@ Image results (`ExpandedImgSpecs`):
 - EXIF: `exifDateTimeOriginal`
 - Source: `source?`, `byteSize?` (remote: Content-Length/Range; buffer: `Buffer.length`), `fetchedBytes?`, `contentType?`
 
+
+```ts
+interface ExpandedImageSpecs {
+    type: "IMAGE";
+  width: number;
+  height: number;
+  format:
+    | "apng"
+    | "png"
+    | "jpeg"
+    | "gif"
+    | "bmp"
+    | "webp"
+    | "avif"
+    | "svg"
+    | "ico"
+    | "heic"
+    | "tiff"
+    | "unknown";
+  frames: number;
+  animated: boolean;
+  hasAlpha: boolean | null;
+  orientation: number | null;
+  aspectRatio: number;
+  colorModel:
+    | "rgb"
+    | "rgba"
+    | "grayscale"
+    | "grayscale-alpha"
+    | "indexed"
+    | "cmyk"
+    | "ycbcr"
+    | "ycck"
+    | "vector"
+    | "lab"
+    | "unknown";
+  colorSpace:
+    | "unknown"
+    | "srgb"
+    | "display_p3"
+    | "adobe_rgb"
+    | "prophoto_rgb"
+    | "rec2020"
+    | "rec709"
+    | "cmyk"
+    | "lab"
+    | "xyz"
+    | "gray";
+  iccProfile: string | null;
+  exifDateTimeOriginal: string | null;
+  metadata?: Record<string, string>;
+  source?: string;
+  fetchedBytes?: number;
+  byteSize?: number;
+  contentType?: string;
+}
+
+```
+
 Doc results (`ExpandedDocSpecs`):
 - Core: `type: "DOCUMENT"`, `format`, `mimeType`, `pageCount`, `wordCount`, `lineCount`, `textPreview`
 - PDF: `pdfVersion`, `isEncrypted`, `isSearchable`, `isLinearized`
 - Common: `author`, `subject`, `keywords`, `createdDate`, `modifiedDate`
 - Source: `source?`, `byteSize?` (remote: Content-Length/Range; buffer: `Buffer.length`), `fetchedBytes?`, `contentType?`
+
+
+```ts
+interface ExpandedDocSpecs {
+  type: "DOCUMENT";
+  format: string | null;
+  mimeType: string | null;
+  pageCount: number | null;
+  wordCount: number | null;
+  lineCount: number | null;
+  language: string | null;
+  encoding: string | null;
+  author: string | null;
+  subject: string | null;
+  keywords: string[] | null;
+  pdfVersion: string | null;
+  isEncrypted: boolean | null;
+  isSearchable: boolean | null;
+  isLinearized: boolean | null;
+  textPreview: string | null;
+  createdDate: string | null;
+  modifiedDate: string | null;
+  source?: string;
+  fetchedBytes?: number;
+  byteSize?: number;
+  contentType?: string;
+}
+```
 
 See `src/types/index.ts` for full type definitions.
 

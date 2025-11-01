@@ -126,6 +126,7 @@ export interface ExpandedImgSpecs extends ImageSpecs {
   byteSize?: number;
   contentType?: string;
 }
+
 export interface ExpandedDocSpecs extends DocSpecs {
   source?: string;
   fetchedBytes?: number;
