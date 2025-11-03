@@ -1,3 +1,6 @@
+import { DocMetadataExtractor } from "@/docs/index.ts";
+import { ImgMetadataExtractor } from "@/images/index.ts";
+
 export interface ImageSpecs {
   type: "IMAGE";
   width: number;
@@ -138,3 +141,28 @@ export interface ExpandedDocSpecs extends DocSpecs {
 export type Constructor<A extends any[] = any[], I = object> = new (
   ...args: A
 ) => I;
+
+
+export interface ExtractorOptions {
+  img?: ImgMetadataExtractor;
+  docs?: DocMetadataExtractor;
+}
+
+export interface ExtractorHardenedOptions extends ExtractorOptions {
+  headers?: { [key: string]: string };
+  /** CORS mode for fetch requests (browser environments). Default: 'cors' */
+  corsMode?: RequestMode;
+  /** Credentials mode for fetch requests. Default: 'same-origin' */
+  credentials?: RequestCredentials;
+  /** Given a CF URL, return an origin (S3/R2) URL for the same object. */
+  originFallback?: (cfUrl: string) => Promise<string> | string;
+  /** Invalidate one CF key (path or full URL OK; implementer can map to key). */
+  invalidateCloudFrontKey?: (urlOrKey: string) => Promise<void>;
+  /** Quarantine duration for suspect URLs (ms). Default: 6h */
+  quarantineTtlMs?: number;
+  /** Custom UA string for diagnostics */
+  userAgent?: string;
+  /** Enable verbose debug logging */
+  debug?: boolean;
+}
+
