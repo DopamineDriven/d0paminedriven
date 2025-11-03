@@ -1,9 +1,9 @@
+import { inflateSync } from "fflate";
 import type { ImageSpecs } from "@/types/index.ts";
 import { ImgMetadataExtractorWorkup } from "@/images/workup.ts";
-import { inflateSync } from "fflate";
 
 export class ImgMetadataExtractor extends ImgMetadataExtractorWorkup {
-  constructor(){
+  constructor() {
     super();
   }
   protected png(buffer: Buffer<ArrayBufferLike>) {
@@ -1116,7 +1116,9 @@ export class ImgMetadataExtractor extends ImgMetadataExtractorWorkup {
       const ifdSize = numEntries * 12 + 4; // entries + next IFD pointer
       if (entriesBase + ifdSize > src.length) {
         // IFD extends beyond buffer - this is the issue with coffee.tif
-        console.warn(`TIFF IFD at offset ${ifdOff} requires ${ifdSize} bytes but only ${src.length - entriesBase} available`);
+        console.warn(
+          `TIFF IFD at offset ${ifdOff} requires ${ifdSize} bytes but only ${src.length - entriesBase} available`
+        );
         // Try to parse what we can
       }
 
@@ -1207,14 +1209,14 @@ export class ImgMetadataExtractor extends ImgMetadataExtractorWorkup {
       // Log a warning but try to return sensible defaults rather than throwing
       console.warn(
         `TIFF: Could not find ImageWidth/ImageLength in buffer of ${src.length} bytes. ` +
-        `IFD at offset ${firstIFDOff} may require more data.`
+          `IFD at offset ${firstIFDOff} may require more data.`
       );
 
       // Check if this is likely a truncation issue
       if (firstIFDOff >= src.length - 100) {
         throw new Error(
           `TIFF IFD at offset ${firstIFDOff} is beyond buffer (${src.length} bytes). ` +
-          `This file requires reading more data to parse.`
+            `This file requires reading more data to parse.`
         );
       }
 

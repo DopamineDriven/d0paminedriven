@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { Fs } from "@d0paminedriven/fs";
 import type { ExpandedDocSpecs, ExpandedImgSpecs } from "@/types/index.ts";
+import { ExtractClient } from "@/extract/client.ts";
 import { Extract } from "@/extract/index.ts";
 import { tuplesToTest } from "@/test/tuples.ts";
 
 const fs = new Fs(process.cwd());
 
 const p = new Extract();
+const c = new ExtractClient();
 
 const arr =
   Array.of<
@@ -17,10 +19,8 @@ const arr =
 async function comprehensive() {
   for (const [remote, local] of tuplesToTest) {
     const bufLocal = fs.fileToBuffer(local ?? "");
-    const [r, l] = await Promise.all([
-      p.extractRemote(remote ?? "", 4096 * 48),
-      p.extractRemote(bufLocal, 4096 * 48)
-    ]);
+    const l = c.extractFromBuffer(bufLocal);
+    const r = await p.extractRemote(remote ?? "", 4096 * 48);
     arr.push([r, l]);
   }
   return arr;

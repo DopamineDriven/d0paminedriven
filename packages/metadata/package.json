@@ -1,12 +1,11 @@
 {
   "name": "@d0paminedriven/metadata",
-  "version": "3.4.0",
+  "version": "4.0.1",
   "description": "convenient metadata extraction helpers",
   "author": "Andrew Ross",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DopamineDriven/d0paminedriven",
-    "directory": "./packages/metadata"
+    "url": "https://github.com/DopamineDriven/d0paminedriven/tree/master/packages/metadata"
   },
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/metadata/README.md",
   "files": [
@@ -29,7 +28,9 @@
         "dist/docs/index.d.ts"
       ],
       "extract": [
-        "dist/extract/index.d.ts"
+        "dist/extract/index.d.ts",
+        "dist/extract/client.d.ts"
+
       ],
       "mixins": [
         "dist/mixins/index.d.ts"
@@ -55,7 +56,8 @@
           "dist/docs/index.d.ts"
         ],
         "extract": [
-          "dist/extract/index.d.ts"
+          "dist/extract/index.d.ts",
+          "dist/extract/client.d.ts"
         ],
         "mixins": [
           "dist/mixins/index.d.ts"
@@ -73,6 +75,7 @@
     ".": "./dist/index.js",
     "./docs": "./dist/docs/index.js",
     "./extract": "./dist/extract/index.js",
+    "./extract/client": "./dist/extract/client.js",
     "./images": "./dist/images/index.js",
     "./images/workup": "./dist/images/workup.js",
     "./mixins": "./dist/mixins/index.js",
@@ -96,12 +99,12 @@
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@types/node": "^24.9.1",
-    "eslint": "^9.38.0",
+    "@types/node": "^24.10.0",
+    "eslint": "^9.39.0",
     "jiti": "^2.6.1",
     "prettier": "^3.6.2",
     "terser": "^5.44.0",
-    "tsdown": "^0.15.10",
+    "tsdown": "^0.15.12",
     "tslib": "^2.8.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"

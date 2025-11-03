@@ -1,19 +1,10 @@
-import type { ExtractorOptions } from "@/mixins/index.ts";
-import type { ExpandedDocSpecs, ExpandedImgSpecs } from "@/types/index.ts";
+import type {
+  ExpandedDocSpecs,
+  ExpandedImgSpecs,
+  ExtractorHardenedOptions,
+  ExtractorOptions
+} from "@/types/index.ts";
 import { DocMixin, ImgMixin } from "@/mixins/index.ts";
-
-export interface ExtractorHardenedOptions extends ExtractorOptions {
-  /** Given a CF URL, return an origin (S3/R2) URL for the same object. */
-  originFallback?: (cfUrl: string) => Promise<string> | string;
-  /** Invalidate one CF key (path or full URL OK; implementer can map to key). */
-  invalidateCloudFrontKey?: (urlOrKey: string) => Promise<void>;
-  /** Quarantine duration for suspect URLs (ms). Default: 6h */
-  quarantineTtlMs?: number;
-  /** Custom UA string for diagnostics */
-  userAgent?: string;
-  /** Enable verbose debug logging */
-  debug?: boolean;
-}
 
 class Base {
   constructor(_opts?: ExtractorOptions) {}
@@ -415,8 +406,12 @@ export class Extract extends Unified {
         // For TIFFs, we need a reasonable amount from both ends
         // For PDFs, we need more from the end for the xref table
         const isTiff = contentType === "image/tiff";
-        const startSize = isTiff ? Math.min(32768, size) : Math.min(16384, size);
-        const endSize = isTiff ? Math.min(32768, contentLength) : Math.min(400000, contentLength);
+        const startSize = isTiff
+          ? Math.min(32768, size)
+          : Math.min(16384, size);
+        const endSize = isTiff
+          ? Math.min(32768, contentLength)
+          : Math.min(400000, contentLength);
         const endStart = Math.max(0, contentLength - endSize);
 
         const [startRes, endRes] = await Promise.all([
@@ -449,11 +444,14 @@ export class Extract extends Unified {
             startRes.arrayBuffer(),
             endRes.arrayBuffer()
           ]);
-          this.dlog(`fetchMinimalBuffer:${contentType === "image/tiff" ? "tiff" : "pdf"}:ranged`, {
-            url,
-            startSize,
-            endSize
-          });
+          this.dlog(
+            `fetchMinimalBuffer:${contentType === "image/tiff" ? "tiff" : "pdf"}:ranged`,
+            {
+              url,
+              startSize,
+              endSize
+            }
+          );
           const buffer = Buffer.concat([
             Buffer.from(startBuf),
             Buffer.from(endBuf)
@@ -465,7 +463,8 @@ export class Extract extends Unified {
             reportedTotalBytes: contentLength ?? undefined,
             fetchedBytes: buffer.length,
             // For TIFF, we need to know the total file size to handle the gap
-            totalFileSize: contentType === "image/tiff" ? contentLength : undefined
+            totalFileSize:
+              contentType === "image/tiff" ? contentLength : undefined
           };
         }
         // fall through if ranges misbehave
@@ -631,9 +630,12 @@ export class Extract extends Unified {
           case "image/tiff": {
             // For TIFF, we need the full buffer as IFDs can be anywhere in the file
             // Pass the full buffer as rawbuffer, and a truncated version for initial checks
-            const truncated = buffer.subarray(0, Math.min(buffer.length, 4096 * 6));
+            const truncated = buffer.subarray(
+              0,
+              Math.min(buffer.length, 4096 * 6)
+            );
             dims = this.sniffTiff(buffer, truncated) ?? null;
-            format = "tiff"
+            format = "tiff";
             break;
           }
         }
@@ -687,8 +689,8 @@ export class Extract extends Unified {
     return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
   }
 
-  private sniffTiff(rawbuffer:Buffer, buffer: Buffer){
-     if (
+  private sniffTiff(rawbuffer: Buffer, buffer: Buffer) {
+    if (
       buffer.length >= 8 &&
       // "II*\0" (little-endian classic TIFF)
       ((buffer?.[0] === 0x49 &&
@@ -713,7 +715,7 @@ export class Extract extends Unified {
       const data = this.img.tiff(rawbuffer, buffer);
       if (!data) return null;
       else {
-        return {width: data.width, height: data.height}
+        return { width: data.width, height: data.height };
       }
     }
   }

@@ -25,6 +25,7 @@ export default defineConfig(
         "src/index.ts",
         "src/docs/index.ts",
         "src/extract/index.ts",
+        "src/extract/client.ts",
         "src/images/index.ts",
         "src/images/workup.ts",
         "src/mixins/index.ts",

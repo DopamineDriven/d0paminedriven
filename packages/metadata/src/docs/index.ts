@@ -1,5 +1,5 @@
-import type { DocSpecs, ZipEntry } from "@/types/index.ts";
 import { inflateSync } from "fflate";
+import type { DocSpecs, ZipEntry } from "@/types/index.ts";
 
 export class DocMetadataExtractor {
   // Safer decoding with fallback paths
