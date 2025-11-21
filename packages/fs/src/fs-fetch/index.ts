@@ -174,7 +174,7 @@ export class FsFetch extends FsTmp {
       // else use original base64 → buffer method
       const result = await this.assetToBufferView(inputUrl);
       const cleanedData = this.cleanDataUrl(result.b64encodedData);
-      this.withWs(formattedPath, Buffer.from(cleanedData, "base64"));
+      await this.asyncWithWs(formattedPath, Buffer.from(cleanedData, "base64"));
     } catch (err) {
       console.error(`[fetchRemoteWriteLocalLargeFiles error]:`, err);
     }
