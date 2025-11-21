@@ -112,8 +112,8 @@
   },
   "dependencies": {
     "@d0paminedriven/fs": "^7.6.0",
-    "@inquirer/core": "^10.3.0",
-    "@inquirer/prompts": "^7.9.0",
+    "@inquirer/core": "^11.0.1",
+    "@inquirer/prompts": "^8.0.1",
     "dotenv": "^17.2.3",
     "gradient-string": "^3.0.0"
   },
@@ -121,22 +121,22 @@
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@inquirer/type": "^3.0.9",
+    "@inquirer/type": "^4.0.1",
     "@types/gradient-string": "^1.1.6",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "chokidar": "^4.0.3",
     "dotenv-cli": "^11.0.0",
     "dotenv-expand": "^12.0.3",
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.1",
     "jiti": "^2.6.1",
     "prettier": "^3.6.2",
-    "terser": "^5.44.0",
-    "tsdown": "^0.15.12",
+    "terser": "^5.44.1",
+    "tsdown": "^0.16.6",
     "tslib": "^2.8.1",
-    "tsup": "^8.5.0",
+    "tsup": "^8.5.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.2"
+    "typescript-eslint": "^8.47.0"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }
