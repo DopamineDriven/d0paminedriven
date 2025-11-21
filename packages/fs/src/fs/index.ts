@@ -8,22 +8,22 @@ export default class Fs extends FsFetch {
     cwd ??= process.cwd();
   }
 
-  public async getImageSpecs(filePath: string, size = 4096 * 6) {
+  public async getImageSpecs(filePath: string, size = 4096 * 36) {
     if (filePath.startsWith("https")) {
-      return await this.extractRemote(filePath, size);
+      return await this.extractRemoteFs(filePath, size);
     }
     return await this.extractViaPath(filePath, size);
   }
 
-  public async getImageSpecsFlexi(target: Buffer | string, size = 4096 * 6) {
+  public async getImageSpecsFlexi(target: Buffer | string, size = 4096 * 36) {
     if (Buffer.isBuffer(target)) {
-      return this.getImageSpecsWorkup(target, size);
+      return this.getImageSpecsWorkupFs(target, size);
     } else {
       return await this.getImageSpecs(target, size);
     }
   }
 
-  public async getImageSpecsTmp(filepath: string, size = 4096 * 6) {
+  public async getImageSpecsTmp(filepath: string, size = 4096 * 36) {
     return this.extractViaPath(resolve(this.tmpDir, filepath), size);
   }
 
@@ -31,7 +31,7 @@ export default class Fs extends FsFetch {
    * Extract image metadata using streaming (only reads ~4KB)
    * Much more memory efficient for large images
    */
-  public async getImageSpecsStream(filePath: string, size = 4096) {
+  public async getImageSpecsStream(filePath: string, size = 4096 * 36) {
     return this.extractFromPath(filePath, size);
   }
 

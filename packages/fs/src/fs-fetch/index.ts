@@ -1,6 +1,6 @@
 import fsSync from "fs";
-import { FsTmp } from "@/fs-tmp/index.ts";
 import { relative } from "path";
+import { FsTmp } from "@/fs-tmp/index.ts";
 
 export class FsFetch extends FsTmp {
   constructor(public override cwd: string) {
@@ -124,57 +124,85 @@ export class FsFetch extends FsTmp {
   >(inputUrl: I, outputPathI: O, useDetectedExtension = true) {
     if (!URL.canParse(inputUrl))
       throw new Error(`invalid URL ${inputUrl} is unable to be parsed`);
-    const MAX_SAFE_IN_MEMORY_MB = 100;
 
     try {
-      const head = await fetch(inputUrl, {
-        method: this.knownToBlockHead(inputUrl)
-      });
-      const contentLength = head.headers.get("content-length");
-      const fileSizeMb = contentLength
-        ? parseInt(contentLength, 10) / (1024 * 1024)
-        : null;
-      let outputPath = outputPathI;
-      const assetTypeViaUrl = this.assetType(inputUrl);
-      const contentType = (head.headers.get("content-type") ??
-        "application/octet-stream") as keyof typeof this.toExtObj;
+      // stream directly to disk for large files
+      const [head, meta] = await Promise.all([
+        fetch(inputUrl, {
+          method: this.knownToBlockHead(inputUrl)
+        }),
+        this.extractRemote(inputUrl, 4096 * 48)
+      ]);
+      let ct: keyof typeof this.toExtObj;
+      let ext: keyof typeof this.mimeTypeObj;
+      let size: number;
+      const s = head.headers.get("Content-Type");
+      const cl = head.headers.get("content-length");
+      if (meta.contentType && meta.byteSize && meta.format) {
+        if (
+          !s?.startsWith("image/") ||
+          !s?.startsWith("text") ||
+          !s?.startsWith("application")
+        ) {
+          ct = meta.contentType as keyof typeof this.toExtObj;
+          ext = this.toExtObj[s as keyof typeof this.mimeToExt][0];
+          size = meta.byteSize;
+        } else {
+          ct = meta.contentType as keyof typeof this.toExtObj;
+          ext = meta.format as keyof typeof this.mimeTypeObj;
+          size = meta.byteSize;
+        }
+      } else {
+        const assetTypeViaUrl = this.assetType(inputUrl);
+
+        ct = (head.headers.get("Content-Type") ??
+          "application/octet-stream") as keyof typeof this.toExtObj;
+        ext =
+          typeof assetTypeViaUrl === "undefined"
+            ? this.toExtObj[ct][0]
+            : assetTypeViaUrl;
+        size = cl ? Number.parseInt(cl, 10) / (1024 * 1024) : 0;
+      }
+      const { unit, value } = this.autoFileSizeRaw(size);
+      console.log(
+        `fetchRemoteWriteLocalLargeFiles extracting a file of size ${value} ${unit}`
+      );
       const formattedPath = useDetectedExtension
-        ? `${outputPath}.${typeof assetTypeViaUrl === "undefined" ? this.toExtObj[contentType][0] : assetTypeViaUrl}`
-        : outputPath;
+        ? `${outputPathI}.${ext}`
+        : outputPathI;
 
       this.generateDirIfDNE(this.pathHandler(formattedPath), {
         recursive: true
       });
 
-      // stream directly to disk for large files
-      if (fileSizeMb !== null && fileSizeMb > MAX_SAFE_IN_MEMORY_MB) {
-        const res = await fetch(inputUrl);
-        if (!res.ok || !res.body) {
-          throw new Error(`Failed to fetch asset: ${res.statusText}`);
-        }
-
-        const writeStream = fsSync.createWriteStream(
-          relative(this.cwd, formattedPath)
-        );
-        const reader = res.body.getReader();
-
-        const pump = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            writeStream.write(value);
-          }
-          writeStream.end();
-        };
-
-        await pump();
-        return;
+      const writeStream = fsSync.createWriteStream(
+        relative(this.cwd, formattedPath)
+      );
+      const res = await fetch(inputUrl);
+      if (!res.ok || !res.body) {
+        throw new Error(`Failed to fetch asset: ${res.statusText}`);
       }
+      const { promise, reject, resolve } = Promise.withResolvers();
 
-      // else use original base64 → buffer method
-      const result = await this.assetToBufferView(inputUrl);
-      const cleanedData = this.cleanDataUrl(result.b64encodedData);
-      await this.asyncWithWs(formattedPath, Buffer.from(cleanedData, "base64"));
+      writeStream.on("finish", () => resolve({}));
+      writeStream.on("error", () => reject({}));
+
+      const reader = res.body.getReader();
+
+      const pump = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+          writeStream.write(value);
+        }
+        writeStream.end();
+      };
+
+      await pump();
+
+      await promise.then(() => {});
+      return;
     } catch (err) {
       console.error(`[fetchRemoteWriteLocalLargeFiles error]:`, err);
     }

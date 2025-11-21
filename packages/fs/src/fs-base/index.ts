@@ -1,6 +1,6 @@
 import fsSync from "fs";
 import { Readable } from "node:stream";
-import { devNull, EOL, homedir, hostname, platform, tmpdir } from "os";
+import { devNull, EOL, homedir, hostname, platform, tmpdir } from "node:os";
 import { join, relative, resolve } from "path";
 import { ReadableStream as WebReadableStream } from "stream/web";
 import * as dotenv from "dotenv";

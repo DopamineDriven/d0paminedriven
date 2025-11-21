@@ -432,7 +432,7 @@ export class ImageService extends ImageServiceWorkup {
    * Probe image from various sources
    * Handles local Buffer, remote URL, or S3 object
    */
-  public async extractRemote(
+  public async extractRemoteFs(
     source: Buffer | string,
     size = 16384,
     timeout = 5000
@@ -444,7 +444,7 @@ export class ImageService extends ImageServiceWorkup {
       return this.getImageSpecsWorkup(buffer, size);
     } else {
       // Remote URL - smart fetch with Range
-      buffer = await this.fetchMinimalBuffer(source, size, timeout);
+      buffer = await this.fetchMinimalBufferFs(source, size, timeout);
       return this.getImageSpecsWorkup(buffer, size);
     }
   }
@@ -462,7 +462,7 @@ export class ImageService extends ImageServiceWorkup {
       return "HEAD" as const;
     }
   }
-  private async fetchMinimalBuffer(
+  private async fetchMinimalBufferFs(
     url: string,
     size = 16384,
     timeout = 5000
@@ -547,7 +547,7 @@ export class ImageService extends ImageServiceWorkup {
     }
   }
 
-  public getImageSpecsWorkup(
+  public getImageSpecsWorkupFs(
     rawbuffer: Buffer<ArrayBufferLike>,
     size = 4096 * 6
   ) {

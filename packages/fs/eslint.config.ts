@@ -9,6 +9,7 @@ export default [
       "@typescript-eslint/prefer-includes": "off",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/prefer-regexp-exec": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
       "prefer-const": "off"
     },
     ignores: ["dist/**"]

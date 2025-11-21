@@ -1,18 +1,10 @@
-import type { WithImplicitCoercion } from "buffer";
+import type { ObjectEncodingOptions } from "fs";
+import Stream from "stream";
 
-export type BufferEncodingUnion =
-  | "ascii"
-  | "utf8"
-  | "utf-8"
-  | "utf16le"
-  | "ucs2"
-  | "ucs-2"
-  | "base64"
-  | "base64url"
-  | "latin1"
-  | "binary"
-  | "hex"
-  | "utf-16le";
+export type BufferEncodingUnion = Exclude<
+  CTR<ObjEncodingOptions, "encoding">["encoding"],
+  null
+>;
 
 export interface Dict<T> {
   [key: string]: T | undefined;
@@ -131,9 +123,7 @@ export interface ExecSyncOptionsWithBufferEncoding extends ExecSyncOptions {
   encoding?: "buffer" | null | undefined;
 }
 
-export interface ObjEncodingOptions {
-  encoding?: BufferEncodingUnion | null | undefined;
-}
+export interface ObjEncodingOptions extends ObjectEncodingOptions {}
 export type OpenMode = string | number;
 
 export interface Abortable {
@@ -161,34 +151,30 @@ export interface MkDirOptions {
 
 export type BashEnv = "development" | "production" | "test" | undefined;
 
-export type CoercionUnion = string | Uint8Array | readonly number[];
-
-export type WriteStreamDataShape =
-  | WithImplicitCoercion<CoercionUnion>
-  | CoercionUnion;
-
 export type WriteStreamProps<T extends string = string> = {
-  data: WithImplicitCoercion<CoercionUnion>;
+  data: WriteableDataType;
   cwd: string;
   path: T;
 };
 
-export type WriteStreamOptions =
-  | BufferEncodingUnion
-  | {
-      encoding?: BufferEncodingUnion;
-      autoClose?: boolean;
-      emitClose?: boolean;
-      start?: number;
-      highWaterMark?: number;
-      flush?: boolean;
-    };
+export type WriteStreamOptions = XOR<
+  BufferEncodingUnion,
+  {
+    encoding?: BufferEncodingUnion;
+    autoClose?: boolean;
+    emitClose?: boolean;
+    start?: number;
+    highWaterMark?: number;
+    flush?: boolean;
+  }
+>;
 
-export type WriteFileAsyncDataUnion =
-  | WithImplicitCoercion<string>
-  | { [Symbol.toPrimitive](hint: "string"): string }
-  | string;
-
+export type WriteableDataType =
+  | string
+  | Buffer
+  | NodeJS.TypedArray
+  | NodeJS.NonSharedDataView;
+export type WriteFileAsyncDataType = string | NodeJS.ArrayBufferView | Iterable<string | NodeJS.ArrayBufferView> | AsyncIterable<string | NodeJS.ArrayBufferView> | Stream;
 export interface ReadDirOptionsEntity extends ObjEncodingOptions {
   withFileTypes?: false | undefined;
   recursive?: boolean | undefined;
@@ -198,18 +184,18 @@ export type ReadDirOptions = {
   [P in keyof ReadDirOptionsEntity]: ReadDirOptionsEntity[P];
 };
 
-export type WriteFileAsyncOptions =
-  | (ObjEncodingOptions & {
-      mode?: Mode | undefined;
-      flag?: OpenMode | undefined;
-      flush?: boolean | undefined;
-    } & Abortable)
-  | BufferEncodingUnion
-  | null;
+export type WriteFileAsyncOptions = XOR<
+  ObjEncodingOptions & {
+    mode?: Mode | undefined;
+    flag?: OpenMode | undefined;
+    flush?: boolean | undefined;
+  } & Abortable,
+  BufferEncodingUnion
+> | null;
 
 export type WriteFileAsyncProps<T extends string = string> = {
   path: T;
-  data: WriteFileAsyncDataUnion;
+  data: WriteableDataType;
   options?:
     | (ObjEncodingOptions & {
         mode?: Mode | undefined;
