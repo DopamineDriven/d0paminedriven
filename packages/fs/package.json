@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
   "author": "Andrew Ross",
   "description": "convenient fs helpers",
@@ -154,6 +154,7 @@
     "fix": "npm pkg fix"
   },
   "dependencies": {
+    "@d0paminedriven/metadata": "^4.0.1",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
     "fflate": "^0.8.2",

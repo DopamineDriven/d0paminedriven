@@ -3,8 +3,8 @@ import fsAsync from "fs/promises";
 import { resolve } from "path";
 import type {
   ReadDirOptions,
+  WriteableDataType,
   WriteFileAsyncOptions,
-  WriteStreamDataShape,
   WriteStreamOptions
 } from "@/types/index.ts";
 import { FsCore } from "@/fs-core/index.ts";
@@ -31,7 +31,7 @@ export class FsTmp extends FsCore {
    */
   public writeTmp<const F extends string>(
     filename: F,
-    data: WriteStreamDataShape,
+    data: WriteableDataType,
     options?: WriteStreamOptions
   ) {
     const fullPath = resolve(this.tmpDir, filename);
@@ -44,7 +44,7 @@ export class FsTmp extends FsCore {
 
   public async writeTmpAsync<const F extends string>(
     filename: F,
-    data: string,
+    data: WriteableDataType,
     options: WriteFileAsyncOptions = {}
   ) {
     const fullPath = resolve(this.tmpDir, filename);
@@ -60,7 +60,7 @@ export class FsTmp extends FsCore {
     if (!this.existsTmp(filename)) {
       throw new Error(`Tmp file not found: ${filename}`);
     }
-    return await this.fileToBufferAsync(fullPath);
+    return await fsAsync.readFile(fullPath);
   }
   /**
    * Read a file from the tmp directory

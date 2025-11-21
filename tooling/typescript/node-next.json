@@ -10,7 +10,7 @@
     "importHelpers": false,
     "incremental": true,
     "lib": ["ES2022", "ESNext", "ScriptHost", "DOM.AsyncIterable", "DOM.Iterable", "DOM"],
-    "module": "node20",
+    "module": "nodenext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
     "sourceMap": true,

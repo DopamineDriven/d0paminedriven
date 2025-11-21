@@ -312,6 +312,9 @@ importers:
 
   packages/fs:
     dependencies:
+      '@d0paminedriven/metadata':
+        specifier: ^4.0.1
+        version: 4.0.1
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -1573,6 +1576,9 @@ packages:
 
   '@d0paminedriven/fs@7.6.0':
     resolution: {integrity: sha512-3VgscSMc+XLqCd9JVBs6NxsMlL6rrJu/boyDefectGpCkZPhMjB1tV03VHj2VYFdukFOrJpu085KRLuyh4fsYQ==}
+
+  '@d0paminedriven/metadata@4.0.1':
+    resolution: {integrity: sha512-BBJglfVWEtJQ2WlJPvsu3yGtJy0y5YD/CYF34TsRx0EXgdBONFa14JQ5w9cIca4F+rlRQm1e+owyFIdIu3y6Cw==}
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -9079,6 +9085,10 @@ snapshots:
       dotenv-expand: 12.0.3
       fflate: 0.8.2
       sharp: 0.34.5
+
+  '@d0paminedriven/metadata@4.0.1':
+    dependencies:
+      fflate: 0.8.2
 
   '@edge-runtime/format@2.2.1': {}
 

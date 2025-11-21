@@ -1,4 +1,10 @@
-export class LevenshteinDistance {
+import { Extract } from "@d0paminedriven/metadata";
+
+export class LevenshteinDistance extends Extract {
+  constructor() {
+    super();
+  
+  }
   private createMatrix(rows: number, cols: number, initialValue: number) {
     const matrix = Array.of<number[]>();
     for (let r = 0; r < rows; r++) {
