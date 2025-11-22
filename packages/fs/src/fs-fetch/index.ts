@@ -124,49 +124,18 @@ export class FsFetch extends FsTmp {
   >(inputUrl: I, outputPathI: O, useDetectedExtension = true) {
     if (!URL.canParse(inputUrl))
       throw new Error(`invalid URL ${inputUrl} is unable to be parsed`);
-
     try {
-      // stream directly to disk for large files
-      const [head, meta] = await Promise.all([
-        fetch(inputUrl, {
-          method: this.knownToBlockHead(inputUrl)
-        }),
-        this.extractRemote(inputUrl, 4096 * 48)
-      ]);
-      let ct: keyof typeof this.toExtObj;
-      let ext: keyof typeof this.mimeTypeObj;
-      let size: number;
-      const s = head.headers.get("Content-Type");
-      const cl = head.headers.get("content-length");
-      if (meta.contentType && meta.byteSize && meta.format) {
-        if (
-          !s?.startsWith("image/") ||
-          !s?.startsWith("text") ||
-          !s?.startsWith("application")
-        ) {
-          ct = meta.contentType as keyof typeof this.toExtObj;
-          ext = this.toExtObj[s as keyof typeof this.mimeToExt][0];
-          size = meta.byteSize;
-        } else {
-          ct = meta.contentType as keyof typeof this.toExtObj;
-          ext = meta.format as keyof typeof this.mimeTypeObj;
-          size = meta.byteSize;
-        }
-      } else {
-        const assetTypeViaUrl = this.assetType(inputUrl);
+      const meta = await this.extractRemote(inputUrl, 4096 * 48);
 
-        ct = (head.headers.get("Content-Type") ??
-          "application/octet-stream") as keyof typeof this.toExtObj;
-        ext =
-          typeof assetTypeViaUrl === "undefined"
-            ? this.toExtObj[ct][0]
-            : assetTypeViaUrl;
-        size = cl ? Number.parseInt(cl, 10) / (1024 * 1024) : 0;
-      }
+      const ext = (meta.format ?? "bin") as keyof typeof this.mimeTypeObj;
+      const size = meta.byteSize ?? 0;
+
       const { unit, value } = this.autoFileSizeRaw(size);
+
       console.log(
         `fetchRemoteWriteLocalLargeFiles extracting a file of size ${value} ${unit}`
       );
+
       const formattedPath = useDetectedExtension
         ? `${outputPathI}.${ext}`
         : outputPathI;
@@ -178,10 +147,13 @@ export class FsFetch extends FsTmp {
       const writeStream = fsSync.createWriteStream(
         relative(this.cwd, formattedPath)
       );
+
       const res = await fetch(inputUrl);
+
       if (!res.ok || !res.body) {
         throw new Error(`Failed to fetch asset: ${res.statusText}`);
       }
+
       const { promise, reject, resolve } = Promise.withResolvers();
 
       writeStream.on("finish", () => resolve({}));

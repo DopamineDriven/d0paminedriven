@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
   "author": "Andrew Ross",
   "description": "convenient fs helpers",
