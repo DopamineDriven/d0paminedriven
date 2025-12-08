@@ -5,7 +5,7 @@ import { FsAtomic } from "@/fs-atomic/index.ts";
 import { unitsObj } from "@/types/index.ts";
 
 export class FsSize extends FsAtomic {
-  constructor(public override cwd: string) {
+  constructor(public cwd: string) {
     super((cwd ??= process.cwd()));
   }
 

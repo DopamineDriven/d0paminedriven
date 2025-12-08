@@ -1,5 +1,6 @@
-import fsSync from "fs";
 import fsAsync from "fs/promises";
+import { Abortable } from "node:events";
+import fsSync from "node:fs";
 import { relative } from "path";
 import { FsSize } from "@/fs-size/index.ts";
 import {
@@ -9,8 +10,17 @@ import {
   WriteStreamOptions
 } from "@/types/index.ts";
 
+export interface CreateReadStreamOptions extends Abortable {
+  encoding?: BufferEncoding | null | undefined;
+  autoClose?: boolean | undefined;
+  emitClose?: boolean | undefined;
+  start?: number | undefined;
+  end?: number | undefined;
+  highWaterMark?: number | undefined;
+}
+
 export class FsCore extends FsSize {
-  constructor(public override cwd: string) {
+  constructor(public cwd: string) {
     super((cwd ??= process.cwd()));
   }
 
@@ -19,7 +29,7 @@ export class FsCore extends FsSize {
     data: WriteableDataType,
     options?: WriteStreamOptions
   ) {
- try {
+    try {
       if (/\//g.test(path) === true) {
         return this.generateDirIfDNE(this.pathHandler(path), {
           recursive: true
@@ -74,6 +84,20 @@ export class FsCore extends FsSize {
         .write(data);
     }
   }
+
+  // public async withRs<const T extends string>(
+  //   path: T,
+  //   flags?: number | string,
+  //   mode?: fsSync.Mode,
+  //   options: CreateReadStreamOptions = {}
+  // ) {
+  //   if (this.exists(path)) {
+  //     const fd = await open(path, flags, mode);
+  //     const stream = createReadStream(path,);
+
+  //   } else throw new Error(`path ${path} does not exist.`);
+  // }
+
   public writeFileAsync = async <const T extends string>(
     path: T,
     data: WriteFileAsyncDataType,

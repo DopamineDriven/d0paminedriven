@@ -10,6 +10,7 @@ export default [
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/prefer-regexp-exec": "off",
       "@typescript-eslint/no-empty-object-type": "off",
+      "no-useless-escape": "off",
       "prefer-const": "off"
     },
     ignores: ["dist/**"]

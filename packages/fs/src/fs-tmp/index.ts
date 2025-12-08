@@ -11,7 +11,7 @@ import { FsCore } from "@/fs-core/index.ts";
 import { Streamable } from "@/types/stream.ts";
 
 export class FsTmp extends FsCore {
-  constructor(public override cwd: string) {
+  constructor(public cwd: string) {
     super((cwd ??= process.cwd()));
   }
 
@@ -265,11 +265,7 @@ export class FsTmp extends FsCore {
     const files = this.scanTmp(pattern);
 
     // Use arrToArrOfArrs for effortless batching!
-    const batches = await this.arrToArrOfArrs({
-      arrToFragment: files,
-      arrOfArrsAggregator: [],
-      interval: batchSize
-    });
+    const batches = this.arrToArrOfArrs(files, batchSize);
 
     let totalRemoved = 0;
 

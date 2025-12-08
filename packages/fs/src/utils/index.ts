@@ -2,6 +2,9 @@ import type { RemoveFields, Unenumerate } from "@/types/index.ts";
 import { LevenshteinDistance } from "@/ld/index.ts";
 
 export class UtilsService extends LevenshteinDistance {
+  constructor() {
+    super();
+  }
   public chunkArray<T extends number>(
     arr: string[],
     maxChunkLength: T
@@ -70,27 +73,16 @@ export class UtilsService extends LevenshteinDistance {
     }
   }
 
-  public arrToArrOfArrs = <const T, const N extends number>({
-    arrToFragment = Array.of<T>(),
-    arrOfArrsAggregator = Array.of<T[]>(),
-    interval
-  }: {
-    arrToFragment: T[];
-    arrOfArrsAggregator: T[][];
-    interval: N;
-  }) =>
-    new Promise((resolve, _reject) =>
-      resolve(
-        ((interval: number) => {
-          for (let i = 0; i <= arrToFragment.length; i++) {
-            if ((i % interval === 0 || i === 0) && i <= arrToFragment.length) {
-              let segment = arrToFragment.slice(i, i + interval);
-              arrOfArrsAggregator.push(segment);
-            }
-          }
-        })(interval)
-      )
-    ).then(_ => arrOfArrsAggregator);
+  public arrToArrOfArrs = <const T>(
+    arr: T[],
+    int = 10,
+    agg = Array.of<T[]>()
+  ) => {
+    for (let i = 0; i < arr.length; i++) {
+      agg.push(arr.slice(i, i + int));
+    }
+    return agg;
+  };
 
   public extractTuple<
     const T extends

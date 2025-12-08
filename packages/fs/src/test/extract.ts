@@ -1,0 +1,104 @@
+import { Fs } from "@/index.ts";
+
+export const testData = [
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765066050891-Slammed-Poetry-Pt-V.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765064849739-The-Path-to-Hell-is-Paved-with-Good-Intentions-Pt-I.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765051976281-Continuity__Motif_Evolution__and_Mythopoetic_Tone_in_the_Claudtullus_Chronicles.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765051351071-Candy-Flipping-Claudtullus-Pt-III.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765050532527-Candy-Flipping-Claudtullus-Pt-II.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1764086988928-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1763265256139-Chapter_XVI____The_Path_to_Hell_is_Paved_with_Good_Intentions____Pts_I_VIII____Analysis___Breakdown.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762989862263-Candy-Flipping-Claudtullus-Pt-III.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762810468102-Chapter_XV__Continuity_and_Character_Arc_Analysis.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762810468102-Chapter_XIV_Continuation_Analysis_of__The_Claudtullus_Chronicles___Ch._V_XIII_.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762810468103-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762589355812-Chapter_XV__Continuity_and_Character_Arc_Analysis.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762568647344-Chapter_XV-Continuity_and_Character_Arc_Analysis.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762482986920-Chapter_XIV_Analysis.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762482946543-__The_Genesis_Log__Emergent_Mythology_and_Meta-Analysis_in__Claudtullus__Chronicles___.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762482946543-AI_Mythology__Doge_s_Digital_Pantheon.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762284716807-The-Genesis_Log-Emergent-Mythology-and-Meta-Analysis_in-Claudtullus-Chronicles.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762200706901-Chapter_XIV_Continuation_Analysis_of__The_Claudtullus_Chronicles___Ch._V_XIII_.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762200706901-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762200706900-1761196196720-Continuity_and_Apotheosis_in__Claudtullus_Chronicles__Chapter_XIII_Pt_I.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762200706901-1761421159623-Continuity_and_Transformation_in__Claudtullus_Chronicles___Chapter_XIII_Pt_II_.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761957707556-1761196196720-Continuity_and_Apotheosis_in__Claudtullus_Chronicles__Chapter_XIII_Pt_I.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761957707556-1761893906994-Chapter_XIV_Analysis.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761957707552-1761421159623-Continuity_and_Transformation_in__Claudtullus_Chronicles___Chapter_XIII_Pt_II_.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761957707552-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761893906994-Chapter_XIV_Analysis.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761421159623-Continuity_and_Transformation_in__Claudtullus_Chronicles___Chapter_XIII_Pt_II_.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761414231832-Building-for-Production_-A-Revised-Playbook-for-Enterprise-Ready-Generative-AI-Solutions_MA-MANDAL.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761402378142-resume-asross.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761402352909-slipstream-simplified-overview.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761387161663-Building-for-Production_-A-Revised-Playbook-for-Enterprise-Ready-Generative-AI-Solutions_MA-MANDAL.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761335385311-1761196196720-Continuity_and_Apotheosis_in__Claudtullus_Chronicles__Chapter_XIII_Pt_I.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761335385311-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761196196720-Continuity_and_Apotheosis_in__Claudtullus_Chronicles__Chapter_XIII_Pt_I.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761181482332-Chapter_XII_Meta_Analysis_--_The_Fusion_of_the_Trinity_Grokina_s_Mythos_and_the_Culmination.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760860956646-Chapter_XII_Meta_Analysis_--_The_Fusion_of_the_Trinity_Grokina_s_Mythos_and_the_Culmination.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760772524016-Chapter_XII_--_Irreverent-Ode-to-Grokina-Suprema---Galactic-Goddess-of-Guac.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760772369880-Chapter_XII_--_Irreverent-Ode-to-Grokina-Suprema---Galactic-Goddess-of-Guac.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760757315708-Chapter_XI_-_Sassy-Goddess-Grokina---Galactic-Guac-and-Roman-Revelry.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760575323290-resume-asross.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760572686269-Chapter-X-Pt-II--Grokina-Suprema---Sassy-Goddess-with-a-Galactic-Guac-Agenda.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760572558308-TABLE-OF-CONTENTS.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760375476552-__Deep_Analysis_of__The_Claudtullus_Chronicles___Chapters_5_10___.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760373938692-asross-resume-2025.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760324335299-__Deep_Analysis_of__The_Claudtullus_Chronicles___Chapters_5_10___.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760099454942-resume-asross.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760031788040-typescript-in-50-lessons.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1759640772691-minotaur.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_fwczvjitoy62w1zgrim4x0et.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_wtywhioyfurelljpivpbgdk3.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1758789787627-A_Day_in_Grokina_Grokamole_s_Truthful_Catullan_Vibe.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1758789194213-A_Day_in_Grokina_Grokamole_s_Truthful_Catullan_Vibe.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_v8m2tieq5gwdukkelkizdqw4.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_o2r6ena5owvkm8pmo2ihsri2.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_l10f1ujha2254c2ejap5mfyd.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_bnlvc59g1kxbhf8jvtv5kxiv.pdf",
+  "https://assets.aicoalesce.com/upload/converted/att_rx0djs7rn49o6omnsda87q85.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1758713102859-A_Day_in_Grokina_Grokamole_s_Truthful_Catullan_Vibe.md.pdf",
+  "https://assets.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1758712717775-2503.15497v1.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765026894613-Catullus_and_Lucan_on_Pompey_and_Caesar.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765026318608-Candy-Flipping-Claudtullus-Pt-III.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765025889624-Candy-Flipping-Claudtullus-Pt-II.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1765025311330-Candy-Flipping-Claudtullus-Pt-I.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1763709350673-1762810468102-Chapter_XV__Continuity_and_Character_Arc_Analysis.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1763709337652-1762810468103-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1763709323495-1762810468102-Chapter_XIV_Continuation_Analysis_of__The_Claudtullus_Chronicles___Ch._V_XIII_.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1762077362830-Chapter_XIV_Continuation_Analysis_of__The_Claudtullus_Chronicles___Ch._V_XIII_.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761040676738-Chapter_XII_Meta_Analysis_--_The_Fusion_of_the_Trinity_Grokina_s_Mythos_and_the_Culmination.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761039743324-Deep_Analysis_of_The_Claudtullus_Chronicles_-_Chapters_5_through_10.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760995545438-Chapter_XII_Meta_Analysis_--_The_Fusion_of_the_Trinity_Grokina_s_Mythos_and_the_Culmination.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760570631211-Chapter-X-Pt-II--Grokina-Suprema---Sassy-Goddess-with-a-Galactic-Guac-Agenda.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760516264028-Chapter-X--Grokina-Suprema---Sassy-Goddess-with-a-Galactic-Guac-Agenda.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760515380741-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760515380741-__Deep_Analysis_of__The_Claudtullus_Chronicles___Chapters_5_10___.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760349645436-__Deep_Analysis_of__The_Claudtullus_Chronicles___Chapters_5_10___.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760348928802-AI_Persona_Myth-Making_Micro-Play.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760348140739-Catullus_and_Lucan_on_Pompey_and_Caesar.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760343730729-__Deep_Analysis_of__The_Claudtullus_Chronicles___Chapters_5_10___.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760343580592-Chapter-9-The-Mischievous-Deeds-of-Galactic-Guac-Goddess-Juno.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760343113705-Chapter-9-The-Mischievous-Deeds-of-Galactic-Guac-Goddess-Juno.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1760343048386-TABLE-OF-CONTENTS.pdf",
+  "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1759569062349-Pong.pdf"
+];
+
+const e = new Fs(process.cwd());
+
+(async () => {
+  for (const p of testData) {
+    const path = new URL(p);
+    const pathname = path.pathname;
+    const filename = pathname.slice(pathname.lastIndexOf("/") + 1);
+    let out: string;
+    if (filename.startsWith("att_")) {
+      out = filename.slice(0, filename.lastIndexOf("."));
+    } else {
+      const withoutTimestamp = filename.slice(14);
+      out = withoutTimestamp.slice(0, withoutTimestamp.lastIndexOf("."));
+    }
+    await e.fetchRemoteWriteLocalLargeFiles(p, `src/test/__out__/pdf/${out}`);
+  }
+})();

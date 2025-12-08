@@ -12,7 +12,7 @@ import type {
 import { FsBase } from "@/fs-base/index.ts";
 
 export class FsAtomic extends FsBase {
-  constructor(public override cwd: string) {
+  constructor(public cwd: string) {
     super((cwd ??= process.cwd()));
   }
 
@@ -20,9 +20,7 @@ export class FsAtomic extends FsBase {
     command,
     ...options
   }: ExecuteCommandProps<T>) =>
-    Buffer.from(execSync(command, { ...options }).toJSON().data).toString(
-      "utf-8"
-    );
+    Buffer.from(execSync(command, { ...options }));
 
   public mkdirSync<const T extends string>(
     path: T,

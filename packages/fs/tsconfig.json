@@ -1,12 +1,11 @@
 {
-  "extends": "@d0paminedriven/tsconfig/node-next.json",
+  "extends": "@d0paminedriven/tsconfig/node-pkg.json",
     "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
     },
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "baseUrl": "./"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.test.ts", "tsdown.config.ts"],
   "exclude": ["dist"]
 }

@@ -5,8 +5,12 @@ export { FsCore } from "@/fs-core/index.ts";
 export { FsFetch } from "@/fs-fetch/index.ts";
 export { FsSize } from "@/fs-size/index.ts";
 export { FsTmp } from "@/fs-tmp/index.ts";
-export { ImageService } from "@/image/index.ts";
-export { ImageServiceWorkup } from "@/image/workup.ts";
+export { ExtractClient } from "@/extract/client.ts";
+export { Extract } from "@/extract/index.ts";
+export { DocMixin, ImgMixin, create, createInstance } from "@/mixins/index.ts";
+export { DocMetadataExtractor } from "@/docs/index.ts";
+export { ImgMetadataExtractor } from "@/images/index.ts";
+export { ImgMetadataExtractorWorkup } from "@/images/workup.ts";
 export { LevenshteinDistance } from "@/ld/index.ts";
 export type {
   AllMimeTypes,
@@ -29,6 +33,16 @@ export type {
   BufferEncodingUnion,
   CommonExecOptions,
   CommonOptions,
+  Constructor,
+  DocSpecs,
+  ExpandedDocSpecs,
+  ExpandedImgSpecs,
+  ExtractorHardenedOptions,
+  ExtractorOptions,
+  PdfDocSpecs,
+  PresentationDocSpecs,
+  SpreadSheetDocSpecs,
+  ZipEntry,
   ConditionalPromise,
   ConditionalToRequired,
   CTR,
@@ -84,7 +98,8 @@ export type {
   Unit,
   UnwrapPromise,
   Without,
-  WriteableDataType,WriteFileAsyncDataType,
+  WriteableDataType,
+  WriteFileAsyncDataType,
   WriteFileAsyncOptions,
   WriteFileAsyncProps,
   WriteStreamOptions,
