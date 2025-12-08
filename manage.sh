@@ -131,13 +131,13 @@ clean_house() {
 build_targeted() {
     local build_order=(
         "@d0paminedriven/chess-icons"
-        "@d0paminedriven/fs"
         "@d0paminedriven/iso-3166-1"
         "@d0paminedriven/metadata"
         "@d0paminedriven/motion"
         "@d0paminedriven/redis-utils"
         "@d0paminedriven/turbogen"
         "@d0paminedriven/types"
+        "@d0paminedriven/fs"
         "@d0paminedriven/ui"
     )
 

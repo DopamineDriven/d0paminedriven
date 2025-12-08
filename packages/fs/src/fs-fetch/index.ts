@@ -3,7 +3,7 @@ import { relative } from "path";
 import { FsTmp } from "@/fs-tmp/index.ts";
 
 export class FsFetch extends FsTmp {
-  constructor(public override cwd: string) {
+  constructor(public cwd: string) {
     super((cwd ??= process.cwd()));
   }
   public async assetToBuffer<const T extends string>(path: T) {
@@ -101,6 +101,22 @@ export class FsFetch extends FsTmp {
     }
   }
 
+  public getUrlExt(url: string) {
+    const pathname = new URL(url).pathname;
+    const lastDot = pathname.lastIndexOf(".");
+    if (lastDot === -1 || lastDot === pathname.length - 1) return null;
+    return pathname.slice(lastDot + 1).toLowerCase();
+  }
+  private fuzzyExtEquality(a: string, b: string) {
+    const aNorm = a.toLowerCase();
+    const bNorm = b.toLowerCase();
+
+    const distance = this.calculateLD(aNorm, bNorm);
+    const maxLen = Math.max(aNorm.length, bNorm.length) || 1;
+    const normalized = distance / maxLen;
+
+    return normalized <= 0.34;
+  }
   /**
    *
    * @param inputUrl remote url to fetch data from
@@ -116,7 +132,7 @@ export class FsFetch extends FsTmp {
    * @description
    * This method is designed for all files regardless of size, but especially for
    * larger files that may not fit into memory (it intelligently determines the best approach on the fly)
-   * For files > 100 MB, it streams the data directly to disk instead of loading it all into memory
+   * It streams the data directly to disk for files of all sizes instead of loading it all into memory
    */
   public async fetchRemoteWriteLocalLargeFiles<
     const I extends string,
@@ -127,18 +143,42 @@ export class FsFetch extends FsTmp {
     try {
       const meta = await this.extractRemote(inputUrl, 4096 * 48);
 
-      const ext = (meta.format ?? "bin") as keyof typeof this.mimeTypeObj;
+      const ext = (
+        meta.format && meta.format !== "bin"
+          ? meta.format
+          : this.mimeToExt(
+              this.mimeTypeObj[
+                inputUrl.slice(
+                  inputUrl.lastIndexOf(".") + 1
+                ) as keyof typeof this.mimeTypeObj
+              ][0]
+            )
+      ) as keyof typeof this.mimeTypeObj;
       const size = meta.byteSize ?? 0;
 
       const { unit, value } = this.autoFileSizeRaw(size);
 
       console.log(
-        `fetchRemoteWriteLocalLargeFiles extracting a file of size ${value} ${unit}`
+        `fetchRemoteWriteLocalLargeFiles extracting a ${ext} file of size ${value} ${unit}`
       );
-
-      const formattedPath = useDetectedExtension
-        ? `${outputPathI}.${ext}`
-        : outputPathI;
+      let formattedPath: string;
+      if (useDetectedExtension) {
+        formattedPath = `${outputPathI}.${ext}`;
+      } else {
+        const lastDot = outputPathI.lastIndexOf(".");
+        if (lastDot === 1 || lastDot === -1) {
+          formattedPath = `${outputPathI}.${ext}`;
+        }
+        const outputPathExt = outputPathI.slice(
+          outputPathI.lastIndexOf(".") + 1
+        );
+        const closeness = this.fuzzyExtEquality(ext, outputPathExt);
+        if (closeness === true) {
+          formattedPath = outputPathI;
+        } else {
+          formattedPath = outputPathI.replace(outputPathExt, ext);
+        }
+      }
 
       this.generateDirIfDNE(this.pathHandler(formattedPath), {
         recursive: true

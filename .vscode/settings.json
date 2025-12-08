@@ -8,6 +8,7 @@
   "[css]": {
     "editor.defaultFormatter": "bradlc.vscode-tailwindcss"
   },
+  "tailwindCSS.codeLens": true,
   "tailwindCSS.lint.invalidApply": "warning",
   "tailwindCSS.validate": true,
   "[typescript]": {
@@ -35,7 +36,7 @@
   "editor.bracketPairColorization.enabled": false,
   "svg.preview.autoShow": false,
   "js/ts.hover.maximumLength": 500,
-  "typescript.experimental.useTsgo": false,
+  "tailwindcss-intellisense.trace.server": "messages",
   "svg.preview.disable": true,
   "svg.preview.mode": "svg",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -78,14 +79,19 @@
     ".*Styles.*"
   ],
   "typescript.enablePromptUseWorkspaceTsdk": true,
+  "tailwindCSS.colorDecorators": true,
   "typescript.tsserver.web.typeAcquisition.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,
   "typescript.implementationsCodeLens.showOnInterfaceMethods": true,
   "typescript.locale": "en",
   "typescript.referencesCodeLens.enabled": true,
   "typescript.referencesCodeLens.showOnAllFunctions": true,
+  "typescript.experimental.useTsgo": true,
   "typescript.tsdk": "node_modules/typescript/lib",
   "yaml.hover": true,
+  "markdown-pdf.emoji": true,
+  "markdown-pdf.stylesRelativePathFile": false,
+  "markdown-pdf.styles": ["./misc/markdown-pdf.css"],
   "yaml.validate": true,
   "workbench.editor.autoLockGroups": {
     "default": false
@@ -98,5 +104,7 @@
   },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
-  }
+  },
+  "python.analysis.enableColorPicker": false,
+  "prisma.pinToPrisma6": true
 }

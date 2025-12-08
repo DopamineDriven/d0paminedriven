@@ -1,3 +1,4 @@
 src/test/__out__/*
 CLAUDE.md
 src/test/tests/*
+src/test/local/*

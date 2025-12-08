@@ -121,69 +121,575 @@ export class DocMetadataExtractor {
   }
 
   // -------- PDF helpers --------
-  private countPDFPages(buffer: Buffer): number | null {
-    try {
-      const text = buffer.toString("latin1");
-      // Strategy 1: /Pages /Count
-      const pagesMatch = text.match(/\/Type\s*\/Pages[^>]*?\/Count\s+(\d+)/);
 
-      if (pagesMatch?.[1]) {
-        const count = parseInt(pagesMatch[1], 10);
-        if (count > 0 && count < 100000) {
-          return count;
+
+  /**
+   * Decompress FlateDecode streams to search for page info
+   * Many modern PDFs compress their object streams
+   */
+  private decompressFlateStreams(buffer: Buffer): string[] {
+    const decompressed: string[] = [];
+    const text = buffer.toString("latin1");
+
+    // Find stream...endstream blocks with FlateDecode
+    // Match the dictionary, then find the stream content
+    const streamPattern =
+      /<<[^>]*\/Filter\s*\/FlateDecode[^>]*>>[\r\n]*stream\r?\n/g;
+
+    let match: RegExpExecArray | null;
+    while ((match = streamPattern.exec(text)) !== null) {
+      try {
+        const streamStart = match.index + match[0].length;
+        const endstreamPos = text.indexOf("endstream", streamStart);
+        if (endstreamPos === -1) continue;
+
+        // Get raw bytes from buffer (not string) to preserve binary data
+        const compressedData = buffer.subarray(streamStart, endstreamPos);
+
+        // Trim trailing whitespace that might be before endstream
+        let dataEnd = compressedData.length;
+        while (
+          dataEnd > 0 &&
+          (compressedData[dataEnd - 1] === 0x0a ||
+            compressedData[dataEnd - 1] === 0x0d ||
+            compressedData[dataEnd - 1] === 0x20)
+        ) {
+          dataEnd--;
+        }
+
+        const trimmedData = compressedData.subarray(0, dataEnd);
+        const inflated = inflateSync(new Uint8Array(trimmedData));
+        decompressed.push(Buffer.from(inflated).toString("latin1"));
+      } catch {
+        // Stream might not be pure FlateDecode or corrupted
+        continue;
+      }
+    }
+
+    return decompressed;
+  }
+
+  /**
+   * Parse Object Streams (/Type /ObjStm) used by Acrobat-optimized PDFs
+   * These bundle multiple objects into compressed containers
+   */
+  private parseObjectStreams(buffer: Buffer, text: string): string[] {
+    const extractedObjects: string[] = [];
+
+    // Find all ObjStm objects - they contain /Type /ObjStm, /N (count), /First (offset)
+    const objStmPattern =
+      /(\d+)\s+\d+\s+obj[^]*?\/Type\s*\/ObjStm[^]*?\/N\s+(\d+)[^]*?\/First\s+(\d+)[^]*?stream\r?\n/g;
+
+    let match: RegExpExecArray | null;
+    while ((match = objStmPattern.exec(text)) !== null) {
+      try {
+        if (!match[2] || !match[3]) continue;
+        const numObjects = parseInt(match[2], 10);
+        const firstOffset = parseInt(match[3], 10);
+
+        if (numObjects <= 0 || numObjects > 10000) continue;
+        if (firstOffset < 0 || firstOffset > 1000000) continue;
+
+        // Find stream data
+        const streamStart = match.index + match[0].length;
+        const endstreamPos = text.indexOf("endstream", streamStart);
+        if (endstreamPos === -1) continue;
+
+        const compressedData = buffer.subarray(streamStart, endstreamPos);
+
+        // Trim trailing whitespace
+        let dataEnd = compressedData.length;
+        while (
+          dataEnd > 0 &&
+          (compressedData[dataEnd - 1] === 0x0a ||
+            compressedData[dataEnd - 1] === 0x0d ||
+            compressedData[dataEnd - 1] === 0x20)
+        ) {
+          dataEnd--;
+        }
+
+        const trimmedData = compressedData.subarray(0, dataEnd);
+        const decompressed = inflateSync(new Uint8Array(trimmedData));
+        const decompressedStr = Buffer.from(decompressed).toString("latin1");
+
+        // First part is index: "objNum1 offset1 objNum2 offset2 ..."
+        // Actual objects start at firstOffset
+        if (firstOffset < decompressedStr.length) {
+          const objectData = decompressedStr.slice(firstOffset);
+          extractedObjects.push(objectData);
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    return extractedObjects;
+  }
+
+  /**
+   * Parse cross-reference table to find object offsets
+   */
+  private parseXrefTable(
+    text: string
+  ): Map<number, { offset: number; gen: number }> {
+    const objects = new Map<number, { offset: number; gen: number }>();
+
+    // Traditional xref table
+    const xrefMatch = text.match(/xref\s+([\s\S]*?)trailer/);
+    if (xrefMatch?.[1]) {
+      const lines = xrefMatch[1].trim().split(/\r?\n/);
+      let currentObj = 0;
+
+      for (const line of lines) {
+        // Subsection header: "0 6" means starting at object 0, 6 objects
+        const subsection = line.match(/^(\d+)\s+(\d+)\s*$/);
+        if (subsection?.[1]) {
+          currentObj = parseInt(subsection[1], 10);
+          continue;
+        }
+
+        // Entry: "0000000000 65535 f" or "0000000015 00000 n"
+        const entry = line.match(/^(\d{10})\s+(\d{5})\s+([fn])/);
+        if (entry?.[3] === "n" && entry[1] && entry[2]) {
+          objects.set(currentObj, {
+            offset: parseInt(entry[1], 10),
+            gen: parseInt(entry[2], 10)
+          });
+        }
+        currentObj++;
+      }
+    }
+
+    return objects;
+  }
+
+  /**
+   * Parse PDF 1.5+ cross-reference streams (/Type /XRef)
+   * These replace traditional xref tables in modern PDFs
+   */
+  private parseXrefStream(buffer: Buffer, text: string): Map<number, number> {
+    const objects = new Map<number, number>();
+
+    // Find XRef stream - look for /Type /XRef with /W array
+    const xrefStreamMatch = text.match(
+      /<<[^>]*\/Type\s*\/XRef[^>]*\/W\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s*\][^>]*>>[\r\n]*stream\r?\n/
+    );
+    if (!xrefStreamMatch?.[1] || !xrefStreamMatch[2] || !xrefStreamMatch[3]) {
+      return objects;
+    }
+
+    const w1 = parseInt(xrefStreamMatch[1], 10);
+    const w2 = parseInt(xrefStreamMatch[2], 10);
+    const w3 = parseInt(xrefStreamMatch[3], 10);
+    const entrySize = w1 + w2 + w3;
+
+    if (entrySize <= 0 || entrySize > 20) return objects;
+
+    // Get /Size
+    const sizeMatch = text.match(/\/Size\s+(\d+)/);
+    const size = sizeMatch?.[1] ? parseInt(sizeMatch[1], 10) : 0;
+    if (size <= 0) return objects;
+
+    // Get /Index if present (defines which objects are in the stream)
+    const indexMatch = text.match(/\/Index\s*\[\s*([\d\s]+)\s*\]/);
+    let indices: number[] = [];
+    if (indexMatch?.[1]) {
+      indices = indexMatch[1]
+        .trim()
+        .split(/\s+/)
+        .map(n => parseInt(n, 10));
+    }
+
+    try {
+      if (xrefStreamMatch.index === undefined) return objects;
+      const streamStart = xrefStreamMatch.index + xrefStreamMatch[0].length;
+      const endstreamPos = text.indexOf("endstream", streamStart);
+      if (endstreamPos === -1) return objects;
+
+      const compressedData = buffer.subarray(streamStart, endstreamPos);
+
+      // Trim trailing whitespace
+      let dataEnd = compressedData.length;
+      while (
+        dataEnd > 0 &&
+        (compressedData[dataEnd - 1] === 0x0a ||
+          compressedData[dataEnd - 1] === 0x0d ||
+          compressedData[dataEnd - 1] === 0x20)
+      ) {
+        dataEnd--;
+      }
+
+      const trimmedData = compressedData.subarray(0, dataEnd);
+      const decompressed = inflateSync(new Uint8Array(trimmedData));
+
+      // Parse entries based on /Index or sequential from 0
+      let entryIndex = 0;
+
+      if (indices.length >= 2) {
+        // /Index defines subsections: [start1 count1 start2 count2 ...]
+        for (let i = 0; i < indices.length; i += 2) {
+          const start = indices[i] ?? 0;
+          const count = indices[i + 1] ?? 0;
+
+          for (let j = 0; j < count && entryIndex * entrySize < decompressed.length; j++) {
+            const offset = entryIndex * entrySize;
+
+            // Read type field
+            let type = 0;
+            for (let k = 0; k < w1; k++) {
+              type = (type << 8) | (decompressed[offset + k] ?? 0);
+            }
+
+            // Type 1 = regular object with byte offset
+            if (type === 1) {
+              let byteOffset = 0;
+              for (let k = 0; k < w2; k++) {
+                byteOffset =
+                  (byteOffset << 8) | (decompressed[offset + w1 + k] ?? 0);
+              }
+              objects.set(start + j, byteOffset);
+            }
+
+            entryIndex++;
+          }
+        }
+      } else {
+        // Sequential from 0
+        for (
+          let i = 0;
+          i < size && i * entrySize < decompressed.length;
+          i++
+        ) {
+          const offset = i * entrySize;
+
+          let type = 0;
+          for (let j = 0; j < w1; j++) {
+            type = (type << 8) | (decompressed[offset + j] ?? 0);
+          }
+
+          if (type === 1) {
+            let byteOffset = 0;
+            for (let j = 0; j < w2; j++) {
+              byteOffset =
+                (byteOffset << 8) | (decompressed[offset + w1 + j] ?? 0);
+            }
+            objects.set(i, byteOffset);
+          }
         }
       }
-      // Strategy 2: Catalog -> Pages ref -> Count
-      const catalogMatch = text.match(
-        /\/Type\s*\/Catalog[^>]*?\/Pages\s+(\d+)\s+\d+\s+R/
-      );
-      if (catalogMatch?.[1]) {
-        const objNum = catalogMatch[1];
-        const pagesObjRegex = new RegExp(
-          `${objNum}\\s+\\d+\\s+obj[\\s\\S]*?\\/Type\\s*\\/Pages[\\s\\S]*?\\/Count\\s+(\\d+)`
-        );
-        const pagesObjMatch = text.match(pagesObjRegex);
-        if (pagesObjMatch?.[1]) {
-          const count = parseInt(pagesObjMatch[1], 10);
-          if (count > 0 && count < 100000) return count;
+    } catch {
+      // Decompression failed
+    }
+
+    return objects;
+  }
+
+  /**
+   * Extract page count from object at specific offset
+   */
+  private extractPageCountFromObject(
+    buffer: Buffer,
+    offset: number
+  ): number | null {
+    try {
+      // Read enough bytes to capture the object
+      const chunk = buffer
+        .subarray(offset, Math.min(offset + 4096, buffer.length))
+        .toString("latin1");
+
+      // Check if this is a Pages object with Count
+      if (/\/Type\s*\/Pages/.test(chunk)) {
+        const countMatch = chunk.match(/\/Count\s+(\d+)/);
+        if (countMatch?.[1]) {
+          return parseInt(countMatch[1], 10);
         }
       }
-      // Strategy 3: Linearized dictionary /N
-      if (/Linearized/i.test(text)) {
-        const linearMatch = text.match(
-          /<<[\s\S]*?\/Linearized[\s\S]*?\/N\s+(\d+)/
-        );
-        if (linearMatch?.[1]) {
-          const count = parseInt(linearMatch[1], 10);
-          if (count > 0 && count < 100000) return count;
-        }
-      }
-      // Strategy 4: Kids refs -> unique pages
-      const pageRefs = new Set<string>();
-      const kidsMatches = text.matchAll(/\/Kids\s*\[([\s\S]*?)\]/g);
-      for (const match of kidsMatches) {
+
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  // -------- Multi-strategy page counting --------
+
+  /**
+   * Strategy 1: Direct /Pages /Count in uncompressed content (fastest, high confidence)
+   * Finds the ROOT Pages object by looking for the highest /Count value
+   */
+  private strategy1DirectPagesCount(text: string): number | null {
+    // More flexible patterns that handle whitespace variations
+    const patterns = [
+      /\/Type\s*\/Pages\s*[^>]*?\/Count\s+(\d+)/g,
+      /\/Count\s+(\d+)\s*[^>]*?\/Type\s*\/Pages/g
+    ];
+
+    let maxCount = 0;
+
+    for (const pattern of patterns) {
+      let match: RegExpExecArray | null;
+      while ((match = pattern.exec(text)) !== null) {
         if (match[1]) {
-          const refs = match[1].matchAll(/(\d+)\s+\d+\s+R/g);
-          for (const ref of refs) {
-            if (ref[1]) {
-              pageRefs.add(ref[1]);
+          const count = parseInt(match[1], 10);
+          // Root Pages node has the highest count (sum of all children)
+          if (count > maxCount && count < 100000) {
+            maxCount = count;
+          }
+        }
+      }
+    }
+
+    return maxCount > 0 ? maxCount : null;
+  }
+
+  /**
+   * Strategy 2: Linearized hint (high confidence for linearized PDFs)
+   * /N in the linearization dict is the total page count
+   */
+  private strategy2Linearized(text: string): number | null {
+    // Linearized PDFs have page count in first ~1KB
+    const header = text.slice(0, 2048);
+
+    if (/\/Linearized\s+[\d.]+/.test(header)) {
+      // /N is the page count in linearized dict
+      const nMatch = header.match(/\/N\s+(\d+)/);
+      if (nMatch?.[1]) {
+        const count = parseInt(nMatch[1], 10);
+        if (count > 0 && count < 100000) return count;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Strategy 3: Follow Catalog -> Pages reference chain (high confidence)
+   */
+  private strategy3CatalogChain(buffer: Buffer, text: string): number | null {
+    // Find Catalog object's Pages reference
+    const catalogMatch = text.match(
+      /\/Type\s*\/Catalog[\s\S]{0,500}?\/Pages\s+(\d+)\s+(\d+)\s+R/
+    );
+    if (!catalogMatch?.[1]) return null;
+
+    const pagesObjNum = parseInt(catalogMatch[1], 10);
+
+    // Try to find the Pages object directly by its number
+    const objPattern = new RegExp(
+      `(?:^|\\r|\\n)${pagesObjNum}\\s+\\d+\\s+obj[\\s\\S]*?endobj`,
+      "m"
+    );
+
+    const objMatch = text.match(objPattern);
+    if (objMatch?.[0]) {
+      // Only match /Count if this object has /Type /Pages
+      if (/\/Type\s*\/Pages/.test(objMatch[0])) {
+        const countMatch = objMatch[0].match(/\/Count\s+(\d+)/);
+        if (countMatch?.[1]) {
+          const count = parseInt(countMatch[1], 10);
+          if (count > 0 && count < 100000) return count;
+        }
+      }
+    }
+
+    // Try using xref table for precise location
+    const xrefObjects = this.parseXrefTable(text);
+    let pagesOffset = xrefObjects.get(pagesObjNum);
+
+    // Try xref stream if traditional table didn't work
+    if (!pagesOffset) {
+      const xrefStreamObjects = this.parseXrefStream(buffer, text);
+      const streamOffset = xrefStreamObjects.get(pagesObjNum);
+      if (streamOffset) {
+        pagesOffset = { offset: streamOffset, gen: 0 };
+      }
+    }
+
+    if (pagesOffset) {
+      const count = this.extractPageCountFromObject(buffer, pagesOffset.offset);
+      if (count && count > 0 && count < 100000) return count;
+    }
+
+    return null;
+  }
+
+  /**
+   * Strategy 4: Decompress FlateDecode streams and Object Streams (medium confidence)
+   * Handles Acrobat-optimized PDFs where page tree is compressed
+   */
+  private strategy4DecompressedStreams(buffer: Buffer): number | null {
+    const text = buffer.toString("latin1");
+
+    try {
+      // Get content from Object Streams (Acrobat-optimized PDFs)
+      const objStreams = this.parseObjectStreams(buffer, text);
+
+      // Also try regular FlateDecode streams
+      const flateStreams = this.decompressFlateStreams(buffer);
+
+      const allDecompressed = [...objStreams, ...flateStreams];
+
+      let maxCount = 0;
+
+      for (const content of allDecompressed) {
+        // Search for /Type /Pages with /Count in decompressed content
+        const patterns = [
+          /\/Type\s*\/Pages[\s\S]{0,300}?\/Count\s+(\d+)/g,
+          /\/Count\s+(\d+)[\s\S]{0,300}?\/Type\s*\/Pages/g
+        ];
+
+        for (const pattern of patterns) {
+          let match: RegExpExecArray | null;
+          while ((match = pattern.exec(content)) !== null) {
+            if (match[1]) {
+              const count = parseInt(match[1], 10);
+              // Take the highest count (root Pages node)
+              if (count > maxCount && count < 100000) {
+                maxCount = count;
+              }
             }
           }
         }
       }
-      const count = pageRefs.size;
-      if (count > 0) return count;
-      // Strategy 5: Fallback: count Page objects (with MediaBox/Parent preferred)
-      const fallback =
-        (
-          text.match(
-            /obj[\s\S]*?\/Type\s*\/Page\b(?![s])[\s\S]*?(?:\/MediaBox|\/Parent)/g
-          ) ?? []
-        ).length || (text.match(/\/Type\s*\/Page\b/g) ?? []).length;
-      return fallback || null;
+
+      return maxCount > 0 ? maxCount : null;
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Strategy 5: Count unique Page objects from Kids arrays (medium confidence)
+   * Only counts refs that point to actual /Type /Page objects
+   */
+  private strategy5KidsPageRefs(text: string): number | null {
+    const pageRefs = new Set<string>();
+
+    // First, collect all refs from Kids arrays
+    const kidsMatches = text.matchAll(/\/Kids\s*\[\s*([\s\S]*?)\s*\]/g);
+    const allRefs: string[] = [];
+
+    for (const match of kidsMatches) {
+      if (match[1]) {
+        const refs = match[1].matchAll(/(\d+)\s+\d+\s+R/g);
+        for (const ref of refs) {
+          if (ref[1]) allRefs.push(ref[1]);
+        }
+      }
+    }
+
+    // Check which refs are Page (not Pages) objects
+    for (const objNum of allRefs) {
+      // Look for this object and verify it's a Page (not Pages)
+      const objPattern = new RegExp(
+        `(?:^|\\r|\\n)${objNum}\\s+\\d+\\s+obj[\\s\\S]{0,500}?\\/Type\\s*\\/Page\\b(?!s)`,
+        "m"
+      );
+      if (objPattern.test(text)) {
+        pageRefs.add(objNum);
+      }
+    }
+
+    return pageRefs.size > 0 ? pageRefs.size : null;
+  }
+
+  /**
+   * Strategy 6: Brute force count /Type /Page objects (low confidence)
+   */
+  private strategy6BruteForce(text: string): number | null {
+    // Count objects that have /Type /Page (not /Pages) with MediaBox or Parent
+    // This helps filter out false positives
+    const strictPattern =
+      /\d+\s+\d+\s+obj[\s\S]*?\/Type\s*\/Page\b(?!s)[\s\S]*?\/(?:MediaBox|Parent)/g;
+    const strictMatches = text.match(strictPattern);
+    if (strictMatches && strictMatches.length > 0) {
+      return strictMatches.length;
+    }
+
+    // Looser fallback: any /Type /Page
+    const loosePattern = /\/Type\s*\/Page\b(?!s)/g;
+    const looseMatches = text.match(loosePattern);
+    return looseMatches ? looseMatches.length : null;
+  }
+
+  /**
+   * Strategy 7: Estimate from file characteristics (last resort)
+   */
+  private strategy7Estimate(buffer: Buffer, text: string): number | null {
+    const fileSizeKB = buffer.length / 1024;
+
+    // Check if it's a scanned PDF (typically larger per page)
+    const hasImages = /\/XObject/.test(text) && /\/Image/.test(text);
+    const hasText = /BT[\s\S]*?ET/.test(text);
+
+    if (hasImages && !hasText) {
+      // Scanned PDF: ~100-500KB per page
+      return Math.max(1, Math.round(fileSizeKB / 300));
+    } else if (hasText) {
+      // Text PDF: ~5-50KB per page
+      return Math.max(1, Math.round(fileSizeKB / 25));
+    }
+
+    // Generic estimate
+    return Math.max(1, Math.round(fileSizeKB / 50));
+  }
+
+  /**
+   * Count PDF pages with confidence tracking
+   * Returns both the count and how confident we are in the result
+   */
+  private countPDFPagesWithConfidence(buffer: Buffer): {
+    pageCount: number | null;
+    confidence: "high" | "medium" | "low" | "estimated";
+  } {
+    const text = buffer.toString("latin1");
+
+    // Strategy 1: Direct /Pages /Count (high confidence)
+    const directCount = this.strategy1DirectPagesCount(text);
+    if (directCount && directCount > 0) {
+      return { pageCount: directCount, confidence: "high" };
+    }
+
+    // Strategy 2: Linearized /N (high confidence)
+    const linearizedCount = this.strategy2Linearized(text);
+    if (linearizedCount && linearizedCount > 0) {
+      return { pageCount: linearizedCount, confidence: "high" };
+    }
+
+    // Strategy 3: Catalog chain (high confidence)
+    const catalogCount = this.strategy3CatalogChain(buffer, text);
+    if (catalogCount && catalogCount > 0) {
+      return { pageCount: catalogCount, confidence: "high" };
+    }
+
+    // Strategy 4: Decompressed streams including ObjStm (medium confidence)
+    const decompressedCount = this.strategy4DecompressedStreams(buffer);
+    if (decompressedCount && decompressedCount > 0) {
+      return { pageCount: decompressedCount, confidence: "medium" };
+    }
+
+    // Strategy 5: Kids refs to Page objects (medium confidence)
+    const kidsCount = this.strategy5KidsPageRefs(text);
+    if (kidsCount && kidsCount > 0) {
+      return { pageCount: kidsCount, confidence: "medium" };
+    }
+
+    // Strategy 6: Brute force Page count (low confidence)
+    const bruteCount = this.strategy6BruteForce(text);
+    if (bruteCount && bruteCount > 0) {
+      return { pageCount: bruteCount, confidence: "low" };
+    }
+
+    // Strategy 7: Estimate (last resort)
+    const estimatedCount = this.strategy7Estimate(buffer, text);
+    return { pageCount: estimatedCount, confidence: "estimated" };
+  }
+
+  /**
+   * Legacy method for backward compatibility
+   */
+  private countPDFPages(buffer: Buffer): number | null {
+    return this.countPDFPagesWithConfidence(buffer).pageCount;
   }
 
   private extractPDFText(buffer: Buffer, maxLength = 500): string | null {

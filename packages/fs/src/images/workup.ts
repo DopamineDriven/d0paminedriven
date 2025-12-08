@@ -1,17 +1,10 @@
-import { Readable } from "stream";
+import { Readable } from "node:stream";
 import type { BoxInfo, ImageSpecs } from "@/types/index.ts";
-import { MimeService } from "@/mime/index.ts";
 
-export class ImageServiceWorkup extends MimeService {
-  constructor(public cwd: string) {
-    super();
-  }
-  /**
-   * Read exactly N bytes from a stream, returning a Buffer
-   * Closes stream after reading or on error
-   */
-  public async readBytes(stream: Readable, bytes: number): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
+export class ImgMetadataExtractorWorkup {
+
+  protected async readBytes(stream: Readable, bytes: number) {
+    return new Promise((resolve: (value: Buffer) => void, reject) => {
       const chunks = Array.of<Buffer>();
       let totalBytes = 0;
 

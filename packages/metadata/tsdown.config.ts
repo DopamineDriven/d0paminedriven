@@ -1,5 +1,5 @@
 import { relative } from "node:path";
-import type { Options } from "tsdown";
+import type { UserConfig as Options } from "tsdown";
 import { defineConfig } from "tsdown";
 
 export default defineConfig(
@@ -8,7 +8,6 @@ export default defineConfig(
       Options,
       | "entry"
       | "target"
-      | "platform"
       | "dts"
       | "watch"
       | "format"
@@ -24,20 +23,22 @@ export default defineConfig(
       entry: [
         "src/index.ts",
         "src/docs/index.ts",
+        "src/docs/mime-workup.ts",
         "src/extract/index.ts",
         "src/extract/client.ts",
         "src/images/index.ts",
         "src/images/workup.ts",
         "src/mixins/index.ts",
         "src/types/index.ts",
+        "src/types/utils.ts",
         "!src/test/**"
       ],
-      target: ["esnext"],
-      platform: "neutral",
-      dts: true,
+      cwd: process.cwd(),
+      target: ["node25"],
+      fixedExtension: false,
+      dts: { tsgo: true },
       watch: process.env.NODE_ENV === "development",
       format: ["esm"],
-      cwd: process.cwd(),
       sourcemap: true,
       tsconfig: relative(process.cwd(), "tsconfig.json"),
       clean: true,

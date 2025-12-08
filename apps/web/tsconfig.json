@@ -1,7 +1,6 @@
 {
   "extends": "@d0paminedriven/tsconfig/next.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"]
     },

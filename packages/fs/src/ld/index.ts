@@ -1,9 +1,8 @@
-import { Extract } from "@d0paminedriven/metadata";
+import { Extract } from "@/extract/index.ts";
 
 export class LevenshteinDistance extends Extract {
   constructor() {
     super();
-  
   }
   private createMatrix(rows: number, cols: number, initialValue: number) {
     const matrix = Array.of<number[]>();
@@ -45,7 +44,7 @@ export class LevenshteinDistance extends Extract {
    * the minimum number of single-character edits (insertions,
    * deletions, or substitutions) needed to transform `a` into `b`.
    */
-  public calculate(a?: string | null, b?: string | null) {
+  public calculateLD(a?: string | null, b?: string | null) {
     const strA = a ?? "";
     const strB = b ?? "";
 

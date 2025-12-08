@@ -7,11 +7,11 @@ import * as dotenv from "dotenv";
 import expand from "dotenv-expand";
 import type { ReadDirOptions } from "@/types/index.ts";
 import type { AsyncIter, Streamable } from "@/types/stream.ts";
-import { ImageService } from "@/image/index.ts";
+import { MimeService } from "@/mime/index.ts";
 
-export class FsBase extends ImageService {
-  constructor(public override cwd: string) {
-    super(cwd ?? process.cwd());
+export class FsBase extends MimeService {
+  constructor(public cwd: string) {
+    super();
   }
   public get tmpDir() {
     return tmpdir();

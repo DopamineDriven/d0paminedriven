@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/fs",
-  "version": "10.1.0",
+  "version": "11.0.0",
   "homepage": "https://github.com/DopamineDriven/d0paminedriven/blob/master/packages/fs/README.md",
   "author": "Andrew Ross",
   "description": "convenient fs helpers",
@@ -17,25 +17,39 @@
           "dist/*.d.ts",
           "dist/*/index.d.ts"
         ],
-       "fs": [
+        "images": [
+          "dist/images/index.d.ts",
+          "dist/images/workup.d.ts"
+        ],
+        "docs": [
+          "dist/docs/index.d.ts"
+        ],
+        "extract": [
+          "dist/extract/index.d.ts",
+          "dist/extract/client.d.ts"
+        ],
+        "mixins": [
+          "dist/mixins/index.d.ts"
+        ],
+        "fs": [
           "dist/fs/index.d.ts"
         ],
-       "fs-atomic": [
+        "fs-atomic": [
           "dist/fs-atomic/index.d.ts"
         ],
-       "fs-base": [
+        "fs-base": [
           "dist/fs-base/index.d.ts"
         ],
-       "fs-core": [
+        "fs-core": [
           "dist/fs-core/index.d.ts"
         ],
-       "fs-fetch": [
+        "fs-fetch": [
           "dist/fs-fetch/index.d.ts"
         ],
-       "fs-size": [
+        "fs-size": [
           "dist/fs-size/index.d.ts"
         ],
-       "fs-tmp": [
+        "fs-tmp": [
           "dist/fs-tmp/index.d.ts"
         ],
         "image": [
@@ -44,7 +58,7 @@
         "image/workup": [
           "dist/image/workup.d.ts"
         ],
-       "ld": [
+        "ld": [
           "dist/ld/index.d.ts"
         ],
         "mime": [
@@ -72,36 +86,50 @@
         "dist/*.d.ts",
         "dist/*/index.d.ts"
       ],
-       "fs": [
-          "dist/fs/index.d.ts"
-        ],
-       "fs-atomic": [
-          "dist/fs-atomic/index.d.ts"
-        ],
-       "fs-base": [
-          "dist/fs-base/index.d.ts"
-        ],
-       "fs-core": [
-          "dist/fs-core/index.d.ts"
-        ],
-       "fs-fetch": [
-          "dist/fs-fetch/index.d.ts"
-        ],
-       "fs-size": [
-          "dist/fs-size/index.d.ts"
-        ],
-       "fs-tmp": [
-          "dist/fs-tmp/index.d.ts"
-        ],
-        "image": [
-          "dist/image/index.d.ts"
-        ],
-        "image/workup": [
-          "dist/image/workup.d.ts"
-        ],
-       "ld": [
-          "dist/ld/index.d.ts"
-        ],
+      "images": [
+        "dist/images/index.d.ts",
+        "dist/images/workup.d.ts"
+      ],
+      "docs": [
+        "dist/docs/index.d.ts"
+      ],
+      "extract": [
+        "dist/extract/index.d.ts",
+        "dist/extract/client.d.ts"
+      ],
+      "mixins": [
+        "dist/mixins/index.d.ts"
+      ],
+      "fs": [
+        "dist/fs/index.d.ts"
+      ],
+      "fs-atomic": [
+        "dist/fs-atomic/index.d.ts"
+      ],
+      "fs-base": [
+        "dist/fs-base/index.d.ts"
+      ],
+      "fs-core": [
+        "dist/fs-core/index.d.ts"
+      ],
+      "fs-fetch": [
+        "dist/fs-fetch/index.d.ts"
+      ],
+      "fs-size": [
+        "dist/fs-size/index.d.ts"
+      ],
+      "fs-tmp": [
+        "dist/fs-tmp/index.d.ts"
+      ],
+      "image": [
+        "dist/image/index.d.ts"
+      ],
+      "image/workup": [
+        "dist/image/workup.d.ts"
+      ],
+      "ld": [
+        "dist/ld/index.d.ts"
+      ],
       "mime": [
         "dist/mime/index.d.ts"
       ],
@@ -130,6 +158,12 @@
   "exports": {
     ".": "./dist/index.js",
     "./*": "./dist/*.js",
+    "./docs": "./dist/docs/index.js",
+    "./extract": "./dist/extract/index.js",
+    "./extract/client": "./dist/extract/client.js",
+    "./images": "./dist/images/index.js",
+    "./images/workup": "./dist/images/workup.js",
+    "./mixins": "./dist/mixins/index.js",
     "./fs": "./dist/fs/index.js",
     "./fs-atomic": "./dist/fs-atomic/index.js",
     "./fs-base": "./dist/fs-base/index.js",
@@ -147,34 +181,34 @@
     "./utils": "./dist/utils/index.js"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "dev": "pnpm build",
     "lint": "eslint",
     "clean": "git clean -xdf .turbo dist node_modules",
-    "fix": "npm pkg fix"
+    "fix": "npm pkg fix",
+    "test": "node --test --import tsx --test-reporter spec",
+    "pretest": "tsx src/test/output-local.ts"
   },
   "dependencies": {
-    "@d0paminedriven/metadata": "^4.0.1",
     "dotenv": "^17.2.3",
     "dotenv-expand": "^12.0.3",
-    "fflate": "^0.8.2",
-    "sharp": "^0.34.5"
+    "fflate": "^0.8.2"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "^24.10.1",
-    "chokidar": "^4.0.3",
+    "@typescript/native-preview": "7.0.0-dev.20251206.1",
+    "chokidar": "^5.0.0",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.1",
     "jiti": "^2.6.1",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "terser": "^5.44.1",
-    "tsdown": "^0.16.6",
+    "tsdown": "^0.17.0",
     "tslib": "^2.8.1",
-    "tsup": "^8.5.1",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0"
   },

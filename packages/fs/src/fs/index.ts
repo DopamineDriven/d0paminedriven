@@ -1,107 +1,114 @@
-import { resolve } from "node:path";
-import sharp from "sharp";
+import { createReadStream } from "node:fs";
+import { relative, resolve } from "node:path";
+import { Readable } from "node:stream";
 import { FsFetch } from "@/fs-fetch/index.ts";
 
 export default class Fs extends FsFetch {
-  constructor(public override cwd: string) {
+  constructor(public cwd: string) {
     super((cwd ??= process.cwd()));
-    cwd ??= process.cwd();
   }
 
-  public async getImageSpecs(filePath: string, size = 4096 * 36) {
-    if (filePath.startsWith("https")) {
-      return await this.extractRemoteFs(filePath, size);
-    }
-    return await this.extractViaPath(filePath, size);
-  }
-
-  public async getImageSpecsFlexi(target: Buffer | string, size = 4096 * 36) {
-    if (Buffer.isBuffer(target)) {
-      return this.getImageSpecsWorkupFs(target, size);
+  public async getSpecs(filePath: string, size = 4096 * 36) {
+    if (URL.canParse(filePath)) {
+      return await this.extractRemote(filePath, size);
     } else {
-      return await this.getImageSpecs(target, size);
+      const stream = createReadStream(relative(this.cwd, filePath), {
+        highWaterMark: size
+      });
+      const buffer = await this.readBytes(stream, size);
+      return await this.extractRemote(buffer, size);
     }
   }
 
-  public async getImageSpecsTmp(filepath: string, size = 4096 * 36) {
-    return this.extractViaPath(resolve(this.tmpDir, filepath), size);
+  public async getSpecsFlexi(target: Buffer | string, size = 4096 * 36) {
+    if (Buffer.isBuffer(target)) {
+      return this.extractRemote(target, size);
+    } else {
+      if (URL.canParse(target)) {
+        return await this.extractRemote(target, size);
+      } else {
+        const stream = createReadStream(relative(this.cwd, target), {
+          highWaterMark: size
+        });
+        const buffer = await this.readBytes(stream, size);
+        return this.extractRemote(buffer, size);
+      }
+    }
+  }
+
+  public async getSpecsTmp(filename: string, size = 4096 * 36) {
+    const absPath = resolve(this.tmpDir, filename);
+    const rs = createReadStream(absPath);
+    const arr = Array.of<Buffer>();
+    const iterate = rs.iterator() as NodeJS.AsyncIterator<Buffer>;
+    for await (const chunk of iterate) {
+      arr.push(chunk);
+    }
+    const buffer = Buffer.concat(arr);
+    return await this.extractRemote(buffer, size);
   }
 
   /**
    * Extract image metadata using streaming (only reads ~4KB)
    * Much more memory efficient for large images
    */
-  public async getImageSpecsStream(filePath: string, size = 4096 * 36) {
-    return this.extractFromPath(filePath, size);
+  public async getSpecsStream(filePath: string, size = 4096 * 36) {
+    const stream = createReadStream(relative(this.cwd, filePath), {
+      highWaterMark: size
+    });
+    const buffer = await this.readBytes(stream, size);
+    return await this.extractRemote(buffer, size);
   }
 
-  public async getImageSpecsStreamTmp(filePath: string) {
-    return this.extractFromPath(resolve(this.tmpDir, filePath));
-  }
-
-  /**
-   *
-   * @access package-private
-   *
-   * work in progress, for internal package maintainer use only
-   */
-  // USE fluent-ffmpeg for video/animated image transforms (apng, etc)
-  // https://www.npmjs.com/package/fluent-ffmpeg
-  // https://www.npmjs.com/package/@types/fluent-ffmpeg
-  public async imageTransform<
-    const F extends
-      | "webp"
-      | "avif"
-      | "jpg"
-      | "gif"
-      | "svg"
-      | "png"
-      | "tif"
-      | "tiff"
-      | "jp2"
-      | "jpeg"
-  >({
-    format,
-    target,
-    quality = 80,
-    tint,
-    resize
-  }: {
-    format: F;
-    target: Buffer<ArrayBuffer>;
-    quality?: number;
-    tint?:
-      | string
-      | {
-          r?: number | undefined;
-          g?: number | undefined;
-          b?: number | undefined;
-          alpha?: number | undefined;
-        };
-    resize?: {
-      widthOrOptions?: number | sharp.ResizeOptions | null;
-      height?: number | null;
-      options?: sharp.ResizeOptions;
-    };
-  }) {
-    if (tint && !resize) {
-      return await sharp(target)
-        .toFormat(format, { quality })
-        .tint(tint)
-        .toBuffer();
-    } else if (!tint && resize) {
-      return await sharp(target)
-        .toFormat(format, { quality })
-        .resize(resize.widthOrOptions, resize.height, resize.options)
-        .toBuffer();
-    } else if (tint && resize) {
-      return await sharp(target)
-        .toFormat(format, { quality })
-        .tint(tint)
-        .resize(resize.widthOrOptions, resize.height, resize.options)
-        .toBuffer();
-    } else {
-      return await sharp(target).toFormat(format, { quality }).toBuffer();
+  public async getSpecsStreamTmp(filename: string) {
+    const absPath = resolve(this.tmpDir, filename);
+    const rs = createReadStream(absPath);
+    const arr = Array.of<Buffer>();
+    const iterate = rs.iterator() as NodeJS.AsyncIterator<Buffer>;
+    for await (const chunk of iterate) {
+      arr.push(chunk);
     }
+    const buffer = Buffer.concat(arr);
+    return await this.extractRemote(buffer);
+  }
+
+  protected async readBytes(stream: Readable, size?: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks = Array.of<Buffer>();
+      let totalBytes = 0;
+
+      const cleanup = () => {
+        stream.removeAllListeners();
+        stream.destroy();
+      };
+
+      stream.on("error", err => {
+        cleanup();
+        reject(err);
+      });
+
+      stream.on("data", (chunk: Buffer) => {
+        const bytes = size ?? chunk.length;
+        const remaining = bytes - totalBytes;
+        if (chunk.length <= remaining) {
+          chunks.push(chunk);
+          totalBytes += chunk.length;
+        } else {
+          // Take only what we need
+          chunks.push(chunk.subarray(0, remaining));
+          totalBytes = bytes;
+        }
+
+        if (totalBytes >= bytes) {
+          cleanup();
+          resolve(Buffer.concat(chunks));
+        }
+      });
+
+      stream.on("end", () => {
+        cleanup();
+        resolve(Buffer.concat(chunks));
+      });
+    });
   }
 }
