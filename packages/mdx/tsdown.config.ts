@@ -20,25 +20,15 @@ export default defineConfig(
   ) =>
     ({
       ...options,
-      entry: [
-        "src/index.ts",
-        "src/docs/index.ts",
-        "src/docs/mime-workup.ts",
-        "src/extract/index.ts",
-        "src/extract/client.ts",
-        "src/images/index.ts",
-        "src/images/workup.ts",
-        "src/mixins/index.ts",
-        "src/types/index.ts",
-        "src/types/utils.ts",
-        "!src/test/**"
-      ],
+      entry: ["src/index.ts", "!src/services/postbuild.ts"],
       cwd: process.cwd(),
       target: ["node25"],
+      external: ["react"],
       fixedExtension: false,
       dts: { tsgo: true },
       watch: process.env.NODE_ENV === "development",
       format: ["esm"],
+      platform: "neutral",
       sourcemap: true,
       tsconfig: relative(process.cwd(), "tsconfig.json"),
       clean: true,

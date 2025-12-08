@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/metadata",
-  "version": "4.0.1",
+  "version": "6.0.2",
   "description": "convenient metadata extraction helpers",
   "author": "Andrew Ross",
   "repository": {
@@ -36,7 +36,8 @@
         "dist/mixins/index.d.ts"
       ],
       "types": [
-        "dist/types/index.d.ts"
+        "dist/types/index.d.ts",
+        "dist/types/utils.d.ts"
       ]
     }
   },
@@ -63,7 +64,8 @@
           "dist/mixins/index.d.ts"
         ],
         "types": [
-          "dist/types/index.d.ts"
+          "dist/types/index.d.ts",
+          "dist/types/utils.d.ts"
         ]
       }
     }
@@ -79,7 +81,8 @@
     "./images": "./dist/images/index.js",
     "./images/workup": "./dist/images/workup.js",
     "./mixins": "./dist/mixins/index.js",
-    "./types": "./dist/types/index.js"
+    "./types": "./dist/types/index.js",
+    "./types/utils": "./dist/types/utils.js"
   },
   "scripts": {
     "lint": "eslint",
@@ -89,24 +92,26 @@
     "clean": "git clean -xdf dist node_modules",
     "types": "tsc --emitDeclarationOnly",
     "pretest":"tsx src/test/output-local.ts",
-    "test": "tsx src/test/index.test.ts"
+    "test": "tsx src/test/index.test.ts",
+    "test:pdf": "tsx src/test/pdf-page-count.test.ts"
   },
   "dependencies": {
     "fflate": "^0.8.2"
   },
   "devDependencies": {
-    "@d0paminedriven/fs": "^7.6.0",
+    "@d0paminedriven/fs": "^10.1.0",
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
+    "@typescript/native-preview": "7.0.0-dev.20251206.1",
     "@types/node": "^24.10.1",
     "eslint": "^9.39.1",
     "jiti": "^2.6.1",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "terser": "^5.44.1",
-    "tsdown": "^0.16.6",
+    "tsdown": "^0.17.0",
     "tslib": "^2.8.1",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "prettier": "@d0paminedriven/prettier-config"

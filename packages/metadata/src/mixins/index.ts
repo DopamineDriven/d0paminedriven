@@ -1,8 +1,8 @@
 import type {
   Constructor,
-  ExtractorOptions,
   ExpandedDocSpecs,
-  ExpandedImgSpecs
+  ExpandedImgSpecs,
+  ExtractorOptions
 } from "@/types/index.ts";
 import { DocMetadataExtractor } from "@/docs/index.ts";
 import { ImgMetadataExtractor } from "@/images/index.ts";
@@ -14,7 +14,6 @@ export function create<Type>(c: new () => Type): Type {
 export function createInstance<A extends object>(c: new () => A): A {
   return new c();
 }
-
 
 /**
  * ImgMixin

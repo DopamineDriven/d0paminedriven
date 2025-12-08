@@ -13,7 +13,7 @@ class Base {
 const Unified = ImgMixin(DocMixin(Base));
 
 export class Extract extends Unified {
-  private badUrls = new Map<string, number>(); // url -> expiry
+  private readonly badUrls = new Map<string, number>(); // url -> expiry
   private readonly originFallback?: ExtractorHardenedOptions["originFallback"];
   private readonly invalidateCF?: ExtractorHardenedOptions["invalidateCloudFrontKey"];
   private readonly quarantineTtl: number;
@@ -661,8 +661,7 @@ export class Extract extends Unified {
             fetchedBytes,
             metadata: {}
           } satisfies ExpandedImgSpecs;
-        }
-        // If we can't sniff either, rethrow to surface the error
+        } // If we can't sniff either, rethrow to surface the error
         throw new Error("IMAGE_PARSE_FAILED");
       }
     } else {
@@ -719,6 +718,26 @@ export class Extract extends Unified {
       }
     }
   }
+
+  // private sniffKtx2(buffer: Buffer) {
+  //       if (
+  //     buffer.length >= 80 &&
+  //     buffer[0] === 0xab &&
+  //     buffer[1] === 0x4b &&
+  //     buffer[2] === 0x54 &&
+  //     buffer[3] === 0x58 &&
+  //     buffer[4] === 0x20 &&
+  //     buffer[5] === 0x32 &&
+  //     buffer[6] === 0x30 &&
+  //     buffer[7] === 0xbb &&
+  //     buffer[8] === 0x0d &&
+  //     buffer[9] === 0x0a &&
+  //     buffer[10] === 0x1a &&
+  //     buffer[11] === 0x0a
+  //   ) {
+  //     return this.img.ktx2(buffer);
+  //   } else return null
+  // }
 
   private sniffHeic(buffer: Buffer) {
     if (buffer.length >= 32 && buffer.toString("ascii", 4, 8) === "ftyp") {

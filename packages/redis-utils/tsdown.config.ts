@@ -21,17 +21,12 @@ export default defineConfig(
     ({
       ...options,
       entry: [
-        "src/index.ts",
-        "src/docs/index.ts",
-        "src/docs/mime-workup.ts",
-        "src/extract/index.ts",
-        "src/extract/client.ts",
-        "src/images/index.ts",
-        "src/images/workup.ts",
-        "src/mixins/index.ts",
-        "src/types/index.ts",
-        "src/types/utils.ts",
-        "!src/test/**"
+      "src/index.ts",
+      "src/redis.ts",
+      "src/env.ts",
+      "!src/__generated__/**/*",
+      "!src/__tests__/**/*",
+      "!public/**/*"
       ],
       cwd: process.cwd(),
       target: ["node25"],

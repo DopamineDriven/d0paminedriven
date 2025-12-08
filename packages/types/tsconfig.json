@@ -4,15 +4,13 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "baseUrl": "./"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": [
     "**/*.ts",
     "src/**/*.ts",
     "**/*.mjs",
-    "**/*.preset.ts",
-    "tsdown.config.ts"
+    "**/*.preset.ts"
   ],
   "exclude": ["dist"]
 }

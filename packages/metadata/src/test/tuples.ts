@@ -2515,4 +2515,4 @@ export const tuplesToTest = [
     "https://assets-dev.aicoalesce.com/upload/nrr6h4r4480f6kviycyo1zhf/1761198325534-doge-404.jpg",
     "src/test/local/1761198325534-doge-404.jpg"
   ]
-];
+]
