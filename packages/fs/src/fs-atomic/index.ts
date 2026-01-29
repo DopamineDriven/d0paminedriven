@@ -1,7 +1,7 @@
-import fsSync from "fs";
-import fsAsync from "fs/promises";
 import { execSync } from "node:child_process";
-import { join, relative, resolve } from "path";
+import fsSync from "node:fs";
+import fsAsync from "node:fs/promises";
+import { join, relative, resolve } from "node:path";
 import type {
   ExecuteCommandProps,
   MkDirSyncOptions,
@@ -19,14 +19,20 @@ export class FsAtomic extends FsBase {
   public executeCommand = <const T extends string>({
     command,
     ...options
-  }: ExecuteCommandProps<T>) =>
-    Buffer.from(execSync(command, { ...options }));
+  }: ExecuteCommandProps<T>) => Buffer.from(execSync(command, { ...options }));
 
   public mkdirSync<const T extends string>(
     path: T,
     options: MkDirSyncOptions = { mode: 0o777, recursive: true }
   ) {
     return fsSync.mkdirSync(relative(this.cwd, path), options);
+  }
+
+  public mkdirSyncAbs<const T extends string>(
+    path: T,
+    options: MkDirSyncOptions = { mode: 0o777, recursive: true }
+  ) {
+    return fsSync.mkdirSync(this.absPath(path), options);
   }
 
   public generateDirIfDNE<const T extends string>(
@@ -116,30 +122,29 @@ export class FsAtomic extends FsBase {
     }
   }
 
+  public existsTmp(path: string) {
+    return this.exists(resolve(this.tmpDir, path));
+  }
 
-    public existsTmp(path: string) {
-      return this.exists(resolve(this.tmpDir, path));
-    }
+  public mkdirTmp(
+    path: string,
+    options: MkDirSyncOptions = { mode: 0o777, recursive: true }
+  ) {
+    return this.mkdirSync(resolve(this.tmpDir, path), options);
+  }
 
-    public mkdirTmp(
-      path: string,
-      options: MkDirSyncOptions = { mode: 0o777, recursive: true }
-    ) {
-      return this.mkdirSync(resolve(this.tmpDir, path), options);
+  public generateDirIfDNETmp<const T extends string>(
+    path: T,
+    options?: MkDirSyncOptions
+  ) {
+    if (this.existsTmp(path)) return;
+    else {
+      return this.mkdirTmp(path, options);
     }
+  }
+  public rmTmpFile<const V extends string>(filename: V) {
+    const tmpPath = resolve(this.tmpDir, filename);
 
-    public generateDirIfDNETmp<const T extends string>(
-      path: T,
-      options?: MkDirSyncOptions
-    ) {
-      if (this.existsTmp(path)) return;
-      else {
-        return this.mkdirTmp(path, options);
-      }
-    }
-    public rmTmpFile<const V extends string>(filename: V) {
-      const tmpPath = resolve(this.tmpDir, filename);
-
-      this.rmFile(tmpPath);
-    }
+    this.rmFile(tmpPath);
+  }
 }

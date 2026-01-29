@@ -5,11 +5,12 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "rootDir": "./src",
-    "outDir": "dist",
-    "emitDeclarationOnly": true
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "**/*.ts",
+    "tsdown.config.ts"
+  ],
   "exclude": ["dist"]
 }

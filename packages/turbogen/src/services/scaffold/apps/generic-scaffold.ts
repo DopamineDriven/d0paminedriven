@@ -2,13 +2,12 @@ import { ConfigHandler } from "@/config/index.ts";
 import { PromptPropsBase } from "@/types/index.ts";
 
 /* eslint-disable no-useless-escape */
-
-export class WebAppScaffolder extends ConfigHandler {
+/* eslint-disable @typescript-eslint/await-thenable */
+export class WebAppScaffolder {
   constructor(
-    public override cwd: string,
-    public baseProps: PromptPropsBase
+    public baseProps: PromptPropsBase,
+    protected handler: ConfigHandler
   ) {
-    super((cwd ??= process.cwd()));
   }
 
   private get workspace() {
@@ -273,6 +272,53 @@ declare global {
       readonly VERCEL_ENV: "development" | "production" | "preview";
     }
   }
+  declare module "http" {
+    interface IncomingHttpHeaders {
+      "x-vercel-ip-country"?: string;
+      "x-vercel-ip-city"?: string;
+      "x-vercel-ip-continent"?: string;
+      "x-vercel-forwarded-for"?: string;
+      "x-real-ip"?: string;
+      "x-vercel-ip-country-region"?: string;
+      "x-vercel-ip-postal-code"?: string;
+      "x-vercel-signature"?: string;
+      "x-vercel-ip-timezone"?: string;
+      "x-vercel-ip-latitude"?: string;
+      "x-vercel-ip-longitude"?: string;
+    }
+  }
+  interface JSON {
+    parse<T = unknown>(
+      text: string,
+      reviver?: (this: any, key: string, value: any) => any
+    ): T;
+  }
+  interface Body {
+    json<T = unknown>(): Promise<T>;
+  }
+  interface Response {
+    json<T = unknown>(): Promise<T>;
+  }
+  interface ObjectConstructor {
+    keys<T = object>(
+      o: T
+    ): (keyof T extends infer K
+      ? K extends string
+        ? K
+        : K extends number
+          ? \`\${K}\`
+          : never
+      : never)[];
+    entries<T = object, V extends keyof T = keyof T>(
+      o: T
+    ): (V extends infer K
+      ? K extends string
+        ? [K, T[V]]
+        : K extends number
+          ? [\`\${K}\`, T[V]]
+          : never
+      : never)[];
+  }
 }
 
 export {};
@@ -323,9 +369,9 @@ export default {
   private get tsconfigJson() {
     // prettier-ignore
     return `{
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@${this.workspace}/tsconfig/next.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -340,8 +386,8 @@ export default {
     ".",
     "next-env.d.ts",
     "next.config.ts",
+    "global.d.ts",
     "postcss.config.mjs",
-    "tailwind.config.ts",
     "src/**/*.tsx",
     "src/**/*.ts",
     ".next/types/**/*.ts"
@@ -352,7 +398,9 @@ export default {
 
   private get deps() {
     return [
+      "class-variance-authority",
       "clsx",
+      "csstype",
       "lucide-react",
       "motion",
       "next",
@@ -371,10 +419,11 @@ export default {
       "@types/node",
       "@types/react",
       "@types/react-dom",
+      "@typescript/native-preview",
       "autoprefixer",
+      "babel-plugin-react-compiler",
       "dotenv",
       "eslint",
-      "eslint-config-next",
       "motion-dom",
       "motion-utils",
       "postcss",
@@ -408,11 +457,20 @@ export default {
 
 export default {
   reactStrictMode: true,
-  eslint: { ignoreDuringBuilds: false },
+  reactCompiler: true,
   typescript: { ignoreBuildErrors: false, tsconfigPath: "./tsconfig.json" },
   images: {
+      localPatterns: [
+      { pathname: "/svgs/**" },
+      { pathname: "/*" }
+    ],
+    qualities: [75, 100],
     loader: "default",
     formats: ["image/avif", "image/webp"],
+    dangerouslyAllowLocalIP: true,
+    maximumRedirects: 5,
+    contentDispositionType: "attachment",
+    dangerouslyAllowSVG: true,
     remotePatterns: [
       {
         hostname: "localhost",
@@ -427,31 +485,12 @@ export default {
 } satisfies NextConfig;` as const;
   }
 
-  private get tailwindTemplate() {
-    // prettier-ignore
-    return `import type { Config as TailwindConfig } from "tailwindcss";
-
-export default {
-  content: ["src/**/*.{js,ts,jsx,tsx}"],
-  future: { hoverOnlyWhenSupported: true },
-  theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px"
-      }
-    }
-  }
-} satisfies TailwindConfig;` as const;
-  }
-
   private get globalCss() {
     // prettier-ignore
-    return `@import "tailwindcss";
+    return `@import "tailwindcss" source("../../src");
 @import "tw-animate-css";
 
-@config "../../tailwind.config.ts";
+
 @plugin "tailwindcss-motion";
 
 /*
@@ -702,7 +741,7 @@ export default function GlobalError({
 
   private get rootLayoutTsx() {
     try {
-      this.calSansFont().then(() => this.calSansRegularFont());
+      this.handler.calSansFont().then(() => this.handler.calSansRegularFont());
     } catch (err) {
       console.error(err);
     } finally {
@@ -731,7 +770,7 @@ export const viewport = {
   width: "device-width"
 } satisfies Viewport;
 
-export const metadata = {
+export const metadata: Metadata = {
   /* populate relevant values in src/lib/site-url.ts and uncomment for url injetion */
   // metadataBase: new URL(getSiteUrl(process.env.NODE_ENV)),
   title: {
@@ -739,7 +778,7 @@ export const metadata = {
     template: "%s | @${this.workspace}/web"
   },
   description: "@${this.workspace}/web scaffolded by @d0paminedriven/turbogen"
-} satisfies Metadata;
+};
 
 export default function RootLayout({
   children
@@ -1086,6 +1125,46 @@ export default function HomePage() {
 ` as const
   }
 
+  private get indexdts() {
+    // prettier-ignore
+    return `declare global {
+  interface JSON {
+    parse<T = unknown>(
+      text: string,
+      reviver?: (this: any, key: string, value: any) => any
+    ): T;
+  }
+  interface Body {
+    json<T = unknown>(): Promise<T>;
+  }
+  interface Response {
+    json<T = unknown>(): Promise<T>;
+  }
+  interface ObjectConstructor {
+    keys<T = object>(
+      o: T
+    ): (keyof T extends infer K
+      ? K extends string
+        ? K
+        : K extends number
+          ? \`\${K}\`
+          : never
+      : never)[];
+    entries<T = object, V extends keyof T = keyof T>(
+      o: T
+    ): (V extends infer K
+      ? K extends string
+        ? [K, T[V]]
+        : K extends number
+          ? [\`\${K}\`, T[V]]
+          : never
+      : never)[];
+  }
+}
+
+export {}` as const;
+  }
+
   public get svgWindow() {
     // prettier-ignore
     return `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -1222,7 +1301,7 @@ export function LandingPage() {
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Tooling Included</h3>
               <p className="text-muted-foreground text-sm">
-                Pre-configured ESLint, Prettier, TypeScript, and Jest for
+                Pre-configured ESLint, Prettier, and TypeScript for
                 consistent code quality.
               </p>
             </div>
@@ -1299,7 +1378,6 @@ pnpm run:web\`}</code>
 │   └── ui/
 └── tooling/
     ├── eslint/
-    ├── jest-presets/
     ├── prettier/
     └── typescript/\`}
                 </code>
@@ -1331,7 +1409,6 @@ pnpm run:web\`}</code>
       eslint: this.appPath("eslint.config.mjs"),
       postcss: this.appPath("postcss.config.mjs"),
       nextconfig: this.appPath("next.config.ts"),
-      tailwind: this.appPath("tailwind.config.ts"),
       tsconfig: this.appPath("tsconfig.json"),
       nextenvdts: this.appPath("next-env.d.ts"),
       globaldts: this.appPath("global.d.ts"),
@@ -1367,11 +1444,11 @@ pnpm run:web\`}</code>
     const T extends ReturnType<typeof this.appTarget>,
     const V extends string
   >(target: T, template: V) {
-    return this.withWs(target, template);
+    return this.handler.withWs(target, template);
   }
 
   public async exeWebApp() {
-    const pkgJson = await this.resolveAllDeps(
+    const pkgJson = await this.handler.resolveAllDeps(
       this.deps,
       this.devDeps,
       this.localDeps,
@@ -1379,6 +1456,20 @@ pnpm run:web\`}</code>
       this.workspace,
       this.port
     );
+
+    /**
+     * const pa = this.getPaths;
+     *
+     *
+     * use -> `for (const rec of (Object.entries(pa))) {// do stuff...}`
+     *
+     * augmented entries properly groups tuples
+     *
+     * ```ts
+     * const rec: ["index", "apps/web/turbo.json"] | ["packageJson", "apps/web/package.json"] | ["eslint", "apps/web/eslint.config.mjs"] | ["postcss", "apps/web/postcss.config.mjs"] | ["nextconfig", "apps/web/next.config.ts"] | ["tsconfig", "apps/web/tsconfig.json"] | ["nextenvdts", "apps/web/next-env.d.ts"] | ["globaldts", "apps/web/global.d.ts"] | ["globalCss", "apps/web/src/app/globals.css"] | ["rootlayout", "apps/web/src/app/layout.tsx"] | ["rootpage", "apps/web/src/app/page.tsx"] | ["globalerror", "apps/web/src/app/global-error.tsx"] | ... 16 more ... | [...]
+     * ```
+     */
+
     return Promise.all([
       this.writeTarget("apps/web/turbo.json", this.turboJson),
       this.writeTarget("apps/web/next.config.ts", this.nextConfigTemplate),
@@ -1386,7 +1477,6 @@ pnpm run:web\`}</code>
         "apps/web/package.json",
         JSON.stringify(pkgJson, null, 2)
       ),
-      this.writeTarget("apps/web/tailwind.config.ts", this.tailwindTemplate),
       this.writeTarget("apps/web/tsconfig.json", this.tsconfigJson),
       this.writeTarget("apps/web/global.d.ts", this.globalDts),
       this.writeTarget("apps/web/next-env.d.ts", this.nextEnvDts),

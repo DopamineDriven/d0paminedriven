@@ -1,15 +1,14 @@
-import type { PromptPropsBase } from "@/types/index.js";
-import { WebAppScaffolder } from "./apps/generic-scaffold.js";
-import { UIPackageScaffolder } from "./packages/ui.js";
-import { RootScaffolder } from "./root/root-scaffolder.js";
-import { EslintScaffolder } from "./tooling/eslint-scaffold.js";
-import { JestScaffolder } from "./tooling/jest-scaffold.js";
-import { PrettierScaffolder } from "./tooling/prettier-scaffold.js";
-import { TsScaffolder } from "./tooling/ts-scaffold.js";
+import type { PromptPropsBase } from "@/types/index.ts";
+import { ConfigHandler } from "@/config/index.ts";
+import { WebAppScaffolder } from "@/services/scaffold/apps/generic-scaffold.ts";
+import { UIPackageScaffolder } from "@/services/scaffold/packages/ui.ts";
+import { RootScaffolder } from "@/services/scaffold/root/root-scaffolder.ts";
+import { EslintScaffolder } from "@/services/scaffold/tooling/eslint-scaffold.ts";
+import { PrettierScaffolder } from "@/services/scaffold/tooling/prettier-scaffold.ts";
+import { TsScaffolder } from "@/services/scaffold/tooling/ts-scaffold.ts";
 
 export interface ScaffoldServiceProps {
   eslint: EslintScaffolder;
-  jest: JestScaffolder;
   prettier: PrettierScaffolder;
   root: RootScaffolder;
   typescript: TsScaffolder;
@@ -17,14 +16,16 @@ export interface ScaffoldServiceProps {
   web: WebAppScaffolder;
 }
 
-export function scaffoldService(cwd: string, promptBase: PromptPropsBase) {
+export function scaffoldService(
+  promptBase: PromptPropsBase,
+  configHandler: ConfigHandler
+) {
   return {
-    eslint: new EslintScaffolder(cwd, promptBase),
-    jest: new JestScaffolder(cwd, promptBase),
-    prettier: new PrettierScaffolder(cwd, promptBase),
-    root: new RootScaffolder(cwd, promptBase),
-    typescript: new TsScaffolder(cwd, promptBase),
-    ui: new UIPackageScaffolder(cwd, promptBase),
-    web: new WebAppScaffolder(cwd, promptBase)
+    eslint: new EslintScaffolder(promptBase, configHandler),
+    prettier: new PrettierScaffolder(promptBase, configHandler),
+    root: new RootScaffolder(promptBase, configHandler),
+    typescript: new TsScaffolder(promptBase, configHandler),
+    ui: new UIPackageScaffolder(promptBase, configHandler),
+    web: new WebAppScaffolder(promptBase, configHandler)
   };
 }

@@ -1,4 +1,10 @@
 src/test/**out**/batch
 src/test/**local/*
-src/test/pdf/**/*
+src/test/pdf/*
 src/test/ktx2-test.ts
+src/test/__out__/*
+src/test/__benchmark__/*
+src/test/__pdf-stash__/*
+src/test/local-*/*
+src/test/img-meta/*
+src/test/img-data/segmented/*

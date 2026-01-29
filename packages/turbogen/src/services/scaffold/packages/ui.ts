@@ -1,13 +1,12 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
-export class UIPackageScaffolder extends ConfigHandler {
+/* eslint-disable @typescript-eslint/await-thenable */
+export class UIPackageScaffolder {
   constructor(
-    public override cwd: string,
-    public baseProps: PromptPropsBase
-  ) {
-    super((cwd ??= process.cwd()));
-  }
+    public baseProps: PromptPropsBase,
+    protected handler: ConfigHandler
+  ) {}
 
   private get workspace() {
     return this.baseProps.workspace;
@@ -15,12 +14,11 @@ export class UIPackageScaffolder extends ConfigHandler {
 
   private get globalCss() {
     // prettier-ignore
-    return `@import "tailwindcss";
-@import "tw-animate-css";
+    return `@import "tailwindcss/theme.css" layer(theme) source("../src");
 
-@config "../tailwind.config.ts";
+@import "tailwindcss/utilities.css" layer(utilities);
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant dark (&:where([data-theme=dark], .dark, [data-theme=dark] *));
 
 @font-face {
   font-family: "CalSans";
@@ -139,72 +137,6 @@ export class UIPackageScaffolder extends ConfigHandler {
     --color-hue-5: oklch(0.8203 0.141 210.49);
     --color-hue-6: oklch(0.8842 0.107 168.47);
   }
-}
-
-/*
-  The default border color has changed to \`currentColor\` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-
-:root {
-  --radius: 0.5rem;
-}
-
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
-  * {
-    border-color: var(--color-border);
-  }
-}
-
-@supports not (backdrop-filter: blur(4px)) {
-  .backdrop-blur-sm {
-    background-color: color-mix(
-      in oklab,
-      var(--color-background) 90%,
-      transparent
-    );
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-@layer components {
-  .container {
-    margin-inline: auto;
-    @apply [padding-inline:1rem] sm:[padding-inline:2rem] lg:[padding-inline:3rem];
-  }
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-input,
-button,
-textarea,
-select {
-  font: inherit;
-}
-
-body {
-  overflow-x: hidden;
 }
 ` as const;
   }
@@ -802,7 +734,18 @@ export function Zap({
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "src/**/*.css",
+        "tsconfig.json",
+        "package.json",
+        "postcss.config.mjs",
+        "eslint.config.mjs",
+        "tsup.config.ts"
+      ]
     }
   }
 }` as const;
@@ -824,7 +767,8 @@ export default [
       "@typescript-eslint/prefer-includes": "off",
       "@typescript-eslint/prefer-string-starts-ends-with": "off",
       "@typescript-eslint/require-await": "off",
-      "prefer-const": "off"
+      "prefer-const": "off",
+      "@typescript-eslint/no-empty-object-type": "off"
     }
   }
 ] satisfies Config;` as const;
@@ -849,25 +793,6 @@ export default {
 };` as const;
   }
 
-  private get tailwindTemplate() {
-    // prettier-ignore
-    return `import type { Config as TailwindConfig } from "tailwindcss";
-
-export default {
-  content: ["src/**/*.{js,ts,jsx,tsx}"],
-  future: { hoverOnlyWhenSupported: true },
-  theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px"
-      }
-    }
-  }
-} satisfies TailwindConfig;` as const;
-  }
-
   private get tsConfigTemplate() {
     // prettier-ignore
     return `{
@@ -883,12 +808,10 @@ export default {
       }
     ],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "baseUrl": "./",
     "rootDir": "./src",
     "outDir": "dist"
   },
-
-  "include": ["src/**/*.ts", "src/**/*.tsx", "next-env.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/globals.d.ts", "next-env.d.ts"],
   "exclude": ["dist"]
 }
 ` as const;
@@ -902,39 +825,26 @@ import { defineConfig } from "tsup";
 
 const tsupConfig = (options: Options) =>
   ({
+    ...options,
     entry: [
-      "src/index.ts",
       "src/globals.css",
-      "src/icons/arrow-right.tsx",
-      "src/icons/code.tsx",
-      "src/icons/github.tsx",
-      "src/icons/index.tsx",
-      "src/icons/layers.tsx",
-      "src/icons/moon.tsx",
-      "src/icons/package.tsx",
-      "src/icons/sun.tsx",
-      "src/icons/terminal.tsx",
-      "src/icons/zap.tsx",
-      "src/lib/utils.ts",
-      "src/ui/button.tsx",
+      "src/index.ts",
+      "src/icons/*.tsx",
+      "src/lib/*.ts",
+      "src/ui/*.tsx",
+      "!src/services/icon-workup.ts",
       "!src/services/postbuild.ts"
     ],
-    // esbuildOptions: (options, _) => {
-    //   options.keepNames = true;
-    //   options.minifyIdentifiers = false;
-    // },
-    // minifyIdentifiers: false,
-    // banner: { js: '"use client"' },
     dts: true,
-    external: ["react"],
+    external: ["react", "react-dom"],
     watch: process.env.NODE_ENV === "development",
     keepNames: true,
-    format: ["cjs", "esm"],
+    target: ["esnext"],
+    format: ["esm"],
     sourcemap: true,
     tsconfig: relative(process.cwd(), "tsconfig.json"),
     clean: true,
-    outDir: "dist",
-    ...options
+    outDir: "dist"
   }) satisfies Options;
 
 export default defineConfig(tsupConfig);
@@ -960,6 +870,7 @@ export default defineConfig(tsupConfig);
       "@types/node",
       "@types/react",
       "@types/react-dom",
+      "@typescript/native-preview",
       "autoprefixer",
       "chokidar",
       "eslint",
@@ -1002,7 +913,6 @@ export default defineConfig(tsupConfig);
       eslint: this.pkgPath("eslint.config.ts"),
       postcss: this.pkgPath("postcss.config.mjs"),
       tsup: this.pkgPath("tsup.config.ts"),
-      tailwind: this.pkgPath("tailwind.config.ts"),
       tsconfig: this.pkgPath("tsconfig.json"),
       nextenvdts: this.pkgPath("next-env.d.ts"),
       globalCss: this.pkgPath("src/globals.css"),
@@ -1031,11 +941,11 @@ export default defineConfig(tsupConfig);
     const T extends ReturnType<typeof this.pkgTarget>,
     const V extends string
   >(target: T, template: V) {
-    return this.withWs(target, template);
+    return this.handler.withWs(target, template);
   }
 
   public async exeUIPkg() {
-    const pkgJson = await this.resolveAllDepsUIPkg(
+    const pkgJson = await this.handler.resolveAllDepsUIPkg(
       this.deps,
       this.devDeps,
       this.localDevDeps,
@@ -1062,7 +972,6 @@ export default defineConfig(tsupConfig);
       this.wt("packages/ui/src/lib/utils.ts", this.libUtils),
       this.wt("packages/ui/src/services/postbuild.ts", this.postBuildService),
       this.wt("packages/ui/src/ui/button.tsx", this.uiButtonComponent),
-      this.wt("packages/ui/tailwind.config.ts", this.tailwindTemplate),
       this.wt("packages/ui/tsconfig.json", this.tsConfigTemplate),
       this.wt("packages/ui/tsup.config.ts", this.tsupConfigTemplate),
       this.wt("packages/ui/turbo.json", this.turboJson)

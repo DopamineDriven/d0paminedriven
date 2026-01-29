@@ -11,7 +11,9 @@ export default [
       "prefer-const": "off",
       "no-useless-escape": "off",
       "@typescript-eslint/prefer-regexp-exec": "off",
-      "no-control-regex": "off"
+      "no-control-regex": "off",
+      "no-case-declarations": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off"
     },
     ignores: ["dist/**"]
   }

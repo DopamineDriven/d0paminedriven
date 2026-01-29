@@ -1,12 +1,9 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
-export class TsScaffolder extends ConfigHandler {
-  constructor(
-    public override cwd: string,
-    public baseProps: PromptPropsBase
-  ) {
-    super((cwd ??= process.cwd()));
+/* eslint-disable @typescript-eslint/await-thenable */
+export class TsScaffolder {
+  constructor(public baseProps: PromptPropsBase,     protected configHandler: ConfigHandler) {
   }
 
   private get workspace() {
@@ -25,7 +22,7 @@ export class TsScaffolder extends ConfigHandler {
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "isolatedModules": true,
-    "lib": ["ES2022", "ScriptHost"],
+    "lib": ["ES2024", "ScriptHost", "ESNext"],
     "module": "Preserve",
     "moduleDetection": "auto",
     "moduleResolution": "Bundler",
@@ -36,47 +33,9 @@ export class TsScaffolder extends ConfigHandler {
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "ES2022"
+    "target": "ESNext"
   },
   "exclude": ["node_modules", "build", "dist", ".next"]
-}
-` as const;
-  }
-
-  private get expressTemplate() {
-    // prettier-ignore
-    return `{
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./base.json",
-  "compilerOptions": {
-    "lib": ["ESNext", "ScriptHost"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "target": "ESNext",
-    "incremental": true,
-    "sourceMap": true,
-    "useDefineForClassFields": true,
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "declarationMap": true,
-    "importHelpers": true,
-    "alwaysStrict": true
-  }
-}
-` as const;
-  }
-
-  private get internalTemplate() {
-    // prettier-ignore
-    return `{
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./base.json",
-  "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": false,
-    "emitDeclarationOnly": true
-  }
 }
 ` as const;
   }
@@ -94,7 +53,7 @@ export class TsScaffolder extends ConfigHandler {
     "declarationMap": true,
     "importHelpers": false,
     "incremental": true,
-    "module": "Node16",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
     "sourceMap": true,
@@ -122,7 +81,7 @@ export class TsScaffolder extends ConfigHandler {
     "jsx": "preserve",
     "moduleResolution": "bundler",
     "importHelpers": false,
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "ScriptHost"]
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "ScriptHost", "ES2024"]
   }
 }` as const;
   }
@@ -149,51 +108,7 @@ export class TsScaffolder extends ConfigHandler {
     "importHelpers": false,
     "noEmit": false
   }
-}
-` as const;
-  }
-
-  private get reactNativeTemplate() {
-    // prettier-ignore
-    return `{
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./base.json",
-  "compilerOptions": {
-    "jsx": "react",
-    "lib": ["DOM", "ESNext"],
-    "target": "ESNext",
-    "noEmit": true,
-    "incremental": true,
-    "alwaysStrict": true
-  }
-}
-` as const;
-  }
-
-  private get cliPkgTemplate() {
-    // prettier-ignore
-    return `{
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "alwaysStrict": true,
-    "module": "Node16",
-    "moduleResolution": "NodeNext",
-    "target": "ESNext",
-    "incremental": false,
-    "sourceMap": true,
-    "useDefineForClassFields": true,
-    "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
-    "declaration": true,
-    "declarationMap": true,
-    "importHelpers": false,
-    "noEmit": true
-  }
-}
-` as const;
+}` as const;
   }
 
   private get pkgJsonTemplate() {
@@ -216,14 +131,10 @@ export class TsScaffolder extends ConfigHandler {
   private getPaths() {
     return {
       base: this.tsPath("base.json"),
-      express: this.tsPath("express.json"),
-      internal: this.tsPath("internal.json"),
       next: this.tsPath("next.json"),
       nodePkg: this.tsPath("node-pkg.json"),
       packageJson: this.tsPath("package.json"),
-      reactLib: this.tsPath("react-library.json"),
-      reactNative: this.tsPath("react-native.json"),
-      cliPkg: this.tsPath("cli-pkg.json")
+      reactLib: this.tsPath("react-library.json")
     } as const;
   }
 
@@ -237,18 +148,12 @@ export class TsScaffolder extends ConfigHandler {
     const T extends ReturnType<typeof this.tsTarget>,
     const V extends string
   >(target: T, template: V) {
-    return this.withWs(target, template);
+    return this.configHandler.withWs(target, template);
   }
 
   public exeTs() {
     return Promise.all([
-      this.writeTarget("tooling/typescript/cli-pkg.json", this.cliPkgTemplate),
       this.writeTarget("tooling/typescript/base.json", this.baseTemplate),
-      this.writeTarget("tooling/typescript/express.json", this.expressTemplate),
-      this.writeTarget(
-        "tooling/typescript/internal.json",
-        this.internalTemplate
-      ),
       this.writeTarget("tooling/typescript/next.json", this.nextTemplate),
       this.writeTarget(
         "tooling/typescript/node-pkg.json",
@@ -258,10 +163,6 @@ export class TsScaffolder extends ConfigHandler {
       this.writeTarget(
         "tooling/typescript/react-library.json",
         this.reactLibTemplate
-      ),
-      this.writeTarget(
-        "tooling/typescript/react-native.json",
-        this.reactNativeTemplate
       )
     ]);
   }

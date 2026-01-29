@@ -7,7 +7,7 @@ import turboPlugin from "eslint-plugin-turbo";
 import tseslint from "typescript-eslint";
 import { includeIgnoreFile } from "@eslint/compat";
 
-const project = relative(process.cwd(), "tsconfig.json");
+const _project = relative(process.cwd(), "tsconfig.json");
 
 export default tseslint.config(
   includeIgnoreFile(join(import.meta.dirname, "../../.gitignore")),
@@ -64,6 +64,6 @@ export default tseslint.config(
   },
   {
     linterOptions: { reportUnusedDisableDirectives: true },
-    languageOptions: { parserOptions: { project } }
+    languageOptions: { parserOptions: { project: true } }
   }
 );

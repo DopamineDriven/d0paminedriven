@@ -99,20 +99,19 @@
     "fflate": "^0.8.2"
   },
   "devDependencies": {
-    "@d0paminedriven/fs": "^10.1.0",
+    "@d0paminedriven/fs": "^11.0.0",
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@typescript/native-preview": "7.0.0-dev.20251206.1",
-    "@types/node": "^24.10.1",
-    "eslint": "^9.39.1",
-    "jiti": "^2.6.1",
-    "prettier": "^3.7.4",
-    "terser": "^5.44.1",
-    "tsdown": "^0.17.0",
-    "tslib": "^2.8.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "@typescript/native-preview": "catalog:tsgo",
+    "@types/node": "catalog:node",
+    "eslint": "catalog:eslint",
+    "jiti": "catalog:jiti",
+    "prettier": "catalog:prettier",
+    "tsdown": "catalog:tsdown",
+    "tslib": "catalog:tslib",
+    "tsx": "catalog:tsx",
+    "typescript": "catalog:ts"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }

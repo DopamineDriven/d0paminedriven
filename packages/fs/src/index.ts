@@ -117,3 +117,33 @@ export type {
 } from "@/url/index.ts";
 export { UrlService } from "@/url/index.ts";
 export { UtilsService } from "@/utils/index.ts";
+declare global {
+  interface JSON {
+    parse<T = unknown>(
+      text: string,
+      reviver?: (this: any, key: string, value: any) => any
+    ): T;
+  }
+  interface Body {
+    json<T = unknown>(): Promise<T>;
+  }
+  interface Response {
+    json<T = unknown>(): Promise<T>;
+  }
+  namespace NodeJS {
+    interface ProcessEnv {
+      HOME?: string;
+      HOSTTYPE?: string;
+      OLDPWD?: string;
+      PWD?: string;
+      PATH?: string;
+      USER?: string;
+      SHLVL?: string;
+      LOGNAME?: string;
+      EDITOR?: string;
+      SHELL?: string;
+      TERM?: string;
+      TERM_PROGRAM?: string;
+    }
+  }
+}

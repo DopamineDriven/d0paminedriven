@@ -1,6 +1,152 @@
-import type { BoxInfo, ImageSpecs } from "@/types/index.ts";
+import type { BoxInfo, ImageSpecs, PngIccProfileMeta } from "@/types/index.ts";
+import { MimeWorkupService } from "@/docs/mime-workup.ts";
 
-export class ImgMetadataExtractorWorkup {
+export class ImgMetadataExtractorWorkup extends MimeWorkupService {
+  protected toAscii(
+    buffer: Buffer<ArrayBufferLike>,
+    start: number,
+    end: number
+  ) {
+    return buffer.toString("ascii", start, end);
+  }
+
+  protected XMP_FIELD_PATTERNS = [
+    { key: "xmpToolkit", regex: /x(?:mp)?:?(?:xmptk|toolkit)[=:>\s]["']?([^"'<]+)/i },
+    { key: "creatorTool", regex: /xmp:CreatorTool[>"'\s]*([^<"']+)/i },
+    { key: "documentId", regex: /xmpMM:DocumentID[>"'\s]*([^<"']+)/i },
+    { key: "instanceId", regex: /xmpMM:InstanceID[>"'\s]*([^<"']+)/i },
+    { key: "originalDocumentId", regex: /xmpMM:OriginalDocumentID[>"'\s]*([^<"']+)/i },
+    { key: "derivedFromDocumentId", regex: /stRef:documentID[>"'\s]*([^<"']+)/i },
+    { key: "derivedFromInstanceId", regex: /stRef:instanceID[>"'\s]*([^<"']+)/i },
+    { key: "creator", regex: /dc:creator[^>]*>(?:<[^>]*>)*([^<]+)/i },
+    { key: "title", regex: /dc:title[^>]*>(?:<[^>]*>)*([^<]+)/i },
+    { key: "description", regex: /dc:description[^>]*>(?:<[^>]*>)*([^<]+)/i },
+    { key: "rights", regex: /dc:rights[^>]*>(?:<[^>]*>)*([^<]+)/i },
+    { key: "colorMode", regex: /photoshop:ColorMode[>"'\s]*([^<"']+)/i },
+    { key: "iccProfile", regex: /photoshop:ICCProfile[>"'\s]*([^<"']+)/i },
+    { key: "dateTimeOriginal", regex: /exif:DateTimeOriginal[>"'\s]*([^<"']+)/i },
+    { key: "createDate", regex: /xmp:CreateDate[>"'\s]*([^<"']+)/i },
+    { key: "modifyDate", regex: /xmp:ModifyDate[>"'\s]*([^<"']+)/i },
+    { key: "software", regex: /tiff:Software[>"'\s]*([^<"']+)/i },
+    { key: "artist", regex: /tiff:Artist[>"'\s]*([^<"']+)/i },
+    { key: "copyright", regex: /tiff:Copyright[>"'\s]*([^<"']+)/i },
+    { key: "aiPrompt", regex: /(?:prompt|ai:prompt)[>"'\s:=]*([^<"'\n]+)/i },
+    { key: "aiModel", regex: /(?:model|ai:model)[>"'\s:=]*([^<"'\n]+)/i },
+    { key: "aiSeed", regex: /(?:seed|ai:seed)[>"'\s:=]*(\d+)/i }
+  ] as const;
+
+  protected ICC_PROFILE_CLASS_MAP = {
+    scnr: "Input Device Profile",
+    mntr: "Display Device Profile",
+    prtr: "Output Device Profile",
+    link: "DeviceLink Profile",
+    spac: "ColorSpace Profile",
+    abst: "Abstract Profile",
+    nmcl: "Named Color Profile"
+  } as const;
+
+  protected isKeyofICCProfileClassMap(o: string) {
+    return (
+      o === "scnr" ||
+      o === "mntr" ||
+      o === "prtr" ||
+      o === "link" ||
+      o === "spac" ||
+      o === "abst" ||
+      o === "nmcl"
+    );
+  }
+  protected isKeyofICCCMMTypeMap(o: string) {
+    return (
+      o === "ADBE" ||
+      o === "APPL" ||
+      o === "MSFT" ||
+      o === "SGI" ||
+      o === "SUNW" ||
+      o === "TOSH" ||
+      o === "Lino"
+    );
+  }
+  protected ICC_CMM_TYPE_MAP = {
+    ADBE: "Adobe",
+    APPL: "Apple",
+    MSFT: "Microsoft",
+    SGI: "Silicon Graphics",
+    SUNW: "Sun Microsystems",
+    TOSH: "Toshiba",
+    Lino: "Linotronic"
+  } as const;
+  protected parseIccHeader(
+    iccData: Buffer<ArrayBufferLike>,
+    profileName: string
+  ): PngIccProfileMeta | null {
+    if (iccData.length < 128) return null;
+
+    const profileSize = iccData.readUInt32BE(0);
+    if (profileSize > iccData.length) return null;
+
+    // CMM Type (bytes 4-7)
+    let cmmType: string | null = null;
+    const cmmTypeRaw = iccData
+      .toString("ascii", 4, 8)
+      .replace(/\0/g, "")
+      .trim();
+
+    if (this.isKeyofICCCMMTypeMap(cmmTypeRaw)) {
+      cmmType = (this.ICC_CMM_TYPE_MAP[cmmTypeRaw] ?? cmmTypeRaw) || null;
+    }
+    // Version (bytes 8-11)
+    const versionMajor = iccData[8] ?? 0;
+    const versionMinorBugfix = iccData[9] ?? 0;
+    const versionMinor = versionMinorBugfix >> 4;
+    const versionBugfix = versionMinorBugfix & 0x0f;
+    const version = `${versionMajor}.${versionMinor}.${versionBugfix}`;
+    let profileClass: string | null = null;
+    // Profile/Device Class (bytes 12-15)
+    const profileClassCode = iccData.toString("ascii", 12, 16).trim();
+    if (this.isKeyofICCProfileClassMap(profileClassCode)) {
+      profileClass =
+        this.ICC_PROFILE_CLASS_MAP[profileClassCode] ?? profileClassCode;
+    }
+
+    // Color Space Data (bytes 16-19)
+    const colorSpaceData = iccData.toString("ascii", 16, 20).trim();
+
+    // PCS (bytes 20-23)
+    const pcs = iccData.toString("ascii", 20, 24).trim();
+
+    // Date/Time (bytes 24-35)
+    let dateTime: string | null = null;
+    try {
+      const year = iccData.readUInt16BE(24);
+      const month = iccData.readUInt16BE(26);
+      const day = iccData.readUInt16BE(28);
+      const hour = iccData.readUInt16BE(30);
+      const minute = iccData.readUInt16BE(32);
+      const second = iccData.readUInt16BE(34);
+
+      if (year > 1900 && year < 2100 && month >= 1 && month <= 12) {
+        dateTime = `${year}:${month.toString().padStart(2, "0")}:${day.toString().padStart(2, "0")} ${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:${second.toString().padStart(2, "0")}`;
+      }
+    } catch {
+      // Date parsing failed
+    }
+
+    // Device Manufacturer (bytes 48-51)
+    const deviceManufacturer =
+      iccData.toString("ascii", 48, 52).replace(/\0/g, "").trim() || null;
+
+    return {
+      name: profileName || null,
+      version,
+      profileClass,
+      cmmType,
+      colorSpaceData,
+      pcs,
+      deviceManufacturer,
+      dateTime
+    };
+  }
   public parseExif(
     buffer: Buffer,
     app1Pos: number,
@@ -192,7 +338,7 @@ export class ImgMetadataExtractorWorkup {
 
     return { orientation, dateTimeOriginal };
   }
-  public parseXmpFromAvif(
+  protected parseXmpFromAvif(
     buffer: Buffer,
     meta: BoxInfo,
     _ipco: BoxInfo
@@ -334,7 +480,7 @@ export class ImgMetadataExtractorWorkup {
     // Extract XMP XML string (UTF-8 assumed)
     return buffer.toString("utf8", xmpOffset, xmpOffset + xmpLength);
   }
-  public readVarSize(buffer: Buffer, pos: number, size: number) {
+  protected readVarSize(buffer: Buffer, pos: number, size: number) {
     if (size === 0) return 0;
     if (size === 1 && buffer?.[pos]) return buffer?.[pos];
     if (size === 2) return buffer.readUInt16BE(pos);
@@ -450,7 +596,7 @@ export class ImgMetadataExtractorWorkup {
       return "rec2020";
     return fallback; // No match, keep default
   }
-  public xmpToColorSpaceWorkup<
+  protected xmpToColorSpaceWorkup<
     const T extends
       | ImageSpecs["colorSpace"]
       | "prophoto rgb"

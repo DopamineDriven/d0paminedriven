@@ -107,6 +107,19 @@ export class FsFetch extends FsTmp {
     if (lastDot === -1 || lastDot === pathname.length - 1) return null;
     return pathname.slice(lastDot + 1).toLowerCase();
   }
+  private deriveExt(format: string | null, inputUrl: string) {
+    return (
+      format && format !== "bin"
+        ? format
+        : this.mimeToExt(
+            this.mimeTypeObj[
+              inputUrl.slice(
+                inputUrl.lastIndexOf(".") + 1
+              ) as keyof typeof this.mimeTypeObj
+            ][0]
+          )
+    ) as keyof typeof this.mimeTypeObj;
+  }
   private fuzzyExtEquality(a: string, b: string) {
     const aNorm = a.toLowerCase();
     const bNorm = b.toLowerCase();
@@ -143,17 +156,7 @@ export class FsFetch extends FsTmp {
     try {
       const meta = await this.extractRemote(inputUrl, 4096 * 48);
 
-      const ext = (
-        meta.format && meta.format !== "bin"
-          ? meta.format
-          : this.mimeToExt(
-              this.mimeTypeObj[
-                inputUrl.slice(
-                  inputUrl.lastIndexOf(".") + 1
-                ) as keyof typeof this.mimeTypeObj
-              ][0]
-            )
-      ) as keyof typeof this.mimeTypeObj;
+      const ext = this.deriveExt(meta.format, inputUrl);
       const size = meta.byteSize ?? 0;
 
       const { unit, value } = this.autoFileSizeRaw(size);

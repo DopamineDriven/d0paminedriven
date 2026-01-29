@@ -1,8 +1,8 @@
-import fsSync from "fs";
+import fsSync from "node:fs";
+import { devNull, EOL, homedir as casadir, machine as osmachine, hostname, tmpdir } from "node:os";
+import { join, relative, resolve } from "node:path";
 import { Readable } from "node:stream";
-import { devNull, EOL, homedir, hostname, platform, tmpdir } from "node:os";
-import { join, relative, resolve } from "path";
-import { ReadableStream as WebReadableStream } from "stream/web";
+import { ReadableStream as WebReadableStream } from "node:stream/web";
 import * as dotenv from "dotenv";
 import expand from "dotenv-expand";
 import type { ReadDirOptions } from "@/types/index.ts";
@@ -16,14 +16,19 @@ export class FsBase extends MimeService {
   public get tmpDir() {
     return tmpdir();
   }
-  public get homeDir() {
-    return homedir();
+  public get homedir() {
+    if (process.env.HOME) return process.env.HOME;
+    else return casadir();
   }
   public get platform() {
-    return platform();
+    return process.platform
   }
   public get hostname() {
     return hostname();
+  }
+  public get machine() {
+    if (process.env.HOSTTYPE) return process.env.HOSTTYPE;
+    else return osmachine();
   }
   public get devNull() {
     return devNull;
@@ -33,6 +38,13 @@ export class FsBase extends MimeService {
   }
   private get env() {
     return dotenv.config({ processEnv: {}, quiet: true });
+  }
+  public relPath<const T extends string>(path: T) {
+    return relative(this.cwd, path);
+  }
+
+  public absPath<const T extends string>(path: T) {
+    return resolve(this.relPath(path));
   }
 
   public parseDotEnv() {
@@ -48,14 +60,10 @@ export class FsBase extends MimeService {
     }
   }
 
-  public relative(from: string, to: string) {
-    return relative(from, to);
-  }
-
   public isHomeTargeted(path: string) {
     if (/^(~\/\.?)$/g.test(path)) {
       return true;
-    } else if (path.includes(this.homeDir)) {
+    } else if (path.includes(this.homedir)) {
       return true;
     } else {
       return false;

@@ -596,7 +596,26 @@ export interface PresentationDocSpecs {
   presentationFormat: "standard" | "widescreen" | null;
 }
 
-export interface DocSpecs {
+export type PdfCommonImagesUnion =
+  | "jpeg"
+  | "jpeg2000"
+  | "png-like"
+  | "ccitt-fax"
+  | "jbig2"
+  | "inline";
+export type PdfImageCoverEstUnion = "none" | "moderate" | "minimal" | "heavy";
+
+export interface PdfImageAnalysisMetadata {
+  hasImages: boolean;
+  imageCount: number;
+  estimatedImageCoverage: PdfImageCoverEstUnion;
+  isLikelyScanned: boolean;
+  hasVectorGraphics: boolean;
+  recommendation: "multimodal" | "text-only";
+  imageTypes: PdfCommonImagesUnion[];
+}
+
+export interface DocSpecs<T = unknown> {
   type: "DOCUMENT";
   format: string | null;
   mimeType: string | null;
@@ -615,6 +634,7 @@ export interface DocSpecs {
   textPreview: string | null;
   createdDate: string | null;
   modifiedDate: string | null;
+  metadata?: T;
 }
 
 export type ZipEntry = {
@@ -632,7 +652,7 @@ export interface ExpandedImgSpecs extends ImageSpecs {
   contentType?: string;
 }
 
-export interface ExpandedDocSpecs extends DocSpecs {
+export interface ExpandedDocSpecs<T = unknown> extends DocSpecs<T> {
   source?: string;
   fetchedBytes?: number;
   byteSize?: number;
@@ -665,3 +685,26 @@ export interface ExtractorHardenedOptions extends ExtractorOptions {
   /** Enable verbose debug logging */
   debug?: boolean;
 }
+export type CommonDiscriminants =
+  | "type"
+  | "kind"
+  | "event"
+  | "tag"
+  | "_tag"
+  | "__typename";
+
+export type LiteralUnion<TKnown extends string> = TKnown | (string & {});
+
+export type DiscriminatedUnionToRecord<
+  TUnion extends Record<TKey, string>,
+  TKey extends string = LiteralUnion<CommonDiscriminants>
+> = TKey extends keyof TUnion
+  ? { [K in TUnion[TKey] & string]: Extract<TUnion, Record<TKey, K>> }
+  : never;
+
+export type UnionToRecord<
+  TUnion extends { type: string },
+  TDiscriminant extends string = TUnion["type"]
+> = {
+  [K in TDiscriminant]: Extract<TUnion, { type: K }>;
+};

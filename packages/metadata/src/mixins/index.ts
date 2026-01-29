@@ -1,7 +1,6 @@
 import type {
   Constructor,
   ExpandedDocSpecs,
-  ExpandedImgSpecs,
   ExtractorOptions
 } from "@/types/index.ts";
 import { DocMetadataExtractor } from "@/docs/index.ts";
@@ -27,8 +26,7 @@ export function ImgMixin<TBase extends Constructor>(Base: TBase) {
     static sharedImg?: ImgMetadataExtractor;
 
     constructor(...args: any[]) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      super(...args);
+      super(...(args as (ExtractorOptions | undefined)[]));
       const maybeOpts = args[0] as ExtractorOptions | undefined;
       this.img =
         maybeOpts?.img ??
@@ -36,8 +34,8 @@ export function ImgMixin<TBase extends Constructor>(Base: TBase) {
         new ImgMetadataExtractor();
     }
 
-    public getImageSpecsWorkup(buffer: Buffer, size = 16384): ExpandedImgSpecs {
-      return this.img.getImageSpecsWorkup(buffer, size);
+    public getImageSpecsWorkup<T = unknown>(buffer: Buffer, size = 16384) {
+      return this.img.getImageSpecsWorkup<T>(buffer, size);
     }
 
     // helper to set a shared extractor (nice for init/bootstrap)
