@@ -9,9 +9,7 @@ import { PdfMapperWorkup } from "./mapper/index.ts";
 export class ObjectMapServiceAlt extends PdfMapperWorkup {
   private enumerableObjIdsRe = /\/\w+\d+\s((\d+\s*\d+)\s[A-Z])/g;
   private enumerableAnnotIdsRe = /(:?([\s\S]*?)0\s\w)/g;
-  private annotsCheckRe = /(\/Annots)/g;
   private annotsMatchRe = /(?:\/Annots\s*\[([\s\S]*?)\])/g;
-  private imgCheckRe = /(\/XObject)/g;
   private imgMatchRe = /\/XObject\s*<<([\s\S]*?)>>/g;
 
   public getPageMap(props: ObjOfArrsEntity) {
@@ -44,7 +42,7 @@ export class ObjectMapServiceAlt extends PdfMapperWorkup {
         imgs: Array.of<ImgsCache>()
       } satisfies PageWorkupAggProps;
 
-      if (this.imgCheckRe.test(obj)) {
+      if (/\/XObject/.test(obj)) {
         for (const s of obj.matchAll(this.imgMatchRe)) {
           const im0 = s?.[0],
             im1 = s?.[1];
@@ -69,62 +67,62 @@ export class ObjectMapServiceAlt extends PdfMapperWorkup {
         }
       }
 
-      if (this.annotsCheckRe.test(obj) && !obj.startsWith("<<")) {
+      if (/\/Annots/.test(obj) && !obj.startsWith("<<")) {
         for (const aa of obj.matchAll(this.annotsMatchRe)) {
           const aa0 = aa?.[0],
             aa1 = aa?.[1];
           if (aa0 && aa1) {
-            // one annot is simple to parse, multiple stack in the same arr
-            // handle all situations exhaustively -> [194 196 197 0 R]
-            for (const aId of aa1.matchAll(this.enumerableAnnotIdsRe)) {
-              const an0 = aId?.[0],
-                an1 = aId?.[1],
-                an2 = aId?.[2];
-              if (an0 && an1 && an2) {
-                for (const anId of an2.matchAll(/(\d+\s[0])\s[R]/g)) {
-                  const anId0 = anId?.[0],
-                    anId1 = anId?.[1];
-                  if (anId0 && anId1) {
-                    const annotId = anId1.trim();
-                    const annotRec = annotMap.get(annotId);
-                    if (annotRec?.href && !rec.annotIds.has(annotRec.id)) {
-                      rec.annotIds.add(annotId);
-                      rec.annotCounts += 1;
-                      rec.annots.push(annotRec);
-                    }
-                  }
+            for (const anId of aa1.matchAll(/(\d+)\s+0\s+R/g)) {
+              const anId0 = anId?.[0],
+                anId1 = anId?.[1];
+              if (anId0 && anId1) {
+                const objNum = anId1.trim();
+                // try direct key match first, then match by object number
+                const annotRec =
+                  annotMap.get(`${objNum} 0`) ??
+                  Array.from(annotMap.values()).find(
+                    a => a.id.startsWith(objNum + " ")
+                  );
+                if (annotRec?.href && !rec.annotIds.has(annotRec.id)) {
+                  rec.annotIds.add(annotRec.id);
+                  annotIdSetTrack.add(annotRec.id);
+                  rec.annotCounts += 1;
+                  rec.annots.push(annotRec);
                 }
               }
             }
           }
         }
       }
-      if (props.aObjArr.length < 1 || annotMap.size > 0) {
-        for (const [id, annot] of Array.from(annotMap)) {
-          annotIdSetTrack.add(id);
-          if (!annotIdSetTrack.has(id)) {
-            rec.annotIds.add(id);
-            rec.annots.push(annot);
-          }
 
-          //   if (v && v.length > 0) {
-          //   for (const annot of v) {
-          //     const a = annotMap.get(annot);
-          //     if (a?.href) {
-          //       rec.annotIds.add(a.id);
-          //       rec.annotCounts += 1;
-          //       rec.annots.push(a);
-          //     }
-          //   }
-          // }
+      // fallback: use annotIdsMap to associate annotations with pages
+      if (rec.annots.length === 0 && annotMap.size > 0) {
+        const pageAnnotIds = props.annotIdsMap.get(o - 1);
+        if (pageAnnotIds) {
+          for (const refId of pageAnnotIds) {
+            const objNum = refId.split(/\s+/)[0];
+            if (!objNum) continue;
+            const annotRec =
+              annotMap.get(refId) ??
+              annotMap.get(`${refId} obj`) ??
+              Array.from(annotMap.values()).find(
+                a => a.id.startsWith(objNum + " ")
+              );
+            if (annotRec?.href && !rec.annotIds.has(annotRec.id)) {
+              rec.annotIds.add(annotRec.id);
+              annotIdSetTrack.add(annotRec.id);
+              rec.annotCounts += 1;
+              rec.annots.push(annotRec);
+            }
+          }
         }
       }
-      rec.annotCounts = annotIdSetTrack.size;
+
       m.set(id, rec);
     }
     const topLevelAgg = {
       totalImgs: 0,
-      totalAnnots: annotIdSetTrack.size,
+      totalAnnots: 0,
       annotPages: new Set<number>(),
       imgPages: new Set<number>(),
       totalPages: 0,

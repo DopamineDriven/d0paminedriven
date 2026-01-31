@@ -29,7 +29,17 @@ export class PdfXmpWorkup extends PdfWorkItUp {
   private xmpProducerRe =
     /(?:<\s*\S*:Producer>\s*([\s\S]*?)\s*<\/\s*\S*:Producer>)/g;
 
-  protected xmpWorkup(z: string, testRe: RegExp, matchAllRe: RegExp) {
+  /**
+   * capturing groups 2 through 8 return -> (2) YYYY (3) MM (4) DD (5) HH (6) MM (7) SS (8) TZ offset (eg, +00, -05)
+   */
+  private createDateDictExtensiveRe =
+    /(?:\/CreationDate\s*\(D:((\d\d\d\d){1}(\d\d){1}(\d\d){1}(\d\d){1}(\d\d){1}(\d\d){1}(\+\d\d){1}[\s\S]*?)\)\s*)/g;
+  private createDateDictRe = /(?:\/CreationDate\s*\(D:([\s\S]*?)\)\s*)/g;
+  private modifyDateDictRe = /(?:\/ModDate\s*\(D:([\s\S]*?)\)\s*)/g;
+  private producerDictRe = /(?:\/Producer\s*\(([\s\S]*?)\)\s*)/g;
+  private creatorDictRe = /(?:\/Creator\s*\(([\s\S]*?)\)\s*)/g;
+
+  protected regexIt(z: string, testRe: RegExp, matchAllRe: RegExp) {
     let target = "";
     if (testRe.test(z) && matchAllRe.global) {
       for (const i of z.matchAll(matchAllRe)) {
@@ -50,22 +60,49 @@ export class PdfXmpWorkup extends PdfWorkItUp {
       const o = info?.[1];
       if (z && o) {
         xmp = {
-          createDate: this.xmpWorkup(
-            z,
-            /(?:CreateDate)/g,
-            this.xmpCreateDateRe
-          ),
-          modifyDate: this.xmpWorkup(
-            z,
-            /(?:ModifyDate)/g,
-            this.xmpModifyDateRe
-          ),
-          producer: this.xmpWorkup(z, /(?:Producer)/g, this.xmpProducerRe),
-          creatorTool: this.xmpWorkup(
+          createDate: this.regexIt(z, /(?:CreateDate)/g, this.xmpCreateDateRe),
+          modifyDate: this.regexIt(z, /(?:ModifyDate)/g, this.xmpModifyDateRe),
+          producer: this.regexIt(z, /(?:Producer)/g, this.xmpProducerRe),
+          creatorTool: this.regexIt(
             z,
             /(?:CreatorTool)/g,
             this.xmpCreatorToolRe
           )
+        };
+      }
+    }
+    if (typeof xmp === "undefined") {
+      const createDateFallback = this.regexIt(
+        fullText,
+        /(?:CreationDate)/g,
+        this.createDateDictRe
+      );
+      const modDateFallbackRe = this.regexIt(
+        fullText,
+        /(?:ModDate)/g,
+        this.modifyDateDictRe
+      );
+      const creatorFallback = this.regexIt(
+        fullText,
+        /(?:Creator)/g,
+        this.creatorDictRe
+      );
+      const producerFallback = this.regexIt(
+        fullText,
+        /(?:Producer)/g,
+        this.producerDictRe
+      );
+      if (
+        createDateFallback.length > 0 &&
+        modDateFallbackRe.length > 0 &&
+        creatorFallback.length > 0 &&
+        producerFallback.length > 0
+      ) {
+        xmp = {
+          createDate: createDateFallback,
+          creatorTool: creatorFallback,
+          modifyDate: modDateFallbackRe,
+          producer: producerFallback
         };
       }
     }

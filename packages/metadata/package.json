@@ -93,7 +93,8 @@
     "types": "tsc --emitDeclarationOnly",
     "pretest":"tsx src/test/output-local.ts",
     "test": "tsx src/test/index.test.ts",
-    "test:pdf": "tsx src/test/pdf-page-count.test.ts"
+    "test:pdf": "tsx src/test/pdf-page-count.test.ts",
+    "test:pdfimg": "tsx src/test/claude-test-pdf.ts"
   },
   "dependencies": {
     "fflate": "^0.8.2"

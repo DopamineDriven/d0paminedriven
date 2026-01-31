@@ -7,6 +7,10 @@ export class PdfMapperWorkup extends PdfPagesWorkup {
   private linearizedParseRe =
     /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\r?\n|\s*>>stream|>>\s*endobj)/g;
 
+  private nonlinearized1Dot4Re= /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\s*stream|\s*endobj)/g ;
+private examineRe=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\t?\r?\n\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g;
+
+private examineRe2=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S\t?\r?\n?\f?]*?)(?:\t?\r?\n?\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g;
   private annots =
     /(\d+\s+\d+\s+?)+?<<(?:(?=\/Action)|(?=\/A))*[\s\S]*?([\s\S]*?)(?:\r?\n|\s*>>stream|>>\s*endobj)/g;
   public mapIt(buff: Buffer | Uint8Array) {
@@ -73,7 +77,7 @@ export class PdfMapperWorkup extends PdfPagesWorkup {
     //  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\t?\r?\n\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g
     // DO NOT DELETE
     //  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S\t?\r?\n?\f?]*?)(?:\t?\r?\n\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g
-    for (const d of fullText.matchAll(this.psObjRegex)) {
+    for (const d of fullText.matchAll(this.nonlinearized1Dot4Re)) {
       const d0 = d?.[0],
         d1 = d?.[1],
         d2 = d?.[2];

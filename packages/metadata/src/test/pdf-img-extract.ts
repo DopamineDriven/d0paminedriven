@@ -1,5 +1,5 @@
 import { Fs } from "@d0paminedriven/fs";
-import { ObjectMapServiceAlt as DocImgWorkupService } from "@/docs/pdf/alt.ts";
+import { ObjectMapService as DocImgWorkupService } from "@/docs/pdf/obj-map.ts";
 
 const fs = new Fs(process.cwd());
 const dir = "src/test/__benchmark__";
@@ -245,7 +245,7 @@ const examineArr = Array.of<string>();
 for (const d of docImgWorkup
   .fullText(readPdf)
   .matchAll(
-    /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S\t?\r?\n?\f?]*?)(?:\t?\r?\n\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g
+    /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S\t?\r?\n?\f?]*?)(?:\t?\r?\n?\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g
   )) {
   const d0 = d?.[0],
     d1 = d?.[1],
@@ -262,7 +262,7 @@ for (const d of docImgWorkup
     examineArr.push(tagged);
   }
 }
-fs.withWs(`src/test/pdf-data/out/${name}/ps.txt`, extensiveArr.join(`\n`));
+fs.withWs(`src/test/pdf-inspect/out/${name}/ps.txt`, extensiveArr.join(`\n`));
 fs.withWs(
   `src/test/pdf-data/out/${name}/metadata.txt`,
   arrmeta.creationMeta.join(`\n`)

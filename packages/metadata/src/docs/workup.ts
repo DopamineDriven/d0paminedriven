@@ -1,3 +1,4 @@
+import { inflateSync } from "node:zlib";
 import { PdfWorkupService } from "@/docs/pdf-workup.ts";
 
 export class DocWorkupService extends PdfWorkupService {
@@ -119,6 +120,109 @@ export class DocWorkupService extends PdfWorkupService {
     return this.countPDFPagesWithConfidence(buffer).pageCount;
   }
 
+  protected decompressStream(
+    buffer: Buffer,
+    start: number,
+    end: number
+  ): string | null {
+    try {
+      const compressed = buffer.subarray(start, end);
+      return inflateSync(compressed).toString("latin1");
+    } catch {
+      return null;
+    }
+  }
+
+  protected extractPDFTextRobust(buffer: Buffer, maxLength = 500) {
+    const raw = buffer.toString("latin1");
+    const textBlocks: string[] = [];
+
+    // Find all content streams
+    const streamPattern =
+      /(\d+)\s+\d+\s+obj[^>]*\/Filter\s*\/FlateDecode[^>]*\/Length\s+(\d+)[^>]*>>[\r\n]*stream[\r\n]+([\s\S]*?)[\r\n]+endstream/g;
+
+    let match: RegExpExecArray | null;
+    while ((match = streamPattern.exec(raw)) !== null) {
+      if (!match[2]) continue;
+      const length = parseInt(match[2], 10);
+      const _streamStart = match.index + match[0].indexOf("stream") + 7; // after "stream\n"
+
+      // Find actual byte position for binary-safe extraction
+      const streamStartBytes = buffer.indexOf("stream", match.index) + 7;
+      const decompressed = this.decompressStream(
+        buffer,
+        streamStartBytes,
+        streamStartBytes + length
+      );
+
+      if (decompressed) {
+        this.extractTextFromContent(decompressed, textBlocks, maxLength);
+      }
+
+      if (textBlocks.join(" ").length > maxLength) break;
+    }
+
+    // Also try uncompressed streams (your existing approach)
+    if (textBlocks.length === 0) {
+      return this.extractPDFText(buffer, maxLength);
+    }
+
+    return this.finalizeTextBlocks(textBlocks, maxLength);
+  }
+
+  protected extractTextFromContent(
+    content: string,
+    blocks: string[],
+    maxLength: number
+  ): void {
+    for (const m of content.matchAll(/BT([\s\S]*?)ET/g)) {
+      const body = m[1];
+      if (!body) continue;
+
+      // Tj with () strings
+      for (const tj of body.matchAll(/\(([^)]*)\)\s*Tj/g)) {
+        if (tj[1]) blocks.push(this.decodePdfString(tj[1]));
+        if (blocks.join(" ").length > maxLength) return;
+      }
+
+      // Tj with <hex>
+      for (const hex of body.matchAll(/<([0-9A-Fa-f]+)>\s*Tj/g)) {
+        if (hex[1]) blocks.push(this.decodeHexString(hex[1]));
+        if (blocks.join(" ").length > maxLength) return;
+      }
+
+      // TJ arrays
+      for (const tja of body.matchAll(/\[([\s\S]*?)\]\s*TJ/gi)) {
+        const arr = tja[1];
+        if (!arr) continue;
+
+        for (const str of arr.matchAll(/\(([^)]*)\)/g)) {
+          if (str[1]) blocks.push(this.decodePdfString(str[1]));
+        }
+        for (const hx of arr.matchAll(/<([0-9A-Fa-f]+)>/g)) {
+          if (hx[1]) blocks.push(this.decodeHexString(hx[1]));
+        }
+        if (blocks.join(" ").length > maxLength) return;
+      }
+    }
+  }
+
+  protected finalizeTextBlocks(
+    blocks: string[],
+    maxLength: number
+  ): string | null {
+    if (!blocks.length) return null;
+
+    let result = blocks
+      .join(" ")
+      .replace(/[\r\n]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!result) return null;
+    if (result.length > maxLength) result = result.slice(0, maxLength) + "…";
+    return result;
+  }
   protected extractPDFText(buffer: Buffer, maxLength = 500): string | null {
     try {
       const text = buffer.toString("latin1");
@@ -227,6 +331,7 @@ export class DocWorkupService extends PdfWorkupService {
     // Return ISO 8601 format
     return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}T${hh.padStart(2, "0")}:${mi.padStart(2, "0")}:${ss.padStart(2, "0")}${tz}`;
   }
+
   protected getPdfInfoString(text: string, key: string) {
     // Parenthesis format
     let m = text.match(new RegExp(`\/${key}\\s*\(([^)]*)\)`));
