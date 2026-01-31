@@ -11,7 +11,8 @@ export default [
       "@typescript-eslint/prefer-regexp-exec": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "no-useless-escape": "off",
-      "prefer-const": "off"
+      "prefer-const": "off",
+      "@typescript-eslint/no-namespace": "off"
     },
     ignores: ["dist/**"]
   }

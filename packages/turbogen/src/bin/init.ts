@@ -47,10 +47,11 @@ if (process.argv[2] === "init") {
   const handler = new ConfigHandler(process.cwd());
   Promise.all([
     exeInquirer().then(async v => {
-      const { eslint, jest, prettier, root, typescript, ui, web } =
-        scaffoldService(process.cwd(), v);
+      const { eslint, prettier, root, typescript, ui, web } = scaffoldService(
+        v,
+        handler
+      );
       eslint.exeEslint();
-      jest.exeJestPresets();
       prettier.exePrettier();
       typescript.exeTs();
       root.exeRoot();
@@ -67,7 +68,7 @@ if (process.argv[2] === "init") {
       } catch (err) {
         console.error(err);
       } finally {
-        handler.executeCommand({command: "echo 'testing'"})
+        handler.executeCommand({ command: "echo 'testing'" });
         console.log(
           "\nInstalling dependencies... (this may take a few seconds)\n"
         );

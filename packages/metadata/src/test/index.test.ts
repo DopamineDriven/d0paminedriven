@@ -38,3 +38,6 @@ describe("buffer size equality", async () => {
     );
   });
 });
+describe("should not return any nested compression content", ()=>{
+  
+})

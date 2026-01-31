@@ -2,7 +2,13 @@ import { createReadStream } from "node:fs";
 import { relative } from "node:path";
 import { Readable } from "node:stream";
 import { inflateSync } from "fflate";
-import type { DocSpecs, ZipEntry } from "@/types/index.ts";
+import type {
+  DocSpecs,
+  PdfImageAnalysisMetadata,
+  ZipEntry
+} from "@/types/index.ts";
+import { extMimeMap, mimeToExt } from "@/mime/index.ts";
+
 
 export class DocMetadataExtractor {
   // Safer decoding with fallback paths
@@ -16,6 +22,290 @@ export class DocMetadataExtractor {
         .map(b => String.fromCharCode(b))
         .join("");
     }
+  }
+
+  /**
+   * Detect XObject image references in the PDF
+   * Images are declared as XObjects with /Subtype /Image
+   */
+  private detectXObjectImages(text: string): {
+    count: number;
+    types: (
+      | "jpeg"
+      | "jpeg2000"
+      | "png-like"
+      | "ccitt-fax"
+      | "jbig2"
+      | "inline"
+    )[];
+  } {
+    const types = Array.of<
+      "jpeg" | "jpeg2000" | "png-like" | "ccitt-fax" | "jbig2" | "inline"
+    >();
+
+    // Find all XObject Image declarations
+    // Pattern: obj ... /Type /XObject /Subtype /Image ... /Filter /SomeFilter
+    const imageObjPattern =
+      /\d+\s+\d+\s+obj[\s\S]*?\/Subtype\s*\/Image[\s\S]*?endobj/g;
+    const imageMatches = text.match(imageObjPattern) ?? [];
+
+    // Also catch the reverse order: /Subtype before /Type
+    const reversePattern =
+      /\d+\s+\d+\s+obj[\s\S]*?\/Type\s*\/XObject[\s\S]*?\/Subtype\s*\/Image[\s\S]*?endobj/g;
+    const reverseMatches = text.match(reversePattern) ?? [];
+
+    const allImageBlocks = [...new Set([...imageMatches, ...reverseMatches])];
+
+    for (const block of allImageBlocks) {
+      // Detect filter types to understand image encoding
+      if (
+        /\/Filter\s*\/DCTDecode/.test(block) ||
+        /\/Filter\s*\[.*?\/DCTDecode/.test(block)
+      ) {
+        types.push("jpeg");
+      }
+      if (
+        /\/Filter\s*\/JPXDecode/.test(block) ||
+        /\/Filter\s*\[.*?\/JPXDecode/.test(block)
+      ) {
+        types.push("jpeg2000");
+      }
+      if (
+        /\/Filter\s*\/CCITTFaxDecode/.test(block) ||
+        /\/Filter\s*\[.*?\/CCITTFaxDecode/.test(block)
+      ) {
+        types.push("ccitt-fax");
+      }
+      if (
+        /\/Filter\s*\/JBIG2Decode/.test(block) ||
+        /\/Filter\s*\[.*?\/JBIG2Decode/.test(block)
+      ) {
+        types.push("jbig2");
+      }
+      // FlateDecode with ColorSpace often indicates PNG-like raster
+      if (
+        /\/Filter\s*\/FlateDecode/.test(block) &&
+        /\/ColorSpace/.test(block)
+      ) {
+        types.push("png-like");
+      }
+    }
+
+    // Count unique image objects by their object numbers
+    const objNumbers = new Set<string>();
+
+    const objNumPattern = /(\d+)\s+\d+\s+obj[\s\S]*?\/Subtype\s*\/Image/g;
+    let match: RegExpExecArray | null;
+    while ((match = objNumPattern.exec(text)) !== null) {
+      if (match?.[1]) objNumbers.add(match[1]);
+    }
+
+    return { count: objNumbers.size, types: Array.from(types) };
+  }
+
+  /**
+   * Detect inline images (BI ... ID ... EI blocks)
+   * These are embedded directly in content streams, common in older PDFs
+   */
+  private detectInlineImages(text: string) {
+    // Inline image format: BI <params> ID <data> EI
+    // The BI must be preceded by whitespace and followed by image params
+    const inlinePattern = /\sBI\s[\s\S]*?\sID[\s\S]*?\sEI\s/g;
+    const matches = text.match(inlinePattern);
+    return matches?.length ?? 0;
+  }
+
+  /**
+   * Check for vector graphics (Form XObjects, paths, etc.)
+   * These don't need multimodal but indicate visual complexity
+   */
+  private detectVectorGraphics(text: string) {
+    // Form XObjects (reusable graphics)
+    const hasFormXObjects = /\/Subtype\s*\/Form/.test(text);
+
+    // Complex path operations (bezier curves, fills)
+    // c = curveto, re = rectangle, f/F = fill, S = stroke
+    const hasComplexPaths =
+      /\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+c/.test(
+        text
+      );
+
+    // Shading patterns (gradients)
+    const hasShading =
+      /\/ShadingType\s+\d/.test(text) || /\/Pattern/.test(text);
+
+    return hasFormXObjects || hasComplexPaths || hasShading;
+  }
+  private hasFaxEncoding(
+    types: (
+      | "jpeg"
+      | "jpeg2000"
+      | "png-like"
+      | "ccitt-fax"
+      | "jbig2"
+      | "inline"
+    )[]
+  ) {
+    for (const type of types) {
+      if (type === "ccitt-fax") return true;
+      if (type === "jbig2") return true;
+    }
+    return false;
+  }
+  /**
+   * Estimate if PDF is scanned (image-only with no real text layer)
+   */
+  private detectScannedPdf(
+    text: string,
+    imageAnalysis: {
+      count: number;
+      types: (
+        | "jpeg"
+        | "jpeg2000"
+        | "png-like"
+        | "ccitt-fax"
+        | "jbig2"
+        | "inline"
+      )[];
+    },
+    pageCount: number | null
+  ): boolean {
+    // Strong indicators of scanned content
+    const hasFaxEncoding = this.hasFaxEncoding(imageAnalysis.types);
+
+    // Check for text content
+    const textBlocks = text.match(/BT[\s\S]*?ET/g) ?? [];
+    const hasSubstantialText = textBlocks.length > 5;
+
+    // Check for ToUnicode mappings (indicates real text, not OCR'd)
+    const hasToUnicode = /\/ToUnicode/.test(text);
+
+    // Heuristic: if we have ~1 image per page and minimal text, likely scanned
+    const pages = pageCount ?? 1;
+    const imagesPerPage = imageAnalysis.count / pages;
+
+    if (hasFaxEncoding) return true;
+    if (imagesPerPage >= 0.8 && !hasSubstantialText && !hasToUnicode)
+      return true;
+
+    return false;
+  }
+
+  /**
+   * Analyze images in compressed streams (for Acrobat-optimized PDFs)
+   * Reuses your existing decompression infrastructure
+   */
+  private detectImagesInCompressedStreams(buffer: Buffer) {
+    const types = new Set<
+      "jpeg" | "jpeg2000" | "png-like" | "ccitt-fax" | "jbig2" | "inline"
+    >();
+    let additionalImages = 0;
+
+    try {
+      // Reuse your existing decompression
+      const text = buffer.toString("latin1");
+      const objStreams = this.parseObjectStreams(buffer, text);
+      const flateStreams = this.decompressFlateStreams(buffer);
+
+      for (const content of [...objStreams, ...flateStreams]) {
+        // Look for image declarations in decompressed content
+        const imageRefs = content.match(/\/Subtype\s*\/Image/g);
+        if (imageRefs) {
+          additionalImages += imageRefs.length;
+
+          // Check filter types
+          if (/\/DCTDecode/.test(content)) types.add("jpeg");
+          if (/\/JPXDecode/.test(content)) types.add("jpeg2000");
+          if (/\/CCITTFaxDecode/.test(content)) types.add("ccitt-fax");
+          if (/\/JBIG2Decode/.test(content)) types.add("jbig2");
+          if (/\/FlateDecode[\s\S]{0,200}\/ColorSpace/.test(content))
+            types.add("png-like");
+        }
+      }
+    } catch {
+      // Decompression failed
+    }
+
+    return { additionalImages, types };
+  }
+
+  public analyzePdfImages(buffer: Buffer, pageCount: number | null) {
+    const text = buffer.toString("latin1");
+
+    // Detect images from uncompressed content
+    const xobjectAnalysis = this.detectXObjectImages(text);
+    const inlineCount = this.detectInlineImages(text);
+
+    // Check compressed streams for additional images
+    const compressedAnalysis = this.detectImagesInCompressedStreams(buffer);
+
+    const xobjSet = new Set([...xobjectAnalysis.types]);
+
+    // Merge results
+    const allTypes = compressedAnalysis.types.union(xobjSet);
+
+    if (inlineCount > 0) {
+      allTypes.add("inline");
+    }
+
+    const totalImages =
+      xobjectAnalysis.count + inlineCount + compressedAnalysis.additionalImages;
+    const hasImages = totalImages > 0;
+    const hasVectorGraphics = this.detectVectorGraphics(text);
+
+    // Determine if likely scanned
+    const isLikelyScanned = this.detectScannedPdf(
+      text,
+      { count: totalImages, types: Array.from(allTypes) },
+      pageCount
+    );
+
+    // Calculate coverage estimate
+    const pages = pageCount ?? 1;
+    const imagesPerPage = totalImages / pages;
+
+    let estimatedImageCoverage:
+      | "none"
+      | "moderate"
+      | "minimal"
+      | "heavy"
+      | null = null;
+    if (totalImages === 0) {
+      estimatedImageCoverage = "none";
+    } else if (imagesPerPage < 0.5) {
+      estimatedImageCoverage = "minimal";
+    } else if (imagesPerPage < 2) {
+      estimatedImageCoverage = "moderate";
+    } else {
+      estimatedImageCoverage = "heavy";
+    }
+
+    // Make recommendation
+    let recommendation: "multimodal" | "text-only" | null = null;
+
+    if (isLikelyScanned) {
+      // Scanned PDFs absolutely need multimodal
+      recommendation = "multimodal";
+    } else if (estimatedImageCoverage === "none" && !hasVectorGraphics) {
+      // Pure text PDF, text-only is fine and cheaper
+      recommendation = "text-only";
+    } else if (estimatedImageCoverage === "minimal" && !isLikelyScanned) {
+      // Few images, text extraction probably captures the important stuff
+      recommendation = "text-only";
+    } else {
+      // Moderate to heavy images, or has charts/diagrams
+      recommendation = "multimodal";
+    }
+
+    return {
+      hasImages,
+      imageCount: totalImages,
+      estimatedImageCoverage,
+      imageTypes: allTypes,
+      isLikelyScanned,
+      hasVectorGraphics,
+      recommendation
+    };
   }
 
   protected detectTextEncodingPrefix(buffer: Uint8Array): {
@@ -921,7 +1211,14 @@ export class DocMetadataExtractor {
     return { createdDate, modifiedDate };
   }
 
-  public parsePdf(buffer: Buffer, mime: string): DocSpecs {
+  private cleanPdfImgAnalysis(buffer: Buffer, pageCount: number | null) {
+    const { imageTypes, ...rest } = this.analyzePdfImages(buffer, pageCount);
+    return {
+      imageTypes: Array.from(imageTypes),
+      ...rest
+    } satisfies PdfImageAnalysisMetadata;
+  }
+  public parsePdf(buffer: Buffer, mime: "application/pdf") {
     // Use latin1 for stable byte->char mapping during regex scans
     const text = buffer.toString("latin1");
     const headerMatch = text.match(/^%PDF-([0-9.]+)/);
@@ -986,8 +1283,9 @@ export class DocMetadataExtractor {
       isLinearized,
       textPreview,
       createdDate,
-      modifiedDate
-    } satisfies DocSpecs;
+      modifiedDate,
+      metadata: this.cleanPdfImgAnalysis(buffer, pageCount)
+    } as DocSpecs<PdfImageAnalysisMetadata>;
   }
   public parseRtf(buffer: Buffer, mime: string): DocSpecs {
     const latin = buffer.toString("latin1");
@@ -1042,7 +1340,7 @@ export class DocMetadataExtractor {
       type: "DOCUMENT",
       format:
         ext === "md"
-          ? "markdown"
+          ? "md"
           : ext === "csv"
             ? "csv"
             : ext === "json"
@@ -1465,27 +1763,41 @@ export class DocMetadataExtractor {
     return await this.extractDocViaStream(stream, mime);
   }
 
+  // public getDocumentSpecsWorkup(
+  //   rawBuffer: Buffer<ArrayBufferLike>,
+  //   mime: "application/pdf",
+  //   filename?: string
+  // ): DocSpecs<PdfImageAnalysisMetadata>;
+
+public  getDocumentSpecsWorkup(buffer: Buffer<ArrayBufferLike>, mime: "application/pdf", fileName?: string): DocSpecs<PdfImageAnalysisMetadata>
+public  getDocumentSpecsWorkup(buffer: Buffer<ArrayBufferLike>, mime: string, fileName?: string): DocSpecs<unknown>
   public getDocumentSpecsWorkup(
     rawbuffer: Buffer<ArrayBufferLike>,
     mime: string,
     filename?: string
   ) {
     const buffer = rawbuffer;
-    const ext = this.getExtFromFilename(filename);
+    let ext = this.getExtFromFilename(filename);
 
     // PDF
-    if (
-      mime === "application/pdf" ||
-      (buffer?.length >= 5 && buffer.toString("latin1", 0, 5) === "%PDF-")
-    ) {
-      return this.parsePdf(buffer, mime);
-    }
+
+      if (mime === "application/pdf") {
+        ext="pdf";
+        return this.parsePdf(buffer, mime);
+      } else if (
+        buffer?.length >= 5 &&
+        buffer.toString("latin1", 0, 5) === "%PDF-"
+      ) {
+        return this.parsePdf(buffer, "application/pdf");
+      }
+
 
     // RTF
     if (
       mime === "application/rtf" ||
       (buffer?.length >= 5 && buffer.toString("latin1", 0, 5) === "{\\rtf")
     ) {
+      ext="rtf"
       return this.parseRtf(buffer, mime);
     }
 
@@ -1511,21 +1823,16 @@ export class DocMetadataExtractor {
               ? "xlsx"
               : undefined);
       if (kind) {
+        ext=kind;
         return this.parseOpenXml(buffer, mime, kind);
       }
     }
 
     // Plain text-ish and code files
     if (
-      mime.startsWith("text/") ||
-      [
-        "application/json",
-        "application/xml",
-        "application/javascript"
-      ].includes(mime) ||
-      (ext &&
-        ["txt", "md", "markdown", "csv", "json", "html", "xml"].includes(ext))
-    ) {
+      mime in mimeToExt) {
+        const m = mime as keyof typeof mimeToExt;
+         ext =  mimeToExt[m][0];
       return this.parsePlainText(buffer, mime, filename);
     }
 
@@ -1556,7 +1863,99 @@ export class DocMetadataExtractor {
       isLinearized: null,
       textPreview: null,
       createdDate: null,
-      modifiedDate: null
+      modifiedDate: null,
+      metadata: {}
     } satisfies DocSpecs;
   }
 }
+
+export type CommonApplicationMimeTypes =
+  | "application/pdf"
+  | "application/rtf"
+  | "application/json"
+  | "application/xml"
+  | "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  | "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  | "application/dash+xml"
+  | "application/epub+zip"
+  | "application/font-sfnt"
+  | "application/gzip"
+  | "application/java-archive"
+  | "application/jsonc"
+  | "application/jsonl"
+  | "application/json5"
+  | "application/ld+json"
+  | "application/manifest+json"
+  | "application/msword"
+  | "application/node"
+  | "application/octet-stream"
+  | "application/ogg"
+  | "application/sql"
+  | "application/text"
+  | "application/toml"
+  | "application/vnd.amazon.ebook"
+  | "application/vnd.apple.installer+xml"
+  | "application/vnd.apple.mpegurl"
+  | "application/vnd.apple.pkpass"
+  | "application/vnd.json5"
+  | "application/vnd.mozilla.xul+xml"
+  | "application/vnd.ms-excel"
+  | "application/vnd.ms-fontobject"
+  | "application/vnd.ms-powerpoint"
+  | "application/vnd.oasis.opendocument.presentation"
+  | "application/vnd.oasis.opendocument.spreadsheet"
+  | "application/vnd.oasis.opendocument.text"
+  | "application/vnd.rar"
+  | "application/vnd.visio"
+  | "application/wasm"
+  | "application/x-7z-compressed"
+  | "application/x-abiword"
+  | "application/x-bzip"
+  | "application/x-bzip2"
+  | "application/x-cdf"
+  | "application/x-csh"
+  | "application/x-freearc"
+  | "application/x-gzip"
+  | "application/x-httpd-php"
+  | "application/x-mdx"
+  | "application/x-ndjson"
+  | "application/x-python-code"
+  | "application/x-sh"
+  | "application/x-tar"
+  | "application/x-zip-compressed"
+  | "application/xhtml+xml"
+  | "application/yaml"
+  | "application/zip"
+  | "text/css"
+  | "text/csv"
+  | "text/event-stream"
+  | "text/html"
+  | "text/javascript"
+  | "text/markdown"
+  | "text/plain"
+  | "text/rust"
+  | "text/typescript"
+  | "text/vtt"
+  | "text/x-c"
+  | "text/x-c++"
+  | "text/x-csharp"
+  | "text/x-go"
+  | "text/x-java"
+  | "text/x-jsonl"
+  | "text/x-php"
+  | "text/x-python"
+  | "text/x-ruby"
+  | "text/x-script.python"
+  | "text/x-tex"
+  | "text/xml";
+
+// type UIO = keyof typeof mimeToExt;
+
+// type Filter<T> = T extends `text/${infer U}` ? `text/${U}` : never;
+
+// type MMMM = Filter<UIO>;
+
+// const OOOOOOOREAILY = (props: MMMM[]) => {
+//   return [...props] as const;
+// };

@@ -1,3 +1,4 @@
+import { HelperService } from "@/helpers/index.ts";
 import type { XOR } from "@/types/utils.ts";
 
 export const extMimeMap = {
@@ -318,7 +319,7 @@ export type ParsedUrlInfo = {
   hash: string;
 };
 
-export class MimeWorkupService {
+export class MimeWorkupService extends HelperService {
   private URL_REGEX =
     /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
   public parseUrl(url: string) {

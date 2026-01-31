@@ -1,8 +1,17 @@
+# TODO
+
+START WITH GEMINI-PT-III --target 33 in the test file
+
+THE DATA IS THERE -- UNFUCK THE PDF PARSING ESTUPIDO
+
+https://claude.ai/chat/adbc7f8c-c6a9-48e0-a901-fcd732c463eb
+
+
 # @d0paminedriven/metadata
 
 1. **`Extract`** - Full-featured Remote URL/Buffer extractor with network capabilities (Node.js/Server-side first) &rarr; isomorphic by design (edge cases being handled as they emerge)
 2. **`ExtractClient`** - Client-side extractor for synchronous buffer processing (Browser-friendly) &rarr; all the same metadata with no remote fetching capabilites
-
+🌚🥑🌝 
 Lightweight, zero‑native metadata extraction for images and documents. Designed to be fast, safe, and “header‑first” so you can classify and preview files without downloading entire objects.
 
 - Minimal bytes fetched (range requests, idle and deadline guards)

@@ -134,8 +134,8 @@ build_targeted() {
         "@d0paminedriven/iso-3166-1"
         "@d0paminedriven/metadata"
         "@d0paminedriven/motion"
-        "@d0paminedriven/redis-utils"
         "@d0paminedriven/turbogen"
+        "@d0paminedriven/type-utils"
         "@d0paminedriven/types"
         "@d0paminedriven/fs"
         "@d0paminedriven/ui"
@@ -264,7 +264,7 @@ main() {
             if [[ -n "${2:-}" ]]; then
                 build_by_pattern "$2"
             else
-                error "Please provide a pattern to build (e.g., ./manage.sh build encryption)"
+                error "Please provide a pattern to build (e.g., ./manage.sh build fs)"
                 exit 1
             fi
             ;;
@@ -272,7 +272,7 @@ main() {
             if [[ -n "${2:-}" ]]; then
                 run_by_pattern "$2"
             else
-                error "Please provide a pattern to run (e.g., ./manage.sh run ws-server)"
+                error "Please provide a pattern to run (e.g., ./manage.sh run web)"
                 exit 1
             fi
             ;;
@@ -297,7 +297,7 @@ Examples:
     $0 clean:house              # Full clean and rebuild
     $0 build:targeted           # Build core packages
     $0 clean ui                 # Clean packages with 'ui' in name
-    $0 build encryption         # Build packages with 'encryption' in name
+    $0 build types              # Build packages with 'types' in name
     $0 list                     # Show all packages
 
 Environment:

@@ -1,12 +1,11 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
-
-export class PrettierScaffolder extends ConfigHandler {
+/* eslint-disable @typescript-eslint/await-thenable */
+export class PrettierScaffolder {
   constructor(
-    public override cwd: string,
-    public baseProps: PromptPropsBase
+    public baseProps: PromptPropsBase,
+        protected configHandler: ConfigHandler
   ) {
-    super((cwd ??= process.cwd()));
   }
 
   private get workspace() {
@@ -44,7 +43,7 @@ const config = {
     "decorators-legacy",
     "importAttributes"
   ],
-  importOrderTypeScriptVersion: "5.8.3",
+  importOrderTypeScriptVersion: "5.9.3",
   semi: true,
   singleQuote: false,
   trailingComma: "none",
@@ -71,7 +70,7 @@ export default config;
   }
 
   private get devDeps() {
-    return ["typescript"] as const;
+    return ["@typescript/native-preview","typescript"] as const;
   }
 
   private get localDeps() {
@@ -112,11 +111,11 @@ export default config;
     const T extends ReturnType<typeof this.prettierTarget>,
     const V extends string
   >(target: T, template: V) {
-    return this.withWs(target, template);
+    return this.configHandler.withWs(target, template);
   }
 
   public async exePrettier() {
-    const pkgJson = await this.resolveAllDepsPrettier(
+    const pkgJson = await this.configHandler.resolveAllDepsPrettier(
       this.deps,
       this.devDeps,
       this.localDeps,

@@ -15,26 +15,27 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@eslint/compat": "^2.0.0",
-    "@eslint/js": "^9.39.1",
-    "@next/eslint-plugin-next": "^16.0.7",
-    "eslint-config-turbo": "^2.6.3",
+    "@eslint/compat": "^2.0.1",
+    "@eslint/js": "^9.39.2",
+    "@next/eslint-plugin-next": "^16.1.6",
+    "eslint-config-turbo": "^2.7.6",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-compiler": "19.1.0-rc.2",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-turbo": "^2.6.3",
-    "jiti": "^2.6.1",
-    "typescript-eslint": "^8.48.1"
+    "eslint-plugin-turbo": "^2.7.6",
+    "jiti": "catalog:jiti",
+    "typescript-eslint": "catalog:tseslint"
   },
   "devDependencies": {
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@typescript/native-preview": "7.0.0-dev.20251206.1",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@typescript/native-preview": "catalog:tsgo",
+    "@types/node": "catalog:node",
+    "eslint": "catalog:eslint",
+    "prettier": "catalog:prettier",
+    "typescript": "catalog:ts"
   },
   "prettier": "@d0paminedriven/prettier-config"
 }

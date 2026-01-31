@@ -1,13 +1,12 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
-export class EslintScaffolder extends ConfigHandler {
+/* eslint-disable @typescript-eslint/await-thenable */
+export class EslintScaffolder {
   constructor(
-    public override cwd: string,
-    public baseProps: PromptPropsBase
-  ) {
-    super((cwd ??= process.cwd()));
-  }
+    public baseProps: PromptPropsBase,
+    protected configHandler: ConfigHandler
+  ) {}
 
   private get workspace() {
     return this.baseProps.workspace;
@@ -19,7 +18,13 @@ export class EslintScaffolder extends ConfigHandler {
     ] as const;
   }
   private get devDeps() {
-    return ["eslint", "prettier", "typescript"] as const;
+    return [
+      "@types/node",
+      "@typescript/native-preview",
+      "eslint",
+      "prettier",
+      "typescript"
+    ] as const;
   }
 
   private get deps() {
@@ -50,7 +55,7 @@ import turboPlugin from "eslint-plugin-turbo";
 import tseslint from "typescript-eslint";
 import { includeIgnoreFile } from "@eslint/compat";
 
-const project = relative(process.cwd(), "tsconfig.json");
+const _project = relative(process.cwd(), "tsconfig.json");
 
 export default tseslint.config(
   includeIgnoreFile(join(import.meta.dirname, "../../.gitignore")),
@@ -107,7 +112,7 @@ export default tseslint.config(
   },
   {
     linterOptions: { reportUnusedDisableDirectives: true },
-    languageOptions: { parserOptions: { project } }
+    languageOptions: { parserOptions: { project: true } }
   }
 );
 ` as const;
@@ -259,11 +264,11 @@ declare module "eslint-plugin-turbo" {
     const T extends ReturnType<typeof this.eslintTarget>,
     const V extends string
   >(target: T, template: V) {
-    return this.withWs(target, template);
+    return this.configHandler.withWs(target, template);
   }
 
   public async exeEslint() {
-    const pkgJson = await this.resolveAllDepsEslint(
+    const pkgJson = await this.configHandler.resolveAllDepsEslint(
       this.deps,
       this.devDeps,
       this.localDeps,

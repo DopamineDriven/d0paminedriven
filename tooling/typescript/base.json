@@ -8,7 +8,18 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "isolatedModules": true,
-    "lib": ["ES2024", "ScriptHost"],
+    "lib": [
+      "ES2024",
+      "ScriptHost",
+      "ESNext",
+      "ES2018.AsyncGenerator",
+      "ES2024.Collection",
+      "ES2024.Object",
+      "ESNext.Iterator",
+      "ESNext.AsyncIterable",
+      "ESNext.Collection",
+      "ES2018.AsyncIterable"
+    ],
     "module": "Preserve",
     "moduleDetection": "auto",
     "moduleResolution": "Bundler",
@@ -16,10 +27,12 @@
     "noUncheckedIndexedAccess": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
+    "pretty": true,
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "ES2022"
+    "useUnknownInCatchVariables": true,
+    "target": "esnext"
   },
   "exclude": ["node_modules", "build", "dist", ".next"]
 }

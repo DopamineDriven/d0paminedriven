@@ -1,20 +1,21 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
-export class RootScaffolder extends ConfigHandler {
+/* eslint-disable @typescript-eslint/await-thenable */
+export class RootScaffolder {
   constructor(
-    public override cwd: string,
-    public baseProps: PromptPropsBase
-  ) {
-    super((cwd ??= process.cwd()));
-  }
+    public baseProps: PromptPropsBase,
+    protected configHandler: ConfigHandler
+  ) {}
 
   private get workspace() {
     return this.baseProps.workspace;
   }
 
   private resolveRootPkgJson() {
-    return JSON.parse(this.fileToBuffer("package.json").toString("utf-8")) as
+    return JSON.parse(
+      this.configHandler.fileToBuffer("package.json").toString("utf-8")
+    ) as
       | {
           repository?: string;
           [record: string]: unknown;
@@ -28,7 +29,7 @@ export class RootScaffolder extends ConfigHandler {
 
   private get readmeMinimal() {
     // prettier-ignore
-    return `### Welcome to the \`@${this.workspace}/*\` workspace 👋` as const
+    return `### Welcome to the \`@${this.workspace}/*\` workspace 🌚` as const
   }
 
   private pkgJsonRepo() {
@@ -54,6 +55,7 @@ export class RootScaffolder extends ConfigHandler {
       "@changesets/cli",
       "@d0paminedriven/turbogen",
       "@types/node",
+      "@typescript/native-preview",
       "dotenv",
       "eslint",
       "husky",
@@ -131,8 +133,15 @@ export default [
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[postcss]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "bradlc.vscode-tailwindcss"
   },
+  "[css]": {
+    "editor.defaultFormatter": "bradlc.vscode-tailwindcss"
+  },
+  "tailwindCSS.codeLens": true,
+  "tailwindCSS.lint.invalidApply": "warning",
+  "tailwindCSS.validate": true,
+  "tailwindCSS.colorDecorators": true,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -145,11 +154,15 @@ export default [
     "strings": "on"
   },
   "C_Cpp.dimInactiveRegions": false,
+  "css.lint.unknownAtRules": "ignore",
   "css.completion.completePropertyWithSemicolon": true,
   "css.format.enable": true,
   "css.format.newlineBetweenSelectors": true,
   "files.associations": {
-    "*.css": "tailwindcss"
+    "*.css": "tailwindcss",
+    "*.svg": "svg",
+    "*.ndjson": "ndjson",
+    "*.jsonl": "jsonl"
   },
   "css.hover.documentation": true,
   "css.hover.references": true,
@@ -208,6 +221,7 @@ export default [
   "typescript.locale": "en",
   "typescript.referencesCodeLens.enabled": true,
   "typescript.referencesCodeLens.showOnAllFunctions": true,
+  "typescript.experimental.useTsgo": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "yaml.hover": true,
   "yaml.validate": true,
@@ -262,8 +276,9 @@ max_line_length = 40
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
+      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
       "dependsOn": ["^build"],
-      "cache": true
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "test": {
       "outputs": ["coverage/**"],
@@ -273,8 +288,8 @@ max_line_length = 40
       "dependsOn": ["^build"]
     },
     "dev": {
-      "dependsOn": ["^build"],
       "cache": false,
+      "dependsOn": ["^build"],
       "persistent": true
     },
     "typecheck": {
@@ -358,6 +373,24 @@ pnpm-lock.yaml
 ` as const;
   }
 
+  private async fetchShellScript(workspace: string) {
+    return await fetch(
+      "https://raw.githubusercontent.com/DopamineDriven/wallet-ledger-demo/refs/heads/main/manage.sh",
+      {
+        method: "GET"
+      }
+    ).then(async v => {
+      const myT = await v.text();
+      const replaceIt = myT.replace(
+        /(build_order=\(([\s\S]*?)\))/g,
+        // prettier-ignore
+        `build_order=(
+      "@${workspace}/ui"
+    )`
+      );
+      return replaceIt;
+    });
+  }
   private getPaths() {
     return {
       editorConfig: `.editorconfig`,
@@ -368,6 +401,7 @@ pnpm-lock.yaml
       prettierignore: ".prettierignore",
       tsconfig: `tsconfig.json`,
       turboJson: `turbo.json`,
+      manage: "manage.sh",
       readme: "README.md",
       vscodeExtensions: ".vscode/extensions.json",
       vscodeSettings: `.vscode/settings.json`
@@ -384,24 +418,28 @@ pnpm-lock.yaml
     const T extends ReturnType<typeof this.rootTarget>,
     const V extends string
   >(target: T, template: V) {
-    return this.withWs(target, template);
+    return this.configHandler.withWs(target, template);
   }
 
   public async exeRoot() {
-    const pkgJson = await this.resolveAllDepsRoot(
-      this.devDeps,
-      this.localDeps,
-      this.workspace,
-      this.packageManager,
-      this.pkgJsonRepo()
-    );
+    const [pkgJson, manageScript] = await Promise.all([
+      this.configHandler.resolveAllDepsRoot(
+        this.devDeps,
+        this.localDeps,
+        this.workspace,
+        this.packageManager,
+        this.pkgJsonRepo()
+      ),
+      this.fetchShellScript(this.workspace)
+    ]);
     return Promise.all([
-      this.handleNpmrc(),
+      this.configHandler.handleNpmrc(),
       this.writeTarget(".prettierignore", this.prettierignoreTemplate),
       this.writeTarget(
         ".vscode/extensions.json",
         this.vscodeExtensionsTemplate
       ),
+      this.writeTarget("manage.sh", manageScript),
       this.writeTarget(".vscode/settings.json", this.vscodeSettingsTemplate),
       this.writeTarget(".editorconfig", this.editorConfigTemplate),
       this.writeTarget(".gitignore", this.gitignoreTemplate),

@@ -63,24 +63,6 @@ auto-install-peers=true
     }
   }
 
-  public hasNpmrcConfig() {
-    return this.exists(".gitignore");
-  }
-
-  public isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    if (typeof obj === "undefined" || obj == null || typeof obj !== "object")
-      return false;
-    const proto = Reflect.getPrototypeOf(obj);
-    // true for {} and Object.create(null)
-    return proto === Object.prototype || proto === null;
-  }
-
-  public parseFileFromPath(path: string) {
-    return /\//g.test(path) === true
-      ? path?.split(/([/])/gim)?.reverse()?.[0]
-      : path;
-  }
-
   public kebabToCapital<const V extends string>(kebab: V) {
     return kebab
       .split(/(-)/g)
@@ -93,15 +75,15 @@ auto-install-peers=true
     return this.kebabToCapital(value);
   }
 
-  public calSansFont() {
-    return this.fetchRemoteWriteLocalLargeFiles(
+  public async calSansFont() {
+    return await this.fetchRemoteWriteLocalLargeFiles(
       "https://raw.githubusercontent.com/DopamineDriven/portfolio-2025/refs/heads/master/apps/web/public/fonts/CalSans-SemiBold.woff2",
       "apps/web/public/fonts/CalSans-SemiBold"
     );
   }
 
-  public calSansRegularFont() {
-    return this.fetchRemoteWriteLocalLargeFiles(
+  public async calSansRegularFont() {
+    return await this.fetchRemoteWriteLocalLargeFiles(
       "https://raw.githubusercontent.com/DopamineDriven/portfolio-2025/refs/heads/master/apps/web/public/fonts/CalSans-Regular.woff2",
       "apps/web/public/fonts/CalSans-Regular"
     );
@@ -149,11 +131,13 @@ auto-install-peers=true
       license: "MIT",
       prettier: `@${workspace}/prettier-config`,
       scripts: {
-        dev: `next dev -p ${port} --turbo`,
+        dev: `next dev -p ${port}`,
         build: "next build",
         format: `prettier --write "**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx,graphql,gql}" --ignore-unknown --cache`,
         start: "next start",
-        lint: "eslint"
+        lint: "eslint",
+        typecheck: "tsgo --noEmit",
+        typegen: "next typegen"
       },
       dependencies: Object.fromEntries([...localEntries, ...entries]),
       devDependencies: Object.fromEntries([...localDevEntries, ...devEntries])
@@ -192,14 +176,13 @@ auto-install-peers=true
           lint: "turbo lint",
           prepare: "husky",
           typecheck: "turbo typecheck",
-          "clean:house":
-            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../../packages/ui && git clean -xdf dist .turbo node_modules && cd ../../apps/web && git clean -xdf node_modules .next .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install && pnpm build:targeted",
+          "clean:house": "bash ./manage.sh clean:house",
+          "postclean:house": `pnpm --filter=@${workspace}/web typegen`,
+          "list:packages": "bash ./manage.sh list",
           "generate:base64": "openssl rand -base64 64",
           "generate:hex": "openssl rand -hex 64",
           "npm:registry": "npm set registry https://registry.npmjs.org",
-          "run:web": `turbo dev --filter=@${workspace}/web`,
-          "latest:pnpm": "corepack use pnpm@latest",
-          "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
+          "run:web": `turbo dev --filter=@${workspace}/web`
         },
         devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
         prettier: `@${workspace}/prettier-config`,
@@ -226,20 +209,19 @@ auto-install-peers=true
           lint: "turbo lint",
           prepare: "husky",
           typecheck: "turbo typecheck",
-          "clean:house":
-            "cd tooling/eslint && git clean -xdf node_modules .turbo && cd ../prettier && git clean -xdf node_modules .turbo && cd ../typescript && git clean -xdf .turbo node_modules && cd ../jest-presets && git clean -xdf node_modules .turbo && cd ../../packages/ui && git clean -xdf dist .turbo node_modules && cd ../../apps/web && git clean -xdf node_modules .next .turbo && cd ../.. && git clean -xdf node_modules pnpm-lock.yaml && pnpm install && pnpm build:targeted",
+          "clean:house": "bash ./manage.sh clean:house",
+          "postclean:house": `pnpm --filter=@${workspace}/web typegen`,
+          "list:packages": "bash ./manage.sh list",
           "generate:base64": "openssl rand -base64 64",
           "generate:hex": "openssl rand -hex 64",
           "npm:registry": "npm set registry https://registry.npmjs.org",
-          "run:web": `turbo dev --filter=@${workspace}/web`,
-          "latest:pnpm": "corepack use pnpm@latest",
-          "update:pnpm": "curl -fsSL https://get.pnpm.io/install.sh | sh -"
+          "run:web": `turbo dev --filter=@${workspace}/web`
         },
         devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
         prettier: `@${workspace}/prettier-config`,
         engines: {
-          node: ">=20",
-          npm: ">=9",
+          node: ">=24",
+          npm: ">=10",
           pnpm: ">=9"
         }
       };
@@ -281,53 +263,6 @@ auto-install-peers=true
         format: "prettier --check . --ignore-path ../../.gitignore",
         typecheck: "tsc --noEmit"
       },
-      dependencies: Object.fromEntries(entries),
-      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
-      prettier: `@${workspace}/prettier-config`
-    };
-  }
-
-  public async resolveAllDepsJest(
-    deps: readonly string[],
-    devDeps: readonly string[],
-    peerDeps: readonly string[],
-    localDeps: readonly string[],
-    workspace = "placeholder"
-  ) {
-    const entries = await Promise.all(
-      deps.map(async pkg => {
-        const version = (await this.fetchLatestVersion(pkg)).version;
-        return [pkg, `^${version}`] as const;
-      })
-    );
-    const devEntries = await Promise.all(
-      devDeps.map(async pkg => {
-        const v = (await this.fetchLatestVersion(pkg)).version;
-        return [pkg, `^${v}`] as const;
-      })
-    );
-    const peerEntries = await Promise.all(
-      peerDeps.map(async pkg => {
-        const v = (await this.fetchLatestVersion(pkg)).version;
-        return [pkg, `>=${v}`] as const;
-      })
-    );
-    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
-    return {
-      name: `@${workspace}/jest-presets`,
-      version: "1.0.0",
-      private: true,
-      license: "MIT",
-      type: "module",
-      exports: {
-        "./browser": "./browser/jest-preset.mjs",
-        "./node": "./node/jest-preset.mjs"
-      },
-      files: ["browser/jest-preset.mjs", "node/jest-preset.mjs"],
-      scripts: {
-        clean: "git clean -xdf node_modules"
-      },
-      peerDependencies: Object.fromEntries(peerEntries),
       dependencies: Object.fromEntries(entries),
       devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
       prettier: `@${workspace}/prettier-config`
@@ -402,7 +337,7 @@ auto-install-peers=true
     return {
       name: `@${workspace}/ui`,
       version: "1.0.0",
-      description: "a react-ui component starter",
+      description: "convenient ui helpers",
       files: ["dist/**/*.{js,mjs,cjs,d.mts,d.ts,d.cts,css}"],
       license: "MIT",
       sideEffecs: ["**/*.css"],
@@ -411,20 +346,9 @@ auto-install-peers=true
         "*": {
           "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
           "globals.css": ["dist/globals.d.ts"],
-          icons: [
-            "dist/icons/arrow-right.d.ts",
-            "dist/icons/code.d.ts",
-            "dist/icons/github.d.ts",
-            "dist/icons/index.d.ts",
-            "dist/icons/layers.d.ts",
-            "dist/icons/moon.d.ts",
-            "dist/icons/package.d.ts",
-            "dist/icons/sun.d.ts",
-            "dist/icons/terminal.d.ts",
-            "dist/icons/zap.d.ts"
-          ],
-          lib: ["dist/lib/utils.d.ts"],
-          ui: ["dist/ui/button.d.ts"]
+          icons: ["dist/icons/index.d.ts", "dist/icons/*.d.ts"],
+          lib: ["dist/lib/*.d.ts"],
+          ui: ["dist/ui/*.d.ts"]
         }
       },
       publishConfig: {
@@ -433,20 +357,9 @@ auto-install-peers=true
           "*": {
             "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
             "globals.css": ["dist/globals.d.ts"],
-            icons: [
-              "dist/icons/arrow-right.d.ts",
-              "dist/icons/code.d.ts",
-              "dist/icons/github.d.ts",
-              "dist/icons/index.d.ts",
-              "dist/icons/layers.d.ts",
-              "dist/icons/moon.d.ts",
-              "dist/icons/package.d.ts",
-              "dist/icons/sun.d.ts",
-              "dist/icons/terminal.d.ts",
-              "dist/icons/zap.d.ts"
-            ],
-            lib: ["dist/lib/utils.d.ts"],
-            ui: ["dist/ui/button.d.ts"]
+            icons: ["dist/icons/index.d.ts", "dist/icons/*.d.ts"],
+            lib: ["dist/lib/*.d.ts"],
+            ui: ["dist/ui/*.d.ts"]
           }
         }
       },
@@ -458,17 +371,9 @@ auto-install-peers=true
         "./*": "./dist/*.js",
         "./globals.css": "./dist/globals.css",
         "./icons": "./dist/icons/index.js",
-        "./icons/arrow-right": "./dist/icons/arrow-right.js",
-        "./icons/code": "./dist/icons/code.js",
-        "./icons/github": "./dist/icons/github.js",
-        "./icons/layers": "./dist/icons/layers.js",
-        "./icons/moon": "./dist/icons/moon.js",
-        "./icons/package": "./dist/icons/package.js",
-        "./icons/sun": "./dist/icons/sun.js",
-        "./icons/terminal": "./dist/icons/terminal.js",
-        "./icons/zap": "./dist/icons/zap.js",
-        "./lib/utils": "./dist/lib/utils.js",
-        "./ui/button": "./dist/ui/button.js"
+        "./icons/*": "./dist/icons/*.js",
+        "./lib/*": "./dist/lib/*.js",
+        "./ui/*": "./dist/ui/*.js"
       },
       scripts: {
         lint: "eslint",
@@ -477,7 +382,7 @@ auto-install-peers=true
         postbuild: "tsx src/services/postbuild.ts flag-check",
         build: "tsup",
         clean: "git clean -xdf dist node_modules",
-        types: "tsc --emitDeclarationOnly"
+        types: "tsgo --emitDeclarationOnly"
       },
       peerDependencies: Object.fromEntries(peerEntries),
       dependencies: Object.fromEntries(entries),

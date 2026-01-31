@@ -1,6 +1,5 @@
 import type {
   Constructor,
-  ExpandedDocSpecs,
   ExpandedImgSpecs,
   ExtractorOptions
 } from "@/types/index.ts";
@@ -68,7 +67,7 @@ export function DocMixin<TBase extends Constructor>(Base: TBase) {
     public getDocumentSpecsWorkup(
       buffer: Buffer,
       contentType = "application/pdf"
-    ): ExpandedDocSpecs {
+    ) {
       return this.docs.getDocumentSpecsWorkup(buffer, contentType);
     }
 

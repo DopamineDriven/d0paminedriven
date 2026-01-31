@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "bitDepth": 8,
+    "dpi": {
+      "x": 216,
+      "y": 216,
+      "unit": "meter"
+    },
+    "pixelAspectRatio": null,
+    "iccProfileMeta": null,
+    "xmp": null,
+    "modificationTime": null,
+    "textChunks": {
+      "iTXt": {},
+      "tEXt": {},
+      "zTXt": {}
+    }
+  },
+  "source": "buffer",
+  "byteSize": 113348,
+  "contentType": "image/png",
+  "fetchedBytes": 113348,
+  "type": "IMAGE",
+  "width": 480,
+  "height": 480,
+  "format": "png",
+  "frames": 1,
+  "animated": false,
+  "hasAlpha": true,
+  "colorModel": "rgba",
+  "orientation": null,
+  "aspectRatio": 1,
+  "colorSpace": "srgb",
+  "iccProfile": "sRGB",
+  "exifDateTimeOriginal": null
+}

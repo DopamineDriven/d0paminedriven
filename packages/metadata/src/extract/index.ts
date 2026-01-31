@@ -12,6 +12,7 @@ class Base {
 
 const Unified = ImgMixin(DocMixin(Base));
 
+
 export class Extract extends Unified {
   private readonly badUrls = new Map<string, number>(); // url -> expiry
   private readonly originFallback?: ExtractorHardenedOptions["originFallback"];
