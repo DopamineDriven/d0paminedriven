@@ -97,6 +97,7 @@
     "test:pdfimg": "tsx src/test/claude-test-pdf.ts"
   },
   "dependencies": {
+    "@d0paminedriven/pdfdown": "catalog:dd",
     "fflate": "^0.8.2"
   },
   "devDependencies": {

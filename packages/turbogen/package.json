@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "7.2.0",
+  "version": "8.0.0",
   "author": "Andrew Ross",
   "description": "convenient turborepo generator",
   "repository": {
@@ -111,8 +111,8 @@
   },
   "dependencies": {
     "@d0paminedriven/fs": "^11.0.0",
-    "@inquirer/core": "^11.1.1",
-    "@inquirer/prompts": "^8.2.0",
+    "@inquirer/core": "^11.1.7",
+    "@inquirer/prompts": "^8.3.2",
     "dotenv": "catalog:dotenv",
     "gradient-string": "^3.0.0"
   },
@@ -120,7 +120,7 @@
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@inquirer/type": "^4.0.3",
+    "@inquirer/type": "^4.0.4",
     "@types/gradient-string": "^1.1.6",
     "@types/node": "catalog:node",
     "@typescript/native-preview": "catalog:tsgo",

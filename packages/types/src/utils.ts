@@ -164,7 +164,6 @@ export type RequireNested<
     ? Rm<T, Path> & Record<Path, Required<T>[Path]>
     : T;
 
-
 export function createDraftId(
   userId: string,
   conversationId: string,
@@ -172,11 +171,13 @@ export function createDraftId(
   ordinal: number
 ) {
   if (!Number.isInteger(ordinal) || ordinal < 0) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw new Error("ordinal must be a non-negative integer");
   }
   if (
     ![userId, conversationId, batchId].every(s => /^[A-Za-z0-9_-]+$/.test(s))
   ) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw new Error("ids must be [A-Za-z0-9_-]+");
   }
   return `${userId}~${conversationId}~${batchId}~${ordinal}` as const;
@@ -190,6 +191,7 @@ export function createDraftId(
  */
 export function parseDraftId(draftId: string) {
   if (/^(?:[A-Za-z0-9_-]+~){3}(?:0|[1-9][0-9]*)$/.test(draftId) === false) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw new Error(`invalid draftId ${draftId}`);
   }
   const toArr = draftId.split("~");

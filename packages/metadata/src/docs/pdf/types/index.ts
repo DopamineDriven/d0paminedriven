@@ -4,6 +4,7 @@ export interface ObjOfArrsBaseArr {
 }
 
 export interface ObjOfArrsEntity {
+  rawBuff: Buffer | Uint8Array;
   pageObjArr: ObjOfArrsBaseArr[];
   xObjArr: ObjOfArrsBaseArr[];
   aObjArr: ObjOfArrsBaseArr[];
@@ -18,6 +19,9 @@ export interface ObjOfArrsEntity {
   pageIdsMap: Map<number, string>;
   annotIdsMap: Map<number, string[]>;
   annotsMap: Map<number, string>;
+  examineUnmodified?: string[];
+  version: string;
+  linearized: boolean;
 }
 
 export interface BoundingBox {

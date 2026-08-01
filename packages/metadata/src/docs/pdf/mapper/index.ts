@@ -7,13 +7,17 @@ export class PdfMapperWorkup extends PdfPagesWorkup {
   private linearizedParseRe =
     /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\r?\n|\s*>>stream|>>\s*endobj)/g;
 
-  private nonlinearized1Dot4Re= /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\s*stream|\s*endobj)/g ;
-private examineRe=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\t?\r?\n\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g;
+  private nonlinearized1Dot4Re =
+    /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\s*stream|\s*endobj)/g;
+  private examineRe =
+    /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\t?\r?\n\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g;
 
-private examineRe2=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S\t?\r?\n?\f?]*?)(?:\t?\r?\n?\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g;
+  private examineRe2 =
+    /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Page)|(?=\/Contents))*[\s\S]*?([\s\S\t?\r?\n?\f?]*?)(?:\t?\r?\n?\f?\n?|\n?\s?>>stream|>>\s*endobj)\r?/g;
   private annots =
     /(\d+\s+\d+\s+?)+?<<(?:(?=\/Action)|(?=\/A))*[\s\S]*?([\s\S]*?)(?:\r?\n|\s*>>stream|>>\s*endobj)/g;
   public mapIt(buff: Buffer | Uint8Array) {
+
     const fullText = this.fullText(buff);
     const _objStrTxt = this.objStreamOnlyText(buff);
     const pdfPsObjs = {
@@ -23,8 +27,12 @@ private examineRe2=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(
       countFallback: 0,
       pageIdsMap: new Map<number, string>(),
       annotIdsMap: new Map<number, string[]>(),
-      annotsMap: new Map<number, string>()
+      annotsMap: new Map<number, string>(),
+      version: this.pdfVersion(fullText, false),
+      rawBuff: buff,
+      linearized:  this.isLinearized(buff)
     } satisfies ObjOfArrsEntity;
+    const examineUnmodified = Array.of<string>();
     const annotIdSet = new Set<string>();
     let annotObjNo = 0;
     let pgNo = 0;
@@ -83,8 +91,12 @@ private examineRe2=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(
         d2 = d?.[2];
       if (d0 && d1 && d2) {
         const s = this.rmTrailingNoise(d2.trim());
+        examineUnmodified.push(d0);
         if (d1.length > 0) {
           const tagged = `${d1}<<${s}`;
+          examineArr.push(tagged);
+        } else {
+          const tagged = `<<${s}`;
           examineArr.push(tagged);
         }
       } else if (d0 && !d1 && d2) {
@@ -96,6 +108,7 @@ private examineRe2=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(
     }
 
     const examineToParse = examineArr.join(`\n`);
+
     for (const k of examineToParse.matchAll(/(?:\/Kids\s*\[([\s\S]*?)\])/g)) {
       const k0 = k?.[0],
         k1 = k?.[1];
@@ -205,9 +218,9 @@ private examineRe2=  /(\d+\s+\d+\s+obj\s+?|[\d\s]*)?\s*<<(?:(?=\/CreationDate)|(
 
     if (xmp) {
       pdfPsObjs.pageIdsMap;
-      const s = { ...pdfPsObjs, xmp, examine: examineArr };
+      const s = { ...pdfPsObjs, xmp, examine: examineArr, examineUnmodified };
       return s;
-    } else return { ...pdfPsObjs, examine: examineArr };
+    } else return { ...pdfPsObjs, examine: examineArr, examineUnmodified };
   }
 }
 

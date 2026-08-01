@@ -1,5 +1,8 @@
 import { Fs } from "@d0paminedriven/fs";
+import { extractImagesPerPage, PageImage } from "@d0paminedriven/pdfdown";
 import { ObjectMapServiceAlt as DocImgWorkupService } from "@/docs/pdf/alt.ts";
+import { Extract } from "@/extract/index.ts";
+import { ExpandedImgSpecs, PngMetadata } from "@/types/index.ts";
 
 const fs = new Fs(process.cwd());
 const dir = "src/test/__benchmark__";
@@ -19,12 +22,12 @@ const getDir = fs
 
 // 68 files in the targeted dir, can target --target 0 through 67
 
-const argvNumber = Number.parseInt(process.argv[3] ?? "10", 10);
+const _argvNumber = Number.parseInt(process.argv[3] ?? "10", 10);
 
-const { name: name, path: path } = getDir[argvNumber] ?? {
-  name: "Geminastics-Pt-VIII",
-  path: `${dir}/Geminastics-Pt-VIII.pdf`
-};
+const { name: name, path: path } =  {
+  name: "Self-Imposed-Chains",
+  path: `${dir}/Self-Imposed-Chains.pdf`
+}
 console.log(name);
 const _name = "Warlord-of-Whimsy-Pt-XVI";
 const readPdf = fs.fileToBuffer(path);
@@ -133,27 +136,52 @@ for (const info of fullText.matchAll(xmpRegex)) {
 }
 
 const examineArr = Array.of<string>();
-    for (const d of fullText.matchAll( /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\s*stream|\s*endobj)/g )) {
-      const d0 = d?.[0],
-        d1 = d?.[1],
-        d2 = d?.[2];
-      if (d0 && d1 && d2) {
-        const s = docImgWorkup.rmTrailingNoise(d2.trim());
-        if (d1.length > 0) {
-          const tagged = `${d1}<<${s}`;
-          examineArr.push(tagged);
-        }
-      } else if (d0 && !d1 && d2) {
-        const s =docImgWorkup.rmTrailingNoise(d2.trim());
-        const tagged = `<<${s}`;
-
-        examineArr.push(tagged);
-      }
+for (const d of fullText.matchAll(
+  /(\d+\s+\d+\s+obj\s+?)+?<<(?:(?=\/CreationDate)|(?=\/BitsPerComponent)|(?=\/Count)|(?=\/Contents))*[\s\S]*?([\s\S]*?)(?:\s*stream|\s*endobj)/g
+)) {
+  const d0 = d?.[0],
+    d1 = d?.[1],
+    d2 = d?.[2];
+  if (d0 && d1 && d2) {
+    const s = docImgWorkup.rmTrailingNoise(d2.trim());
+    if (d1.length > 0) {
+      const tagged = `${d1}<<${s}`;
+      examineArr.push(tagged);
     }
-fs.withWs(`src/test/pdf-inspect/${name}/ps.txt`, extensiveArr.join(`\n`));
-fs.withWs(`src/test/pdf-inspect/${name}/ps-examine.txt`, examineArr.join(`\n`));
+  } else if (d0 && !d1 && d2) {
+    const s = docImgWorkup.rmTrailingNoise(d2.trim());
+    const tagged = `<<${s}`;
+
+    examineArr.push(tagged);
+  }
+}
+fs.withWs(`src/test/pdf-stash/${name}/ps.txt`, extensiveArr.join(`\n`));
+fs.withWs(`src/test/pdf-stash/${name}/ps-examine.txt`, examineArr.join(`\n`));
 const templatize = JSON.stringify(docImgWorkup.pdfMapInit(readPdf), null, 2);
 const literalT = `export const pdfPsObjs${process.argv[3]}=${templatize};`;
 
 // output of src/docs/pdf/alt.ts
-fs.withWs(`src/test/pdf-inspect/${name}/index.ts`, literalT);
+fs.withWs(`src/test/pdf-stash/${name}/index.ts`, literalT);
+
+const e = new Extract();
+
+const agg = Array.of<PageImage>();
+for (const x of extractImagesPerPage(readPdf)) {
+  // const type = e.extractRemote(buf, 1024*48) as unknown as ExpandedImgSpecs<PngMetadata<true>>;
+  agg.push(x);
+}
+
+(async (p: PageImage[]) => {
+  const pStart = performance.now();
+  for (const pp of p) {
+    const meta = (await e.extractRemote(
+      pp.data,
+      1024 * 24
+    )) as unknown as ExpandedImgSpecs<PngMetadata<true>>;
+    fs.withWs(
+      `src/test/pdf-stash/${name}/imgs/${pp.page}.${meta.format}`,
+      pp.data
+    );
+  }
+  console.log(performance.now() - pStart);
+})(agg);

@@ -190,6 +190,7 @@
     "pretest": "tsx src/test/output-local.ts"
   },
   "dependencies": {
+    "@d0paminedriven/pdfdown": "catalog:dd",
     "dotenv": "catalog:dotenv",
     "dotenv-expand": "catalog:dotenv",
     "fflate": "^0.8.2"

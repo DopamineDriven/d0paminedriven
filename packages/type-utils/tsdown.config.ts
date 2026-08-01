@@ -3,7 +3,7 @@ import type { UserConfig as Options } from "tsdown";
 import { defineConfig } from "tsdown";
 
 export default defineConfig(
-  (options: Options) =>
+  options =>
     ({
       ...options,
       entry: ["src/index.ts", "src/utils.ts"],

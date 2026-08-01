@@ -7,7 +7,7 @@ import type {
   PdfImageAnalysisMetadata,
   ZipEntry
 } from "@/types/index.ts";
-import { extMimeMap, mimeToExt } from "@/mime/index.ts";
+import { mimeToExt } from "@/mime/index.ts";
 
 
 export class DocMetadataExtractor {

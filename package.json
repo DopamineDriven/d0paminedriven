@@ -37,8 +37,8 @@
     "run:web": "turbo dev --filter=@d0paminedriven/web"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.13",
-    "@changesets/cli": "^2.29.8",
+    "@biomejs/biome": "^2.4.8",
+    "@changesets/cli": "^2.30.0",
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
@@ -47,12 +47,12 @@
     "dotenv": "catalog:dotenv",
     "eslint": "catalog:eslint",
     "husky": "^9.1.7",
-    "knip": "^5.82.1",
+    "knip": "^6.0.5",
     "prettier": "catalog:prettier",
     "tsx": "catalog:tsx",
-    "turbo": "^2.7.6",
+    "turbo": "catalog:turbo",
     "typescript": "catalog:ts",
-    "vercel": "^50.7.1"
+    "vercel": "^50.37.0"
   },
   "prettier": "@d0paminedriven/prettier-config",
   "engines": {

@@ -2,7 +2,6 @@ import { ConfigHandler } from "@/config/index.ts";
 import { PromptPropsBase } from "@/types/index.ts";
 
 /* eslint-disable no-useless-escape */
-/* eslint-disable @typescript-eslint/await-thenable */
 export class WebAppScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
@@ -30,7 +29,7 @@ export function PageLayout({ children }: { children: ReactNode }) {
   return (
     <div className="@max-9xl:mx-auto flex min-h-screen flex-col justify-center">
       <Nav />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 mx-auto">{children}</main>
       <Footer />
     </div>
   );
@@ -79,8 +78,8 @@ export function Nav() {
     }
   }, [resolvedTheme]);
   return (
-    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 max-w-9xl sticky top-0 z-40 w-full self-center border-b backdrop-blur">
-      <div className="container flex h-14 items-center">
+    <header className="bg-background/95 supports-backdrop-filter:bg-background/60 max-w-9xl sticky top-0 z-40 w-full self-center border-b backdrop-blur">
+      <div className="container mx-auto  flex h-14 items-center">
         <div className="mx-2 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Icon.Package className="size-6" />
@@ -120,8 +119,8 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="max-w-9xl self-center border-t py-6 md:py-0 w-full">
-      <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+    <footer className="max-w-9xl jusify-center container mx-auto flex h-14 w-full border-t md:py-0">
+      <div className="mx-auto flex items-center gap-4 align-middle">
         <p className="text-muted-foreground text-center text-sm leading-loose md:text-left">
           Scaffolded by &nbsp;
           <span className="font-extrabold">@d0paminedriven/turbogen</span>. The
@@ -309,15 +308,6 @@ declare global {
           ? \`\${K}\`
           : never
       : never)[];
-    entries<T = object, V extends keyof T = keyof T>(
-      o: T
-    ): (V extends infer K
-      ? K extends string
-        ? [K, T[V]]
-        : K extends number
-          ? [\`\${K}\`, T[V]]
-          : never
-      : never)[];
   }
 }
 
@@ -369,7 +359,6 @@ export default {
   private get tsconfigJson() {
     // prettier-ignore
     return `{
-  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@${this.workspace}/tsconfig/next.json",
   "compilerOptions": {
     "paths": {
@@ -380,6 +369,8 @@ export default {
         "name": "next"
       }
     ],
+    "ignoreDeprecations":"6.0",
+    "types": ["*"],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": [
@@ -398,6 +389,7 @@ export default {
 
   private get deps() {
     return [
+      "@base-ui/react",
       "class-variance-authority",
       "clsx",
       "csstype",
@@ -477,8 +469,10 @@ export default {
         port: "${this.port}",
         protocol: "http"
       },
+      { hostname: "raw.githubusercontent.com", protocol: "https" },
+      { hostname: "imgen.x.ai", protocol: "https" },
       { hostname: "images.unsplash.com", protocol: "https" },
-      { hostname: "tailwindui.com", protocol: "https" }
+      { hostname: "tailwindcss.com", protocol: "https" }
     ]
   },
   productionBrowserSourceMaps: true
@@ -1125,46 +1119,6 @@ export default function HomePage() {
 ` as const
   }
 
-  private get indexdts() {
-    // prettier-ignore
-    return `declare global {
-  interface JSON {
-    parse<T = unknown>(
-      text: string,
-      reviver?: (this: any, key: string, value: any) => any
-    ): T;
-  }
-  interface Body {
-    json<T = unknown>(): Promise<T>;
-  }
-  interface Response {
-    json<T = unknown>(): Promise<T>;
-  }
-  interface ObjectConstructor {
-    keys<T = object>(
-      o: T
-    ): (keyof T extends infer K
-      ? K extends string
-        ? K
-        : K extends number
-          ? \`\${K}\`
-          : never
-      : never)[];
-    entries<T = object, V extends keyof T = keyof T>(
-      o: T
-    ): (V extends infer K
-      ? K extends string
-        ? [K, T[V]]
-        : K extends number
-          ? [\`\${K}\`, T[V]]
-          : never
-      : never)[];
-  }
-}
-
-export {}` as const;
-  }
-
   public get svgWindow() {
     // prettier-ignore
     return `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -1187,7 +1141,7 @@ export function LandingPage() {
   return (
     <>
       <section className="font-cal-sans mx-auto flex justify-center space-y-6 pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
-        <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
+        <div className="container flex max-w-5xl flex-col items-center gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1201,7 +1155,7 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="font-cal-sans text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
             Welcome to your&nbsp;
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Turbo
             </span>
             &nbsp; powered workspace
@@ -1210,10 +1164,9 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-muted-foreground max-w-[42rem] leading-normal sm:text-xl sm:leading-8">
+            className="text-muted-foreground max-w-2xl leading-normal sm:text-xl sm:leading-8">
             A high-performance monorepo with pnpm workspaces, powered by
-            Turborepo. Pre-configured with ESLint, Prettier, TypeScript, and
-            Jest.
+            Turborepo. Pre-configured with ESLint, Prettier, and TypeScript tooling.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1243,16 +1196,15 @@ export function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
+          className="mx-auto flex max-w-232 flex-col items-center space-y-4 text-center">
           <h2 className="font-cal-sans text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
             Everything you need to build at scale
           </h2>
           <p className="text-muted-foreground max-w-[85%] leading-normal sm:text-lg sm:leading-7">
-            Turbogen provides a solid foundation for your projects with a focus
-            on developer experience and performance.
+            Turbogen gets the boring shit right so you can focus on your bottom line.
           </p>
         </motion.div>
-        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-5xl md:grid-cols-3">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1315,7 +1267,7 @@ export function LandingPage() {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="mx-auto max-w-[58rem] space-y-6 text-center">
+          className="mx-auto max-w-232 space-y-6 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
             Ready to start building?
           </h2>
@@ -1329,7 +1281,7 @@ export function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="bg-muted/50 mx-auto mt-12 max-w-[58rem] rounded-lg border p-6 md:p-8">
+          className="bg-muted/50 mx-auto mt-12 max-w-232 rounded-lg border p-6 md:p-8">
           <div className="flex items-center">
             <Icon.Terminal className="mr-2 size-5" />
             <h3 className="font-bold">Start developing</h3>
@@ -1337,23 +1289,19 @@ export function LandingPage() {
           <div className="mt-4 space-y-4">
             <div className="rounded-md bg-black p-4">
               <pre className="text-sm text-white">
-                <code>{\`# Install dependencies
-pnpm install
-
-# Start development server
+                <code>{\`# from the root
 pnpm run:web\`}</code>
               </pre>
             </div>
             <p className="text-muted-foreground text-sm">
-              This will start the development server for your web application.
-              You can now start building your project!
+              Fire up dev and get to it!
             </p>
           </div>
         </motion.div>
       </section>
 
       <section className="container py-8 md:py-12 lg:py-24">
-        <div className="bg-background mx-auto max-w-[58rem] rounded-lg border p-8">
+        <div className="bg-background mx-auto max-w-232 rounded-lg border p-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1364,10 +1312,10 @@ pnpm run:web\`}</code>
               <Icon.Package className="size-6 text-purple-600" />
             </div>
             <h3 className="font-heading text-2xl leading-[1.1]">
-              Explore your workspace
+              Explore your monorepo
             </h3>
             <p className="text-muted-foreground">
-              Your monorepo is organized with the following structure:
+              Your workspace skeleton at a glance:
             </p>
             <div className="bg-muted w-full max-w-md rounded-md p-4 text-left">
               <pre className="text-sm">

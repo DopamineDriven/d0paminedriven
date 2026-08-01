@@ -13,6 +13,7 @@ export default [
       "@typescript-eslint/prefer-regexp-exec": "off",
       "no-control-regex": "off",
       "no-case-declarations": "off",
+      "no-loss-of-precision": "off",
       "@typescript-eslint/prefer-nullish-coalescing": "off"
     },
     ignores: ["dist/**"]

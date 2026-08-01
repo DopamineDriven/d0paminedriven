@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@d0paminedriven/tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
@@ -7,7 +6,9 @@
     },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "rootDir": "./src",
-    "outDir": "dist"
+    "outDir": "dist",
+        "ignoreDeprecations":"6.0",
+    "types": ["*"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["dist"]

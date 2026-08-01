@@ -11,3 +11,5 @@ src/test/local-*/*
 src/test/img-meta/*
 src/test/img-data/segmented/*
 src/test/pdf-inspect/*
+src/test/pdf-stash/*
+src/test/img-out/*

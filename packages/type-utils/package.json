@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/type-utils",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "convenient type utils",
   "publishConfig": {
     "access": "public",

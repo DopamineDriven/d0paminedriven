@@ -1,7 +1,6 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
-/* eslint-disable @typescript-eslint/await-thenable */
 export class TsScaffolder {
   constructor(public baseProps: PromptPropsBase,     protected configHandler: ConfigHandler) {
   }

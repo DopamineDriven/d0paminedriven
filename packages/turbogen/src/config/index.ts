@@ -40,15 +40,15 @@ auto-install-peers=true
         }
       } catch (error) {
         if (error instanceof SyntaxError) {
-          throw new SyntaxError(error.message);
+          throw error;
         } else if (error instanceof TypeError) {
-          throw new TypeError(error.message);
+          throw error;
         } else if (error instanceof RangeError) {
-          throw new RangeError(error.message);
+          throw error;
         } else if (error instanceof EvalError) {
-          throw new EvalError(error.message);
+          throw error;
         } else if (error instanceof Error) {
-          throw new Error(error.message);
+          throw error;
         } else {
           console.error(error);
         }
@@ -93,9 +93,10 @@ auto-install-peers=true
     const url = `https://registry.npmjs.org/${encodeURIComponent(target)}/latest`;
     const res = await fetch(url);
     if (!res.ok) {
-      throw new Error(
+      console.log(
         `failed to fetch ${target}: ${res.status} ${res.statusText}`
       );
+      /** */
     }
     const data = (await res.json()) as NpmLatest;
     return data;
@@ -181,14 +182,13 @@ auto-install-peers=true
           "list:packages": "bash ./manage.sh list",
           "generate:base64": "openssl rand -base64 64",
           "generate:hex": "openssl rand -hex 64",
-          "npm:registry": "npm set registry https://registry.npmjs.org",
           "run:web": `turbo dev --filter=@${workspace}/web`
         },
         devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
         prettier: `@${workspace}/prettier-config`,
         engines: {
-          node: ">=20",
-          npm: ">=9",
+          node: ">=24",
+          npm: ">=10",
           pnpm: ">=9"
         }
       };
@@ -214,7 +214,6 @@ auto-install-peers=true
           "list:packages": "bash ./manage.sh list",
           "generate:base64": "openssl rand -base64 64",
           "generate:hex": "openssl rand -hex 64",
-          "npm:registry": "npm set registry https://registry.npmjs.org",
           "run:web": `turbo dev --filter=@${workspace}/web`
         },
         devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
@@ -261,7 +260,7 @@ auto-install-peers=true
       scripts: {
         clean: "git clean -xdf .cache .turbo node_modules",
         format: "prettier --check . --ignore-path ../../.gitignore",
-        typecheck: "tsc --noEmit"
+        typecheck: "tsgo --noEmit"
       },
       dependencies: Object.fromEntries(entries),
       devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
@@ -299,7 +298,7 @@ auto-install-peers=true
       scripts: {
         clean: "git clean -xdf .turbo node_modules",
         format: "prettier --check . --ignore-path ../../.gitignore",
-        typecheck: "tsc --noEmit"
+        typecheck: "tsgo --noEmit"
       },
       dependencies: Object.fromEntries(entries),
       devDependencies: Object.fromEntries([...localEntries, ...devEntries]),

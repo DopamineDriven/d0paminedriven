@@ -1,7 +1,6 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
-/* eslint-disable @typescript-eslint/await-thenable */
 export class RootScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
@@ -88,7 +87,8 @@ export default [
     return `{
   "extends": "@${this.workspace}/tsconfig/base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["*"]
   },
   "include": ["."],
   "exclude": ["node_modules"]
@@ -192,7 +192,6 @@ export default [
     }
   ],
   "files.autoSave": "afterDelay",
-  "javascript.referencesCodeLens.showOnAllFunctions": true,
   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
   "tailwindCSS.experimental.classRegex": [
     [
@@ -214,20 +213,30 @@ export default [
     ".*variant.*",
     ".*Styles.*"
   ],
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsserver.web.typeAcquisition.enabled": true,
-  "typescript.implementationsCodeLens.enabled": true,
-  "typescript.implementationsCodeLens.showOnInterfaceMethods": true,
-  "typescript.locale": "en",
-  "typescript.referencesCodeLens.enabled": true,
-  "typescript.referencesCodeLens.showOnAllFunctions": true,
-  "typescript.experimental.useTsgo": false,
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsserver.web.typeAcquisition.enabled": true,
+  "js/ts.implementationsCodeLens.enabled": true,
+  "js/ts.implementationsCodeLens.showOnInterfaceMethods": true,
+  "js/ts.locale": "en",
+  "js/ts.referencesCodeLens.enabled": true,
+  "js/ts.referencesCodeLens.showOnAllFunctions": true,
+  "js/ts.experimental.useTsgo": false,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
   "yaml.hover": true,
   "yaml.validate": true,
   "workbench.editor.autoLockGroups": {
     "default": false
   },
+  "json.schemaDownload.trustedDomains": {
+    "https://schemastore.azurewebsites.net/": true,
+    "https://turborepo.com/schema.json": true,
+    "https://raw.githubusercontent.com/": true,
+    "https://www.schemastore.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://json-schema.org/": true,
+    "https://docs.renovatebot.com/": true,
+    "https://turborepo.org/schema.json": true
+  }
   "github.copilot.enable": {
     "*": false,
     "plaintext": false,
@@ -314,7 +323,11 @@ max_line_length = 40
     return `packages:
   - apps/*
   - packages/*
-  - tooling/*` as const;
+  - tooling/*
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  sharp: true` as const;
   }
 
   private get gitignoreTemplate() {
