@@ -1,13 +1,16 @@
 {
   "name": "@d0paminedriven/types",
-  "version": "2.0.0",
-  "description": "convenient type helpers",
+  "version": "3.0.0",
+  "description": "convenient type definitions",
   "publishConfig": {
     "access": "public",
     "typesVersions": {
       "*": {
         "*": [
           "dist/index.d.ts"
+        ],
+        "enums": [
+          "dist/enums.d.ts"
         ],
         "events-images": [
           "dist/events-images.d.ts"
@@ -18,6 +21,9 @@
         "events": [
           "dist/events.d.ts"
         ],
+        "local-tools": [
+          "dist/local-tools.d.ts"
+        ],
         "models": [
           "dist/models.d.ts"
         ],
@@ -27,8 +33,14 @@
         "types": [
           "dist/types.d.ts"
         ],
+        "types-workup": [
+          "dist/types-workup.d.ts"
+        ],
+        "codegen-types": [
+          "dist/codegen-types.d.ts"
+        ],
         "codegen": [
-          "dist/codegen/*.d.ts"
+          "dist/codegen/__gen__/*.d.ts"
         ]
       }
     }
@@ -40,6 +52,9 @@
       "*": [
         "dist/index.d.ts"
       ],
+      "enums": [
+        "dist/enums.d.ts"
+      ],
       "events-images": [
         "dist/events-images.d.ts"
       ],
@@ -48,6 +63,9 @@
       ],
       "events": [
         "dist/events.d.ts"
+      ],
+      "local-tools": [
+        "dist/local-tools.d.ts"
       ],
       "models": [
         "dist/models.d.ts"
@@ -58,8 +76,14 @@
       "types": [
         "dist/types.d.ts"
       ],
+      "types-workup": [
+        "dist/types-workup.d.ts"
+      ],
+      "codegen-types": [
+        "dist/codegen-types.d.ts"
+      ],
       "codegen": [
-        "dist/codegen/*.d.ts"
+        "dist/codegen/__gen__/*.d.ts"
       ]
     }
   },
@@ -74,11 +98,16 @@
     ".": "./dist/index.js",
     "./utils": "./dist/utils.js",
     "./types": "./dist/types.js",
+    "./types-workup": "./dist/types-workup.js",
+    "./enums": "./dist/enums.js",
     "./models": "./dist/models.js",
+    "./events-audio": "./dist/events-audio.js",
     "./events-images": "./dist/events-images.js",
     "./events-workup": "./dist/events-workup.js",
     "./events": "./dist/events.js",
-    "./codegen/*": "./dist/codegen/*.js"
+    "./local-tools": "./dist/local-tools.js",
+    "./codegen-types": "./dist/codegen-types.js",
+    "./codegen/*": "./dist/codegen/__gen__/*.js"
   },
   "scripts": {
     "build": "tsdown",
@@ -86,10 +115,15 @@
     "lint": "eslint",
     "format": "prettier --write \"src/**/*.{ts,cts,mts,js,mjs,cjs,json,yaml,yml}\" --ignore-unknown --cache",
     "clean": "git clean -xdf .turbo dist node_modules",
-    "gen": "pnpm tsx src/codegen/index.ts"
+    "pregen:media": "tsx src/codegen/index.ts --target video",
+    "gen:media": "tsx src/codegen/index.ts --target img",
+    "pregen": "pnpm gen:media",
+    "gen": "tsx src/codegen/index.ts --target default",
+    "postgen": "pnpm format",
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
-    "@d0paminedriven/fs": "^11.0.0",
+    "@d0paminedriven/fs": "catalog:dd",
     "dotenv": "catalog:dotenv"
   },
   "devDependencies": {
@@ -98,11 +132,10 @@
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "catalog:node",
     "@typescript/native-preview": "catalog:tsgo",
+    "dotenv-expand": "catalog:dotenv",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",
     "prettier": "catalog:prettier",
-    "rolldown": "1.0.0-rc.11",
-    "rolldown-plugin-dts": "^0.22.5",
     "tsdown": "catalog:tsdown",
     "tslib": "catalog:tslib",
     "tsx": "catalog:tsx",

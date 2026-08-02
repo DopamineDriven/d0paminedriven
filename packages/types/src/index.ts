@@ -1,38 +1,105 @@
+/**
+ * api-handling types for codegen
+ */
+export type {
+  AnthropicError,
+  AnthropicModel,
+  AnthropicResponse,
+  AnthropicSuccess,
+  GeminiError,
+  GeminiModel,
+  GeminiResponse,
+  GeminiSuccess,
+  GrokModelsResponse,
+  ListModelsSingleton,
+  MultimodalRT,
+  OpenAiError,
+  OpenAiResponse,
+  SuccessResponse
+} from "@/codegen-types.ts";
+
+export type {
+  GeminiCodecTTS,
+  GrokAudioCodecTTS,
+  GrokBitRateTTS,
+  GrokLanguageTTS,
+  GrokOutputFormatTTS,
+  GrokSampleRateTTS,
+  GrokVoiceDisplayNameTTS,
+  GrokVoiceTTS,
+  GrokTTSReqShape,
+  OpenAICodecTTS,
+  TTSCodec
+} from "@/events-audio.ts";
+
+export {
+  grokVoiceDisplayNameToIdTTS,
+  grokVoiceDisplayNamesTTS,
+  grokVoiceIdToDisplayNameTTS,
+  grokVoiceIdsTTS,
+  grokVoices
+} from "@/events-audio.ts";
+
 export type {
   AIChatRequestImgGenFields,
   AIChatResponseImgGenFields,
-  Dalle2ImgGenWorkupRT,
-  Dalle2Opts,
-  Dalle3ImgGenWorkupRT,
-  Dalle3Opts,
+  AIChatResponseImgGenFieldsFinal,
+  AIChatResponseImgGenSubFields,
+  BaseNanoBananaOutputAR,
+  BaseOpenAISize,
+  GeminiImageQuality,
+  GeminiImageSize,
+  GeminiModelAspectRatio,
+  GeminiModelAspectRatioWorkup,
   GoogleGenAIImageGenOpts,
   GoogleHarmCategory,
   GoogleImagePromptLanguage,
   GoogleImagenGenerateImagesConfig,
-  GoogleImgOutputFormat,
   GoogleImgSizeQualityOpts,
   GooglePersonGeneration,
   GoogleSafetyFilterLevel,
+  GPTImage2Size,
   GptImageAndFacilitatorsImgGenWorkupRT,
   GptImage1Opts,
-  GrokImageGenOpts,
+  GptImageOutputSize,
+  GrokImagineARUnion,
+  GrokImagineImageGenOpts,
+  GrokImagineImgModelUnion,
+  GrokImgGenUnionOpts,
+  GrokModelAspectRatio,
+  GrokModelAspectRatioWorkup,
   ImageGenOptsByProvider,
-  ImagenOptions,
+  ImageGenPartialArr,
+  ImagenOutputSize,
   ImgGenStage,
   ImgGenWorkupRT,
   ImgGenWorkupRTObj,
   ImgGenWorkupResRT,
+  ImgMetadataEntity,
+  NanoBanana2OutputAR,
   NanoBananaImageGenOpts,
+  NanoBananaOutputSize,
   OpenAIImageGenOpts,
   OpenAIImgCapableModels,
+  OpenAIImgNativeGPTImgAR,
+  OpenAIModelAspectRatio,
+  OpenAIModelAspectRatioWorkup,
+  OpenAINativeImgModelAspectRatioWorkup,
+  OpenAINativeImgModelQualityWorkup,
   OpenAISizeQualityOpts,
+  OutputSizeProps,
+  S3Checksum,
+  S3StorageClass,
   SharedOpenAIImageOpts
 } from "@/events-images.ts";
+
+export { GPT_IMAGE_2_EXTENDED_OPTIONS } from "@/events-images.ts";
 
 export type {
   AIChatEventTypeUnion,
   AssetDraftId,
   AssetOrigin,
+  AssetReadyPayload,
   AssetStatus,
   AssetUploadAbortReason,
   AssetUploadInstructionsMethod,
@@ -60,6 +127,7 @@ export type {
   UnknownSpecs,
   UploadMethod,
   UserMetadata,
+  UserRxnAction,
   WithExpiry
 } from "@/events-workup.ts";
 
@@ -73,6 +141,7 @@ export type {
   AIChatRequest,
   AIChatResEntity,
   AIChatResponse,
+  AIChatResponseDb,
   AnyEvent,
   AnyEventTypeUnion,
   AssetAttachedToMessage,
@@ -94,44 +163,113 @@ export type {
   AssetUploadedNotification,
   AssetUploadRequest,
   AssetUploadResponse,
+  ChatChunkAndResMsgBlock,
   ChatWsEvent,
   ChatWsEventTypeUnion,
+  ConnectionEstablished,
+  ConversationList,
+  ConversationListAck,
+  ConversationListEntry,
   EventMap,
   EventTypeMap,
+  HydrateConversation,
+  HydrateConversationAck,
+  HydrateConversationPage,
   ImageGenError,
   ImageGenProgress,
   ImageGenRequest,
   ImageGenResponse,
   PingMessage,
-  TypingIndicator
+  ProviderContextPing,
+  ProviderContextPong,
+  ProviderContextUpdate,
+  ProviderContextUpdateAck,
+  TypingIndicator,
+  UserTTSChunk,
+  UserTTSError,
+  UserTTSRequest,
+  UserTTSResponse,
+  UserTTSResponsePreexisting
 } from "@/events.ts";
+
+export type {
+  CanonicalSchemaProperty,
+  CanonicalToolDefinition,
+  ListDirectoryEntry,
+  ListDirectoryOutput,
+  LocalToolCapabilities,
+  LocalToolErrorCode,
+  LocalToolFailure,
+  LocalToolName,
+  LocalToolOutput,
+  LocalToolRequest,
+  LocalToolResult,
+  LocalToolSuccess,
+  ReadFileOutput,
+  RepoSearchOutput
+} from "@/local-tools.ts";
+
+export {
+  LOCAL_TOOL_DEFINITIONS,
+  LOCAL_TOOL_NAMES,
+  isLocalToolName
+} from "@/local-tools.ts";
 
 /**
  * model/provider types
  */
 export type {
+  AlibabaChatModels,
+  AlibabaDisplayNameUnion,
+  AlibabaModelIdUnion,
   AllDisplayNamesUnion,
   AllImgGenFacilitatingModelsUnion,
   AllImgGenModelsUnion,
+  AllImgGenProviderModelMap,
+  AllImgGenProviderModels,
   AllModelsUnion,
+  AllVideoGenModels,
   AnthropicChatModels,
   AnthropicDisplayNameUnion,
   AnthropicModelIdUnion,
+  CohereChatModels,
+  CohereDisplayNameUnion,
+  CohereModelIdUnion,
+  DeepSeekChatModels,
+  DeepSeekDisplayNameUnion,
+  DeepSeekModelIdUnion,
   DisplayNameModelMap,
   GeminiChatModels,
   GeminiDisplayNameUnion,
+  GeminiDisplayNameUnionImgGen,
+  GeminiDisplayNameUnionVideoGen,
   GeminiImgGenFacilitatingModels,
   GetImgGenFacilitatingModelUtilRT,
   GeminiImgGenModels,
   GeminiModelIdUnion,
+  GeminiModelIdUnionImgGen,
+  GeminiModelIdUnionVideoGen,
+  GeminiVideoGenModels,
   GetDisplayNamesForProviderRT,
+  GetDisplayNamesForProviderRTImgGen,
+  GetDisplayNamesForProviderRTVideoGen,
   GetImgModelUtilRT,
+  GetAllImgGenModelUtilRt,
   GetModelsForProviderRT,
+  GetModelsForProviderRTImgGen,
+  GetModelsForProviderRTVideoGen,
   GetModelUtilRT,
+  GetVideoModelUtilRT,
   GrokChatModels,
   GrokDisplayNameUnion,
+  GrokDisplayNameUnionImgGen,
+  GrokDisplayNameUnionVideoGen,
+  ProviderModelRecord,
   GrokImgGenModels,
   GrokModelIdUnion,
+  GrokModelIdUnionImgGen,
+  GrokModelIdUnionVideoGen,
+  GrokVideoGenModels,
   ImageGenFacilitatingModelsByProvider,
   ImageGenFacilitatingProviders,
   ImgGenFacilitatingModelMap,
@@ -139,38 +277,77 @@ export type {
   ImageGenModelsByProvider,
   ImageGenProviders,
   ImgGenModelMap,
+  KimiChatModels,
+  KimiDisplayNameUnion,
+  KimiModelIdUnion,
   MetaChatModels,
   MetaDisplayNameUnion,
   MetaModelIdUnion,
+  MiniMaxChatModels,
+  MiniMaxDisplayNameUnion,
+  MiniMaxModelIdUnion,
+  MistralChatModels,
+  MistralDisplayNameUnion,
+  MistralModelIdUnion,
   ModelDisplayNameToModelId,
+  ModelDisplayNameToModelIdImgGen,
   ModelIdToModelDisplayName,
+  ModelIdToModelDisplayNameImgGen,
+  ModelDisplayNameToModelIdVideoGen,
+  ModelIdToModelDisplayNameVideoGen,
   ModelMap,
   Models,
   OpenAIChatModels,
   OpenAiDisplayNameUnion,
+  OpenAiDisplayNameUnionImgGen,
   OpenAIImgGenFacilitatingModels,
   OpenAIImgGenModels,
+  OpenAiModelIdUnionImgGen,
   OpenAiModelIdUnion,
+  OpenAIVideoGenModels,
+  OpenAiDisplayNameUnionVideoGen,
+  OpenAiModelIdUnionVideoGen,
   Provider,
   Providers,
+  SakanaChatModels,
+  SakanaDisplayNameUnion,
+  SakanaModelIdUnion,
   VercelChatModels,
   VercelDisplayNameUnion,
-  VercelModelIdUnion
+  VercelModelIdUnion,
+  VideoGenModelMap,
+  VideoGenProviders,
+  ZaiChatModels,
+  ZaiDisplayNameUnion,
+  ZaiModelIdUnion
 } from "@/models.ts";
 
 export {
   allProviders,
+  allImgGenProviders,
+  allImgSupportingProviderModels,
+  allVideoGenProviders,
   audioMimeSupportByProvider,
   defaultModelDisplayNameByProvider,
   defaultModelIdByProvider,
   displayNameModelsByProvider,
   displayNameToModelId,
+  displayNameModelsByProviderImgGen,
+  displayNameModelsByProviderVideoGen,
+  displayNameToModelIdImgGen,
+  displayNameToModelIdVideoGen,
   docMimeSupportByProvider,
   getAllProviders,
+  getAllImgGenProviders,
+  getAllVideoGenProviders,
   getDisplayNameByModelId,
   getDisplayNamesForProvider,
+  getDisplayNamesForProviderImgGen,
+  getDisplayNamesForProviderVideoGen,
   getModelIdByDisplayName,
   getModelsForProvider,
+  getModelsForProviderImgGen,
+  getModelsForProviderVideoGen,
   imageGenFacilitatingProviders,
   imageGenProviders,
   imgMimeSupportByProvider,
@@ -178,6 +355,10 @@ export {
   imageModelSets,
   modelIdsByProvider,
   modelIdToDisplayName,
+  modelIdToDisplayNameImgGen,
+  modelIdToDisplayNameVideoGen,
+  modelIdsByProviderImgGen,
+  modelIdsByProviderVideoGen,
   providerModelChatApi,
   providerModelImageGenApi,
   providerModelImageGenFacilitatingApi,
@@ -190,57 +371,133 @@ export {
  */
 export type {
   ArrFieldReplacer,
+  BigIntKeys,
+  BigIntOrNumber,
+  CommonDiscriminants,
   CTR,
   DeepPartial,
   DeepPartialFields,
   DeepReplace,
+  DiscriminatedUnionToRecord,
   DX,
   Equal,
   Expect,
   Extends,
+  FlexiCase,
+  FlexiProvider,
+  Include,
   InferGSPRT,
   InferGSPRTWorkup,
   IsExact,
   IsOptional,
+  LiteralUnion,
+  NormalizeAndInject,
   OnlyOptional,
   OnlyRequired,
   RTC,
   RequireNested,
   Rm,
+  SerializeBigInt,
+  Signals,
   TCN,
   Unenumerate,
+  UnionToRecord,
+  UTR,
   Without,
   XOR
 } from "@/utils.ts";
 
-export { createDraftId, parseDraftId } from "@/utils.ts";
+export { createDraftId, instanceFunc, parseDraftId } from "@/utils.ts";
 
 /**
- * api-handling types for codegen
+ * domain level types
  */
-
 export type {
-  AnthropicError,
-  AnthropicModel,
-  AnthropicResponse,
-  AnthropicSuccess,
-  AssetReadyPayload,
+  AccountSingleton,
+  AttachmentProviderSingleton,
   AttachmentSingleton,
-  BigIntOrNumber,
+  AudioSingleton,
+  ConversationMemoryChunkSingleton,
+  ConversationMemoryContextSingleton,
+  ConversationMemoryStoreSingleton,
   ConversationSingleton,
+  ConversationSingletonOneOff,
   ConvoSettingsSingleton,
   DocumentSingleton,
-  FlexiProvider,
-  GeminiError,
-  GeminiModel,
-  GeminiResponse,
-  GeminiSuccess,
-  GrokModelsResponse,
+  ImageGenJobSingleton,
+  ImageGenOutputSingleton,
   ImageSingleton,
-  ListModelsSingleton,
+  MessageBlockSingleton,
   MessageSingleton,
-  OpenAiError,
-  OpenAiResponse,
-  Signals,
-  SuccessResponse
+  ProfileSingleton,
+  ProviderStoreDocumentSingleton,
+  ProviderStoreSingleton,
+  SessionSingleton,
+  SettingsSingleton,
+  TTSJobSingleton,
+  UserKeySingleton,
+  UserSingleton,
+  UserStoreDocAnnotSingleton,
+  UserStoreDocChunkSingleton,
+  UserStoreDocSingleton,
+  UserStoreSingleton,
+  VideoSingleton
 } from "@/types.ts";
+
+export type {
+  Account,
+  Attachment,
+  AttachmentProvider,
+  AudioMetadata,
+  Conversation,
+  ConversationMemoryChunk,
+  ConversationMemoryContext,
+  ConversationMemoryStore,
+  ConversationSettings,
+  DocumentMetadata,
+  ImageGenJob,
+  ImageGenOutput,
+  ImageMetadata,
+  Message,
+  MessageBlock,
+  Profile,
+  ProviderStore,
+  ProviderStoreDocument,
+  Session,
+  Settings,
+  TTSJob,
+  User,
+  UserKey,
+  UserStore,
+  UserStoreDoc,
+  UserStoreDocAnnot,
+  UserStoreDocChunk,
+  Verification,
+  VideoMetadata
+} from "@/types-workup.ts";
+
+export * from "@/enums.ts";
+
+declare global {
+  interface JSON {
+    parse<T = unknown>(
+      text: string,
+      reviver?: (this: any, key: string, value: any) => any
+    ): T;
+  }
+  interface Body {
+    json<T = unknown>(): Promise<T>;
+  }
+  interface ObjectConstructor {
+    // PropertyKey -> string and number allowed, symbol disallowed (symbol can't be enumerable)
+    keys<T = object>(
+      o: T
+    ): (keyof T extends infer K
+      ? K extends string
+        ? K
+        : K extends number
+          ? `${K}`
+          : never
+      : never)[];
+  }
+}

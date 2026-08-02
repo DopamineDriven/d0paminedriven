@@ -193,7 +193,7 @@
     "@d0paminedriven/pdfdown": "catalog:dd",
     "dotenv": "catalog:dotenv",
     "dotenv-expand": "catalog:dotenv",
-    "fflate": "^0.8.2"
+    "fflate": "catalog:fflate"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
@@ -201,7 +201,6 @@
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "catalog:node",
     "@typescript/native-preview": "catalog:tsgo",
-    "chokidar": "^5.0.0",
     "dotenv-cli": "catalog:dotenv",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",

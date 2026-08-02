@@ -4,7 +4,7 @@
   "compilerOptions": {
     "alwaysStrict": true,
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ESNext", "ES2024", "ScriptHost"],
+    "lib": ["DOM", "DOM.Iterable", "ESNext", "ScriptHost"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ESNext",

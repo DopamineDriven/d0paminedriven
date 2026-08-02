@@ -10,14 +10,13 @@
       }
     ],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "ignoreDeprecations":"6.0",
     "types": ["*"]
   },
   "include": [
     ".",
     "next-env.d.ts",
     "next.config.ts",
-    "postcss.config.mjs",
+    "postcss.config.ts",
     "tailwind.config.ts",
     "src/**/*.tsx",
     "src/**/*.ts",

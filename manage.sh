@@ -130,6 +130,9 @@ clean_house() {
 # Function to build specific packages
 build_targeted() {
     local build_order=(
+        "@d0paminedriven/eslint-config"
+        "@d0paminedriven/prettier-config"
+        "@d0paminedriven/vitest-config"
         "@d0paminedriven/chess-icons"
         "@d0paminedriven/iso-3166-1"
         "@d0paminedriven/metadata"

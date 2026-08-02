@@ -90,7 +90,6 @@
   "typescript.locale": "en",
   "typescript.referencesCodeLens.enabled": true,
   "typescript.referencesCodeLens.showOnAllFunctions": true,
-  "typescript.experimental.useTsgo": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "yaml.hover": true,
   "markdown-pdf.margin.top": "0.5in",
@@ -128,5 +127,6 @@
   "prisma.pinToPrisma6": true,
   "[sql]": {
     "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
-  }
+  },
+  "js/ts.experimental.useTsgo": true
 }

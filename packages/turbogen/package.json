@@ -107,21 +107,22 @@
     "build": "tsdown",
     "dev": "pnpm build",
     "lint": "eslint",
+    "typecheck": "tsgo --noEmit",
     "clean": "git clean -xdf .turbo dist node_modules"
   },
   "dependencies": {
-    "@d0paminedriven/fs": "^11.0.0",
-    "@inquirer/core": "^11.1.7",
-    "@inquirer/prompts": "^8.3.2",
+    "@d0paminedriven/fs": "catalog:dd",
+    "@inquirer/core": "catalog:inquirer",
+    "@inquirer/prompts": "catalog:inquirer",
     "dotenv": "catalog:dotenv",
-    "gradient-string": "^3.0.0"
+    "gradient-string": "catalog:gradient"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@inquirer/type": "^4.0.4",
-    "@types/gradient-string": "^1.1.6",
+    "@inquirer/type": "catalog:inquirer",
+    "@types/gradient-string": "catalog:gradient",
     "@types/node": "catalog:node",
     "@typescript/native-preview": "catalog:tsgo",
     "dotenv-cli": "catalog:dotenv",

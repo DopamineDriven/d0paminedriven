@@ -1,0 +1,400 @@
+export const AssetOrigin = {
+  UPLOAD: 'UPLOAD',
+  REMOTE: 'REMOTE',
+  GENERATED: 'GENERATED',
+  PASTED: 'PASTED',
+  SCREENSHOT: 'SCREENSHOT',
+  IMPORTED: 'IMPORTED',
+  SCRAPED: 'SCRAPED'
+} as const
+
+export type AssetOrigin = (typeof AssetOrigin)[keyof typeof AssetOrigin]
+
+
+export const AssetStatus = {
+  REQUESTED: 'REQUESTED',
+  PLANNED: 'PLANNED',
+  UPLOADING: 'UPLOADING',
+  STORED: 'STORED',
+  SCANNING: 'SCANNING',
+  READY: 'READY',
+  FAILED: 'FAILED',
+  QUARANTINED: 'QUARANTINED',
+  ATTACHED: 'ATTACHED',
+  DELETED: 'DELETED'
+} as const
+
+export type AssetStatus = (typeof AssetStatus)[keyof typeof AssetStatus]
+
+
+export const CompatStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  FAILED: 'FAILED',
+  ALIASED: 'ALIASED'
+} as const
+
+export type CompatStatus = (typeof CompatStatus)[keyof typeof CompatStatus]
+
+
+export const AssetType = {
+  DOCUMENT: 'DOCUMENT',
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO',
+  AUDIO: 'AUDIO',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type AssetType = (typeof AssetType)[keyof typeof AssetType]
+
+
+export const ChecksumAlgo = {
+  CRC32: 'CRC32',
+  CRC32C: 'CRC32C',
+  SHA1: 'SHA1',
+  SHA256: 'SHA256',
+  CRC64NVME: 'CRC64NVME'
+} as const
+
+export type ChecksumAlgo = (typeof ChecksumAlgo)[keyof typeof ChecksumAlgo]
+
+
+export const UploadMethod = {
+  FETCHED: 'FETCHED',
+  PRESIGNED: 'PRESIGNED',
+  SERVER: 'SERVER',
+  GENERATED: 'GENERATED'
+} as const
+
+export type UploadMethod = (typeof UploadMethod)[keyof typeof UploadMethod]
+
+
+export const ImageFormat = {
+  jpeg: 'jpeg',
+  png: 'png',
+  gif: 'gif',
+  webp: 'webp',
+  avif: 'avif',
+  heic: 'heic',
+  apng: 'apng',
+  bmp: 'bmp',
+  tiff: 'tiff',
+  ico: 'ico',
+  jxl: 'jxl',
+  jp2: 'jp2',
+  jpx: 'jpx',
+  jxr: 'jxr',
+  jls: 'jls',
+  svg: 'svg',
+  raw: 'raw',
+  dng: 'dng',
+  cr2: 'cr2',
+  nef: 'nef',
+  arw: 'arw',
+  hdr: 'hdr',
+  pic: 'pic',
+  rgbe: 'rgbe',
+  xyze: 'xyze',
+  unknown: 'unknown'
+} as const
+
+export type ImageFormat = (typeof ImageFormat)[keyof typeof ImageFormat]
+
+
+export const ColorModel = {
+  rgb: 'rgb',
+  rgba: 'rgba',
+  grayscale: 'grayscale',
+  grayscale_alpha: 'grayscale_alpha',
+  indexed: 'indexed',
+  cmyk: 'cmyk',
+  ycbcr: 'ycbcr',
+  ycck: 'ycck',
+  vector: 'vector',
+  lab: 'lab',
+  unknown: 'unknown'
+} as const
+
+export type ColorModel = (typeof ColorModel)[keyof typeof ColorModel]
+
+
+export const ColorSpace = {
+  srgb: 'srgb',
+  display_p3: 'display_p3',
+  adobe_rgb: 'adobe_rgb',
+  prophoto_rgb: 'prophoto_rgb',
+  rec2020: 'rec2020',
+  rec709: 'rec709',
+  cmyk: 'cmyk',
+  lab: 'lab',
+  xyz: 'xyz',
+  gray: 'gray',
+  unknown: 'unknown'
+} as const
+
+export type ColorSpace = (typeof ColorSpace)[keyof typeof ColorSpace]
+
+
+export const ReasoningEffort = {
+  none: 'none',
+  minimal: 'minimal',
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  xhigh: 'xhigh'
+} as const
+
+export type ReasoningEffort = (typeof ReasoningEffort)[keyof typeof ReasoningEffort]
+
+
+export const OutputVerbosity = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high'
+} as const
+
+export type OutputVerbosity = (typeof OutputVerbosity)[keyof typeof OutputVerbosity]
+
+
+export const ImageGenOutputKind = {
+  PARTIAL: 'PARTIAL',
+  FINAL: 'FINAL'
+} as const
+
+export type ImageGenOutputKind = (typeof ImageGenOutputKind)[keyof typeof ImageGenOutputKind]
+
+
+export const ImageGenStage = {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  PERSISTING: 'PERSISTING',
+  FINALIZING: 'FINALIZING',
+  COMPLETED: 'COMPLETED',
+  REFUSAL: 'REFUSAL',
+  FAILED: 'FAILED',
+  ABORTED: 'ABORTED'
+} as const
+
+export type ImageGenStage = (typeof ImageGenStage)[keyof typeof ImageGenStage]
+
+
+export const MemoryChunkingState = {
+  QUEUED: 'QUEUED',
+  CHUNKING: 'CHUNKING',
+  EMBEDDING: 'EMBEDDING',
+  INDEXED: 'INDEXED',
+  ERROR: 'ERROR'
+} as const
+
+export type MemoryChunkingState = (typeof MemoryChunkingState)[keyof typeof MemoryChunkingState]
+
+
+export const MemorySummaryState = {
+  QUEUED: 'QUEUED',
+  SUMMARIZING: 'SUMMARIZING',
+  READY: 'READY',
+  ERROR: 'ERROR',
+  SKIPPED: 'SKIPPED'
+} as const
+
+export type MemorySummaryState = (typeof MemorySummaryState)[keyof typeof MemorySummaryState]
+
+
+export const MemoryChunkBoundaryReason = {
+  MESSAGE_COUNT: 'MESSAGE_COUNT',
+  TOKEN_LIMIT: 'TOKEN_LIMIT',
+  IDLE_TIME: 'IDLE_TIME',
+  TOPIC_SHIFT: 'TOPIC_SHIFT',
+  SESSION_END: 'SESSION_END',
+  OTHER: 'OTHER'
+} as const
+
+export type MemoryChunkBoundaryReason = (typeof MemoryChunkBoundaryReason)[keyof typeof MemoryChunkBoundaryReason]
+
+
+export const MemorySchemaVersion = {
+  v1_0: 'v1_0'
+} as const
+
+export type MemorySchemaVersion = (typeof MemorySchemaVersion)[keyof typeof MemorySchemaVersion]
+
+
+export const MemoryTranscriptRendererVersion = {
+  v1_0: 'v1_0'
+} as const
+
+export type MemoryTranscriptRendererVersion = (typeof MemoryTranscriptRendererVersion)[keyof typeof MemoryTranscriptRendererVersion]
+
+
+export const MemoryChunkSummaryPromptVersion = {
+  v1_0: 'v1_0'
+} as const
+
+export type MemoryChunkSummaryPromptVersion = (typeof MemoryChunkSummaryPromptVersion)[keyof typeof MemoryChunkSummaryPromptVersion]
+
+
+export const MemoryRollingSummaryReasoningVersion = {
+  v1_0: 'v1_0'
+} as const
+
+export type MemoryRollingSummaryReasoningVersion = (typeof MemoryRollingSummaryReasoningVersion)[keyof typeof MemoryRollingSummaryReasoningVersion]
+
+
+export const MessageType = {
+  AUDIO_GEN: 'AUDIO_GEN',
+  COMPUTER_USE: 'COMPUTER_USE',
+  IMAGE_GEN: 'IMAGE_GEN',
+  DOC_GEN: 'DOC_GEN',
+  DEEP_RESEARCH: 'DEEP_RESEARCH',
+  TEXT: 'TEXT',
+  VIDEO_GEN: 'VIDEO_GEN'
+} as const
+
+export type MessageType = (typeof MessageType)[keyof typeof MessageType]
+
+
+export const SenderType = {
+  USER: 'USER',
+  AI: 'AI',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type SenderType = (typeof SenderType)[keyof typeof SenderType]
+
+
+export const MessageBlockType = {
+  ENCRYPTED_THINKING: 'ENCRYPTED_THINKING',
+  THINKING: 'THINKING',
+  TEXT: 'TEXT'
+} as const
+
+export type MessageBlockType = (typeof MessageBlockType)[keyof typeof MessageBlockType]
+
+
+export const ProviderAssetState = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  FAILED: 'FAILED',
+  DELETED: 'DELETED'
+} as const
+
+export type ProviderAssetState = (typeof ProviderAssetState)[keyof typeof ProviderAssetState]
+
+
+export const ProviderDocState = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  ACTIVE: 'ACTIVE',
+  FAILED: 'FAILED'
+} as const
+
+export type ProviderDocState = (typeof ProviderDocState)[keyof typeof ProviderDocState]
+
+
+export const Provider = {
+  ALIBABA: 'ALIBABA',
+  ANTHROPIC: 'ANTHROPIC',
+  COHERE: 'COHERE',
+  DEEPSEEK: 'DEEPSEEK',
+  GEMINI: 'GEMINI',
+  GROK: 'GROK',
+  META: 'META',
+  MINIMAX: 'MINIMAX',
+  MISTRAL: 'MISTRAL',
+  MOONSHOTAI: 'MOONSHOTAI',
+  OPENAI: 'OPENAI',
+  SAKANA: 'SAKANA',
+  VERCEL: 'VERCEL',
+  ZAI: 'ZAI'
+} as const
+
+export type Provider = (typeof Provider)[keyof typeof Provider]
+
+
+export const TTSStatus = {
+  NONE: 'NONE',
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  COUPLED: 'COUPLED',
+  FAILED: 'FAILED'
+} as const
+
+export type TTSStatus = (typeof TTSStatus)[keyof typeof TTSStatus]
+
+
+export const ThemePreference = {
+  LIGHT: 'LIGHT',
+  DARK: 'DARK',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type ThemePreference = (typeof ThemePreference)[keyof typeof ThemePreference]
+
+
+export const AnnotSubtype = {
+  LINK: 'LINK',
+  TEXT: 'TEXT',
+  HIGHLIGHT: 'HIGHLIGHT',
+  WIDGET: 'WIDGET',
+  MARKUP: 'MARKUP',
+  REFERENCE: 'REFERENCE',
+  AUTOLINK: 'AUTOLINK'
+} as const
+
+export type AnnotSubtype = (typeof AnnotSubtype)[keyof typeof AnnotSubtype]
+
+
+export const VisualMediaContent = {
+  PHOTOS: 'PHOTOS',
+  CHARTS: 'CHARTS',
+  DIAGRAMS: 'DIAGRAMS',
+  SLIDES: 'SLIDES',
+  TABLES: 'TABLES',
+  VIDEO: 'VIDEO',
+  MIXED: 'MIXED',
+  AUDIO: 'AUDIO'
+} as const
+
+export type VisualMediaContent = (typeof VisualMediaContent)[keyof typeof VisualMediaContent]
+
+
+export const VisualMediaSource = {
+  NATIVE: 'NATIVE',
+  SCANNED: 'SCANNED',
+  MIXED: 'MIXED'
+} as const
+
+export type VisualMediaSource = (typeof VisualMediaSource)[keyof typeof VisualMediaSource]
+
+
+export const UserStoreDocState = {
+  QUEUED: 'QUEUED',
+  EXTRACTING: 'EXTRACTING',
+  INDEXING: 'INDEXING',
+  ACTIVE: 'ACTIVE',
+  PARTIAL: 'PARTIAL',
+  REINDEXING: 'REINDEXING',
+  FAILED: 'FAILED'
+} as const
+
+export type UserStoreDocState = (typeof UserStoreDocState)[keyof typeof UserStoreDocState]
+
+
+export const UserStoreChunkState = {
+  QUEUED: 'QUEUED',
+  EMBEDDING: 'EMBEDDING',
+  READY: 'READY',
+  ERROR: 'ERROR',
+  RETRYING: 'RETRYING',
+  ABANDONED: 'ABANDONED'
+} as const
+
+export type UserStoreChunkState = (typeof UserStoreChunkState)[keyof typeof UserStoreChunkState]
+
+
+export const UserStoreSchemaVersion = {
+  v1_0: 'v1_0'
+} as const
+
+export type UserStoreSchemaVersion = (typeof UserStoreSchemaVersion)[keyof typeof UserStoreSchemaVersion]

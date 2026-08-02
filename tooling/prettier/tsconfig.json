@@ -1,9 +1,9 @@
 {
-  "extends": "@d0paminedriven/tsconfig/base.json",
+  "extends": "@d0paminedriven/tsconfig/node-pkg.json",
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-        "types": ["node"]
+    "types": ["*"]
   },
-  "include": ["."],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules"]
 }

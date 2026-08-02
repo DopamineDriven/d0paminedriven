@@ -98,10 +98,10 @@
   },
   "dependencies": {
     "@d0paminedriven/pdfdown": "catalog:dd",
-    "fflate": "^0.8.2"
+    "fflate": "catalog:fflate"
   },
   "devDependencies": {
-    "@d0paminedriven/fs": "^11.0.0",
+    "@d0paminedriven/fs": "catalog:dd",
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",

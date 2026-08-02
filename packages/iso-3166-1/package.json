@@ -51,7 +51,6 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./*": "./dist/*.js",
     "./iso-3166-1": "./dist/iso-3166-1/index.js",
     "./types": "./dist/types/index.js"
   },
@@ -64,7 +63,7 @@
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
-    "@d0paminedriven/fs": "^11.0.0",
+    "@d0paminedriven/fs": "catalog:dd",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "catalog:node",
