@@ -11,7 +11,7 @@ function _getPackageManager2(withCli = false) {
       command: "pnpm -v",
       cwd: fs.cwd
     });
-    return `cli pnpm@${c.trim()}` as const;
+    return `cli pnpm@${c.toString("utf-8").trim()}` as const;
   }
 }
 
@@ -23,9 +23,9 @@ const _p = (argv = process.argv[2]) => {
 
 // console.log(getPackageManager2(p(process.argv[2])));
 
-const postBuildService = ()=> {
-    // prettier-ignore
-    return `import { Fs } from "@d0paminedriven/fs";
+const postBuildService = () => {
+  // prettier-ignore
+  return `import { Fs } from "@d0paminedriven/fs";
 
 const fs = new Fs(process.cwd());
 
@@ -119,8 +119,7 @@ if (process.argv[2] === "flag-check") {
   handleUseClientInjectionOfRelevantChunks(isolateChunkPaths());
 }
 ` as const;
-  }
-
+};
 
 const fs = new Fs(process.cwd());
 

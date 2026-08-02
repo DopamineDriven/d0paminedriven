@@ -115,12 +115,15 @@
     "@inquirer/core": "catalog:inquirer",
     "@inquirer/prompts": "catalog:inquirer",
     "dotenv": "catalog:dotenv",
-    "gradient-string": "catalog:gradient"
+    "gradient-string": "catalog:gradient",
+    "js-yaml": "^5.2.3",
+    "yaml": "catalog:yaml"
   },
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
+    "@d0paminedriven/type-utils": "workspace:*",
     "@inquirer/type": "catalog:inquirer",
     "@types/gradient-string": "catalog:gradient",
     "@types/node": "catalog:node",

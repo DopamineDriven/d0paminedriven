@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import React from "react";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/ui/page-layout";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import "@d0paminedriven/ui/globals.css";
+import Script from "next/script";
 import { CookieProvider } from "@/context/cookie-context";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -43,13 +44,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en" data-scroll-behavior="smooth">
-      <head>
-        <script
-          async={true}
-          id="prevent-flash-of-wrong-theme"
-          dangerouslySetInnerHTML={{
-            __html: `
+    <html
+      suppressHydrationWarning
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${inter.variable}`}>
+      <Script
+        async={true}
+        strategy="beforeInteractive"
+        id="prevent-flash-of-wrong-theme"
+        dangerouslySetInnerHTML={{
+          __html: `
               (function() {
                 try {
                   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -59,13 +64,11 @@ export default function RootLayout({
                 } catch (e) {}
               })();
             `
-          }}
-        />
-      </head>
+        }}
+      />
       <body
         className={cn(
-          "bg-background font-cal-sans m-0 h-dvh w-screen overflow-x-hidden p-0 antialiased",
-          inter.variable
+          "bg-background font-cal-sans m-0 h-dvh w-screen overflow-x-hidden p-0 antialiased"
         )}>
         <CookieProvider>
           <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem>

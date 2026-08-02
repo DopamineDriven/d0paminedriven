@@ -1,6 +1,8 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
+/* eslint-disable @typescript-eslint/await-thenable */
+
 export class RootScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
@@ -45,7 +47,8 @@ export class RootScaffolder {
     return [
       `@${this.workspace}/eslint-config`,
       `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`
+      `@${this.workspace}/tsconfig`,
+      `@${this.workspace}/vitest-config`
     ] as const;
   }
 
@@ -63,37 +66,6 @@ export class RootScaffolder {
       "turbo",
       "typescript"
     ] as const;
-  }
-
-  private get eslintTemplate() {
-    // prettier-ignore
-    return `import baseConfig from "@${this.workspace}/eslint-config/base";
-
-/** @type {import('typescript-eslint').Config} */
-export default [
-  {
-    rules: {
-      "@typescript-eslint/consistent-type-definitions": "off"
-    },
-    ignores: ["**node_modules**"]
-  },
-  ...baseConfig
-];
-` as const;
-  }
-
-  private get tsconfigTemplate() {
-    // prettier-ignore
-    return `{
-  "extends": "@${this.workspace}/tsconfig/base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "types": ["*"]
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
-}
-`as const;
   }
 
   private get vscodeExtensionsTemplate() {
@@ -293,17 +265,13 @@ max_line_length = 40
       "outputs": ["coverage/**"],
       "dependsOn": []
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
+    "lint": {},
     "dev": {
       "cache": false,
       "dependsOn": ["^build"],
       "persistent": true
     },
-    "typecheck": {
-      "dependsOn": ["^build"]
-    },
+    "typecheck": {},
     "clean": {
       "cache": false
     }
@@ -324,6 +292,18 @@ max_line_length = 40
   - apps/*
   - packages/*
   - tooling/*
+
+enablePrePostScripts: true
+nodeLinker: hoisted
+autoInstallPeers: true
+minimumReleaseAge: 0
+trustPolicy: "off"
+trustLockfile: true
+blockExoticSubdeps: false
+ignorePatchFailures: true
+dangerouslyAllowAllBuilds: true
+verifyStoreIntegrity: false
+
 allowBuilds:
   '@swc/core': true
   esbuild: true
@@ -445,6 +425,7 @@ pnpm-lock.yaml
       ),
       this.fetchShellScript(this.workspace)
     ]);
+
     return Promise.all([
       this.configHandler.handleNpmrc(),
       this.writeTarget(".prettierignore", this.prettierignoreTemplate),
@@ -456,10 +437,8 @@ pnpm-lock.yaml
       this.writeTarget(".vscode/settings.json", this.vscodeSettingsTemplate),
       this.writeTarget(".editorconfig", this.editorConfigTemplate),
       this.writeTarget(".gitignore", this.gitignoreTemplate),
-      this.writeTarget("eslint.config.mjs", this.eslintTemplate),
       this.writeTarget("package.json", JSON.stringify(pkgJson, null, 2)),
       this.writeTarget("pnpm-workspace.yaml", this.pnpmWorkspaceYamlTemplate),
-      this.writeTarget("tsconfig.json", this.tsconfigTemplate),
       this.writeTarget("turbo.json", this.turboJsonTemplate),
       this.writeTarget("README.md", this.readmeMinimal)
     ]);

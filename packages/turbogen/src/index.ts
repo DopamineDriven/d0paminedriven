@@ -39,14 +39,5 @@ declare global {
           ? `${K}`
           : never
       : never)[];
-    entries<T = object, V extends keyof T = keyof T>(
-      o: T
-    ): (V extends infer K
-      ? K extends string
-        ? [K, T[V]]
-        : K extends number
-          ? [`${K}`, T[V]]
-          : never
-      : never)[];
   }
 }

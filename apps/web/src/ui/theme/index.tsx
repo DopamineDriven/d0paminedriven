@@ -1,7 +1,7 @@
 "use client";
 
-import { Button, Icon } from "@d0paminedriven/ui";
 import { useEffect, useState } from "react";
+import { BaseButton, Moon, Sun } from "@d0paminedriven/ui";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
@@ -9,6 +9,7 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -22,7 +23,7 @@ export function ThemeToggle() {
       window.matchMedia("(prefers-color-scheme: dark)").matches;
 
     return (
-      <Button
+      <BaseButton
         variant="ghost"
         size="icon"
         style={{
@@ -36,11 +37,7 @@ export function ThemeToggle() {
           height: "2.5rem",
           borderRadius: "0.375rem"
         }}>
-        {prefersDark ? (
-          <Icon.Moon className="size-5" />
-        ) : (
-          <Icon.Sun className="size-5" />
-        )}
+        {prefersDark ? <Moon className="size-5" /> : <Sun className="size-5" />}
         <span
           style={{
             position: "absolute",
@@ -55,12 +52,12 @@ export function ThemeToggle() {
           }}>
           Toggle theme
         </span>
-      </Button>
+      </BaseButton>
     );
   }
 
   return (
-    <Button
+    <BaseButton
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
@@ -76,9 +73,9 @@ export function ThemeToggle() {
         borderRadius: "0.375rem"
       }}>
       {resolvedTheme === "dark" ? (
-        <Icon.Moon className="size-5" />
+        <Moon className="size-5" />
       ) : (
-        <Icon.Sun className="size-5" />
+        <Sun className="size-5" />
       )}
       <span
         style={{
@@ -94,6 +91,6 @@ export function ThemeToggle() {
         }}>
         Toggle theme
       </span>
-    </Button>
+    </BaseButton>
   );
 }
