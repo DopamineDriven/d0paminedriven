@@ -38,7 +38,7 @@
   "css.hover.references": true,
   "editor.bracketPairColorization.enabled": false,
   "svg.preview.autoShow": false,
-  "js/ts.hover.maximumLength": 500,
+  "js/ts.hover.maximumLength": 1000,
   "tailwindcss-intellisense.trace.server": "messages",
   "svg.preview.disable": true,
   "svg.preview.mode": "svg",
@@ -46,7 +46,6 @@
   "editor.suggest.showStatusBar": true,
   "eslint.enable": true,
   "eslint.useFlatConfig": true,
-  "eslint.nodePath": "node_modules",
   "terminal.integrated.suggest.enabled": false,
   "eslint.rules.customizations": [
     {
@@ -66,7 +65,6 @@
     }
   ],
   "files.autoSave": "afterDelay",
-  "javascript.referencesCodeLens.showOnAllFunctions": true,
   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
@@ -82,15 +80,19 @@
     ".*variant.*",
     ".*Styles.*"
   ],
-  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "tailwindCSS.colorDecorators": true,
-  "typescript.tsserver.web.typeAcquisition.enabled": true,
-  "typescript.implementationsCodeLens.enabled": true,
-  "typescript.implementationsCodeLens.showOnInterfaceMethods": true,
-  "typescript.locale": "en",
-  "typescript.referencesCodeLens.enabled": true,
-  "typescript.referencesCodeLens.showOnAllFunctions": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsserver.web.typeAcquisition.enabled": true,
+  // "js/ts.implementationsCodeLens.enabled": true,
+  // "js/ts.implementationsCodeLens.showOnInterfaceMethods": true,
+  "js/ts.locale": "en",
+  "js/ts.referencesCodeLens.showOnAllFunctions": true,
+  // "typescript.native-preview.trace.server": "messages",
+  "js/ts.experimental.useTsgo": true,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.suggest.autoImports": true,
+  "js/ts.suggest.enabled": true,
+
   "yaml.hover": true,
   "markdown-pdf.margin.top": "0.5in",
   "markdown-pdf.margin.bottom": "0.5in",
@@ -104,8 +106,6 @@
   "markdown-pdf.footerTemplate": "<div style=\"font-size: 6px; margin: 0 auto;\"> <span class='pageNumber'></span> / <span class='totalPages'></span></div>",
   "markdown-pdf.displayHeaderFooter": true,
   "markdown-pdf.emoji": true,
-  "pdf-cos-syntax.trace.server": "messages",
-  "pdf-cos-syntax.maxNumberOfProblems": 100,
   "markdown-pdf.highlightStyle": "dark.css",
   "markdown-pdf.styles": [
     "/home/dopaminedriven/.config/config-fonts/misc/markdown-pdf.css"
@@ -120,13 +120,13 @@
     "markdown": false,
     "scminput": false
   },
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  },
   "python.analysis.enableColorPicker": false,
-  "prisma.pinToPrisma6": true,
   "[sql]": {
     "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
   },
-  "js/ts.experimental.useTsgo": true
+  "typescript.native-preview.tsdk": "/home/dopaminedriven/personal/d0pamindriven/node_modules/@typescript/native-preview",
+  "js/ts.implicitProjectConfig.target": "ESNext",
+  "js/ts.referencesCodeLens.enabled": true,
+  "terminal.integrated.defaultLocation": "view",
+  "terminal.integrated.defaultProfile.linux": "bash"
 }

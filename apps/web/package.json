@@ -6,11 +6,12 @@
   "license": "MIT",
   "prettier": "@d0paminedriven/prettier-config",
   "scripts": {
-    "dev": "next dev -p 3004",
+    "dev": "rm -rf .next && next dev -p 3004",
     "build": "next build",
     "format": "prettier --write \"**/*.{ts,tsx,cts,mts,js,jsx,mjs,cjs,json,yaml,yml,css,html,md,mdx,graphql,gql}\" --ignore-unknown --cache",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsgo --noEmit",
     "typegen": "next typegen"
   },
   "dependencies": {
@@ -38,7 +39,7 @@
     "js-cookie": "catalog:cookies",
     "motion": "catalog:motion",
     "motion-dom": "catalog:motion",
-    "motion-plus": "https://api.motion.dev/registry.tgz?package=motion-plus&version=2.11.3",
+    "motion-plus": "https://api.motion.dev/registry.tgz?package=motion-plus&version=2.12.0",
     "motion-plus-dom": "catalog:motion",
     "motion-utils": "catalog:motion",
     "next": "catalog:next",

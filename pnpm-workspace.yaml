@@ -12,6 +12,7 @@ trustLockfile: true
 blockExoticSubdeps: false
 ignorePatchFailures: true
 dangerouslyAllowAllBuilds: true
+verifyStoreIntegrity: false
 
 catalogs:
   babel:

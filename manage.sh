@@ -142,6 +142,7 @@ build_targeted() {
         "@d0paminedriven/types"
         "@d0paminedriven/fs"
         "@d0paminedriven/ui"
+        "@d0paminedriven/web"
     )
 
     for package in "${build_order[@]}"; do

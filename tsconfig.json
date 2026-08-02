@@ -1,9 +1,0 @@
-{
-  "extends": "@d0paminedriven/tsconfig/base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "types": ["*"]
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
-}

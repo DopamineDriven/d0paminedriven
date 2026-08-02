@@ -6,7 +6,7 @@
     "type": "git"
   },
   "private": true,
-  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264",
+  "packageManager": "pnpm@11.18.0+sha512.33d83c77da82f49fba836925c6f1b841181ec3132b670639bd012f7075f5c7cf634c5f870147c19aae7478fac01df09d8892e880454896edd23ee9b33757563c",
   "scripts": {
     "build:chess-icons": "turbo build --filter=@d0paminedriven/chess-icons",
     "build:eslint": "turbo build --filter=@d0paminedriven/eslint-config",
@@ -37,7 +37,8 @@
     "generate:base64": "openssl rand -base64 64",
     "generate:hex": "openssl rand -hex 64",
     "npm:registry": "npm set registry https://registry.npmjs.org",
-    "run:web": "turbo dev --filter=@d0paminedriven/web"
+    "run:web": "turbo dev --filter=@d0paminedriven/web",
+    "motion:version": "bash ./motion-version.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:biome",
