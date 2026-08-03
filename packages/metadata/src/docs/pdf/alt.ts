@@ -1,3 +1,4 @@
+import { extractTextPerPage } from "@d0paminedriven/pdfdown";
 import type {
   AnnotsCache,
   ImgsCache,
@@ -80,8 +81,8 @@ export class ObjectMapServiceAlt extends PdfMapperWorkup {
                 // try direct key match first, then match by object number
                 const annotRec =
                   annotMap.get(`${objNum} 0`) ??
-                  Array.from(annotMap.values()).find(
-                    a => a.id.startsWith(objNum + " ")
+                  Array.from(annotMap.values()).find(a =>
+                    a.id.startsWith(objNum + " ")
                   );
                 if (annotRec?.href && !rec.annotIds.has(annotRec.id)) {
                   rec.annotIds.add(annotRec.id);
@@ -105,8 +106,8 @@ export class ObjectMapServiceAlt extends PdfMapperWorkup {
             const annotRec =
               annotMap.get(refId) ??
               annotMap.get(`${refId} obj`) ??
-              Array.from(annotMap.values()).find(
-                a => a.id.startsWith(objNum + " ")
+              Array.from(annotMap.values()).find(a =>
+                a.id.startsWith(objNum + " ")
               );
             if (annotRec?.href && !rec.annotIds.has(annotRec.id)) {
               rec.annotIds.add(annotRec.id);
@@ -169,10 +170,42 @@ export class ObjectMapServiceAlt extends PdfMapperWorkup {
     const imgPagesFromSet = Array.from(imgPages);
     const annotIds = Array.from(annotMap);
     // const annotIdsFromSet = Array.from(annotIds);
-    // const pageIdsTuple = Array.from(props.pageIdsMap);
+
     // const annotIdsTuple = Array.from(props.annotIdsMap);
     const annotsArr = Array.from(props.annotsMap.values());
+    const newArr = Array.of<string>();
+    for (const pa of props.pageObjArr) {
+      if (pa.obj.length <= 20) {
+        const findPage = props.examine?.find(
+          v => v.includes(pa.id) || /(?:Page(?!s))/g.test(v)
+        );
+        if (findPage) {
+          newArr.push(findPage);
+        }
+      }
+    }
+
+    if (props.pageObjArr.length < 1 && props.examine) {
+      for (const x of props.examine) {
+        if (x.includes("page")) {
+          newArr.push(x);
+        }
+      }
+    }
+    if (props.pageObjArr.length > 1) {
+      for (const v of props.pageObjArr) {
+        newArr.push(`${v.id} ${v.obj}`);
+      }
+    }
+    const textPerPage = extractTextPerPage(
+      Buffer.isBuffer(props.rawBuff)
+        ? props.rawBuff
+        : Buffer.from(props.rawBuff)
+    );
+
     return {
+      version: props.version,
+      linearized: props.linearized,
       xmp: props.xmp ?? undefined,
       annotPages: annotPagesFromSet,
       imgPages: imgPagesFromSet,
@@ -180,7 +213,10 @@ export class ObjectMapServiceAlt extends PdfMapperWorkup {
       annotObjs: annotIds,
       s: Array.from(props.annotsMap),
       totalPages: props.countFallback,
-      annotsArr
+      annotsArr,
+      pages: newArr,
+      examine: props.examine,
+      textPerPage
       // pageIdsTuple,
       // annotsTuple,
       // annotIdsTuple,

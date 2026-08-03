@@ -1,4 +1,5 @@
 import type { ComponentPropsWithRef } from "react";
+import { AICoalesce } from "@/icons/aicoalesce";
 import { AnonymousIcon } from "@/icons/anonymous";
 import { AnthropicIcon } from "@/icons/anthropic";
 import { ArrowDownCircle } from "@/icons/arrow-down-circle";
@@ -12,10 +13,15 @@ import { ChevronDown } from "@/icons/chevron-down";
 import { ChevronRight } from "@/icons/chevron-right";
 import { ChevronUp } from "@/icons/chevron-up";
 import { Circle } from "@/icons/circle";
+import { CircleCheck } from "@/icons/circle-check";
 import { CirclePlus } from "@/icons/circle-plus";
+import { ClaudeIcon } from "@/icons/claude";
 import { Code } from "@/icons/code";
+import { CohereIcon, CohereIconCurrentColor } from "@/icons/cohere";
 import { Compass } from "@/icons/compass";
 import { Copy } from "@/icons/copy";
+import { DeepSeek } from "@/icons/deepseek";
+import { Download } from "@/icons/download";
 import { Edit } from "@/icons/edit";
 import { EditIcon } from "@/icons/edit-icon";
 import { EllipsisHorizontal } from "@/icons/ellipsis-horizontal";
@@ -25,14 +31,18 @@ import { Eye } from "@/icons/eye";
 import { EyeClosed } from "@/icons/eye-closed";
 import { EyeOff } from "@/icons/eye-off";
 import { FileText } from "@/icons/file-text";
+import { Folder } from "@/icons/folder";
 import { GeminiIcon } from "@/icons/gemini";
 import { Github } from "@/icons/github";
 import { GoogleIcon } from "@/icons/google";
 import { GripVertical } from "@/icons/grip-vertical";
 import { History } from "@/icons/history";
+import { ImageGen } from "@/icons/image-gen";
 import { ImageIcon } from "@/icons/image-icon";
+import { Info } from "@/icons/info";
 import { Key } from "@/icons/key";
 import { KeyRound } from "@/icons/key-round";
+import { Kimi } from "@/icons/kimi";
 import { Layers } from "@/icons/layers";
 import { Loader } from "@/icons/loader";
 import { LoaderCircle } from "@/icons/loader-circle";
@@ -45,7 +55,11 @@ import { MessageSquare } from "@/icons/message-square";
 import { MessageSquareText } from "@/icons/message-square-text";
 import { MetaIcon } from "@/icons/meta";
 import { Mic } from "@/icons/mic";
+import { MinimaxIcon } from "@/icons/minimax";
+import { MistralIcon } from "@/icons/mistral";
 import { Moon } from "@/icons/moon";
+import { MoreHorizontal } from "@/icons/more-horizontal";
+import { OctagonX } from "@/icons/octagon-x";
 import { OpenAiIcon } from "@/icons/openai";
 import { Package } from "@/icons/package";
 import { Palette } from "@/icons/palette";
@@ -53,12 +67,16 @@ import { PanelLeft } from "@/icons/panel-left";
 import { PanelLeftClose } from "@/icons/panel-left-close";
 import { PanelRightClose } from "@/icons/panel-right-close";
 import { Paperclip } from "@/icons/paperclip";
+import { Pause } from "@/icons/pause";
 import { PenLine } from "@/icons/pen-line";
+import { Play } from "@/icons/play";
 import { Plus } from "@/icons/plus";
 import { QuestionMark } from "@/icons/question-mark";
 import { QuoteIcon } from "@/icons/quote";
+import { QwenIcon } from "@/icons/qwen";
 import { ReadAloud } from "@/icons/read-aloud";
 import { RetryIcon } from "@/icons/retry";
+import { SakanaIcon } from "@/icons/sakana";
 import { Save } from "@/icons/save";
 import { Search } from "@/icons/search";
 import { Send } from "@/icons/send";
@@ -67,6 +85,7 @@ import { Settings } from "@/icons/settings";
 import { ShareIcon } from "@/icons/share-icon";
 import { Sparkles } from "@/icons/sparkles";
 import { SquarePen } from "@/icons/square-pen";
+import { Stop } from "@/icons/stop";
 import { Sun } from "@/icons/sun";
 import { Terminal } from "@/icons/terminal";
 import { ThumbsDown } from "@/icons/thumbs-down";
@@ -74,13 +93,16 @@ import { ThumbsUp } from "@/icons/thumbs-up";
 import { Tools } from "@/icons/tools";
 import { Trash } from "@/icons/trash";
 import { TrashSimple } from "@/icons/trash-simple";
+import { TriangleAlert } from "@/icons/triangle-alert";
 import { User } from "@/icons/user";
 import { VercelIcon } from "@/icons/vercel";
 import { X } from "@/icons/x";
 import { XAiIcon } from "@/icons/xai";
+import { Zai } from "@/icons/zai";
 import { Zap } from "@/icons/zap";
 
 const IconComponents = {
+  AICoalesce,
   AnonymousIcon,
   AnthropicIcon,
   ArrowDownCircle,
@@ -95,9 +117,15 @@ const IconComponents = {
   ChevronUp,
   CirclePlus,
   Circle,
+  CircleCheck,
+  ClaudeIcon,
   Code,
+  CohereIcon,
+  CohereIconCurrentColor,
   Compass,
   Copy,
+  DeepSeek,
+  Download,
   Edit,
   EditIcon,
   EllipsisHorizontal,
@@ -107,14 +135,18 @@ const IconComponents = {
   EyeClosed,
   EyeOff,
   FileText,
+  Folder,
   GeminiIcon,
   Github,
   GoogleIcon,
   GripVertical,
   History,
+  ImageGen,
   ImageIcon,
+  Info,
   Key,
   KeyRound,
+  Kimi,
   Layers,
   LoaderCircle,
   LoaderPinwheel,
@@ -127,7 +159,11 @@ const IconComponents = {
   MessageSquareText,
   MetaIcon,
   Mic,
+  MinimaxIcon,
+  MistralIcon,
   Moon,
+  MoreHorizontal,
+  OctagonX,
   OpenAiIcon,
   Package,
   Palette,
@@ -135,12 +171,16 @@ const IconComponents = {
   PanelLeftClose,
   PanelRightClose,
   Paperclip,
+  Pause,
   PenLine,
+  Play,
   Plus,
   QuestionMark,
   QuoteIcon,
+  QwenIcon,
   ReadAloud,
   RetryIcon,
+  SakanaIcon,
   Save,
   Search,
   Send,
@@ -149,6 +189,7 @@ const IconComponents = {
   ShareIcon,
   Sparkles,
   SquarePen,
+  Stop,
   Sun,
   Terminal,
   ThumbsDown,
@@ -156,10 +197,12 @@ const IconComponents = {
   Tools,
   Trash,
   TrashSimple,
+  TriangleAlert,
   User,
   VercelIcon,
   X,
   XAiIcon,
+  Zai,
   Zap
 } as const;
 
@@ -197,6 +240,7 @@ export const Icon = Object.assign(
 );
 
 export {
+  AICoalesce,
   AnonymousIcon,
   AnthropicIcon,
   ArrowDownCircle,
@@ -211,9 +255,15 @@ export {
   ChevronUp,
   CirclePlus,
   Circle,
+  CircleCheck,
+  ClaudeIcon,
   Code,
+  CohereIcon,
+  CohereIconCurrentColor,
   Compass,
   Copy,
+  DeepSeek,
+  Download,
   Edit,
   EditIcon,
   EllipsisHorizontal,
@@ -223,14 +273,18 @@ export {
   EyeClosed,
   EyeOff,
   FileText,
+  Folder,
   GeminiIcon,
   Github,
   GoogleIcon,
   GripVertical,
   History,
+  ImageGen,
   ImageIcon,
+  Info,
   Key,
   KeyRound,
+  Kimi,
   Layers,
   LoaderCircle,
   LoaderPinwheel,
@@ -243,7 +297,11 @@ export {
   MessageSquareText,
   MetaIcon,
   Mic,
+  MinimaxIcon,
+  MistralIcon,
   Moon,
+  MoreHorizontal,
+  OctagonX,
   OpenAiIcon,
   Package,
   Palette,
@@ -251,12 +309,16 @@ export {
   PanelLeftClose,
   PanelRightClose,
   Paperclip,
+  Pause,
   PenLine,
+  Play,
   Plus,
   QuestionMark,
   QuoteIcon,
+  QwenIcon,
   ReadAloud,
   RetryIcon,
+  SakanaIcon,
   Save,
   Search,
   Send,
@@ -265,6 +327,7 @@ export {
   ShareIcon,
   Sparkles,
   SquarePen,
+  Stop,
   Sun,
   Terminal,
   ThumbsDown,
@@ -272,9 +335,11 @@ export {
   Tools,
   Trash,
   TrashSimple,
+  TriangleAlert,
   User,
   VercelIcon,
   X,
   XAiIcon,
+  Zai,
   Zap
 };

@@ -1,336 +1,211 @@
-import type { XOR } from "@/utils.ts";
+import type {
+  Account,
+  Attachment,
+  AttachmentProvider,
+  AudioMetadata,
+  Conversation,
+  ConversationMemoryChunk,
+  ConversationMemoryContext,
+  ConversationMemoryStore,
+  ConversationSettings,
+  DocumentMetadata,
+  ImageGenJob,
+  ImageGenOutput,
+  ImageMetadata,
+  Message,
+  MessageBlock,
+  Profile,
+  ProviderStore,
+  ProviderStoreDocument,
+  Session,
+  Settings,
+  TTSJob,
+  User,
+  UserKey,
+  UserStore,
+  UserStoreDoc,
+  UserStoreDocAnnot,
+  UserStoreDocChunk,
+  VideoMetadata
+} from "@/types-workup.ts";
+import type { SerializeBigInt } from "@/utils.ts";
 
-/**
- * the union satisfies both the Prisma ORM expected enum (all uppercase) and the
- * client/server used (all lowercase) provider names
- */
-export type FlexiProvider =
-  | "openai"
-  | "anthropic"
-  | "gemini"
-  | "grok"
-  | "OPENAI"
-  | "ANTHROPIC"
-  | "GEMINI"
-  | "GROK";
-
-export interface ListModelsSingleton {
-  id: string;
-  object: string;
-  created: number;
-  owned_by: string;
+export interface UserSingleton<T extends boolean = false> extends User {
+  conversations?: ConversationSingleton<T>[];
+  attachments?: AttachmentSingleton<T>[];
+  keys?: UserKeySingleton<T>[];
+  accounts?: AccountSingleton<T>[];
+  sessions?: SessionSingleton<T>[];
+  profile?: ProfileSingleton<T>;
+  providerStores?: ProviderStoreSingleton<T>[];
+  settings?: SettingsSingleton<T>;
+  conversationMemoryStore?: ConversationMemoryStoreSingleton<T>;
+  userStores?: UserStoreSingleton<T>[];
 }
 
-export type SuccessResponse = {
-  object: "list";
-  data: ListModelsSingleton[];
-};
-
-export type GrokModelsResponse = SuccessResponse;
-
-export type OpenAiError = {
-  error: {
-    message: string;
-    type: string;
-    param: string | null;
-    code: string;
-  };
-};
-
-
-export type AnthropicError = {
-  type: "error";
-  error: {
-    type: string;
-    message: string;
-  };
-};
-
-export interface AnthropicModel {
-  created_at: string;
-  display_name: string;
-  id: string;
-  type: "model";
+export interface SessionSingleton<T extends boolean = false> extends Session {
+  user?: UserSingleton<T>;
 }
 
-export type AnthropicSuccess = {
-  data: AnthropicModel[];
-  first_id: string | null;
-  last_id: string | null;
-  has_more: boolean;
-};
-
-export interface GeminiModel {
-  name: string;
-  version: string;
-  displayName: string;
-  description: string;
-  inputTokenLimit: number;
-  outputTokenLimit: number;
-  supportedGenerationMethods: string[];
-  temperature?: number;
-  topP?: number;
-  topK?: number;
+export interface AccountSingleton<T extends boolean = false> extends Account {
+  user?: UserSingleton<T>;
 }
 
-export type GeminiSuccess = {
-  models: GeminiModel[];
-  nextPageToken: string;
-};
+export interface ProfileSingleton<T extends boolean = false> extends Profile {
+  user?: UserSingleton<T>;
+}
 
-export type GeminiError = {
-  error: {
-    code: number;
-    message: string;
-    status: string;
-  };
-};
+export interface SettingsSingleton<T extends boolean = false> extends Settings {
+  user?: UserSingleton<T>;
+}
 
-export type AnthropicResponse = XOR<AnthropicError, AnthropicSuccess>;
+export interface UserStoreSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<UserStore, T> {
+  user?: UserSingleton<T>;
+  docs?: UserStoreDocSingleton<T>[];
+}
 
-export type OpenAiResponse = XOR<OpenAiError, SuccessResponse>;
+export interface UserStoreDocSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<UserStoreDoc, T> {
+  store?: UserStoreSingleton<T>;
+  attachment?: AttachmentSingleton<T>;
+  annots?: UserStoreDocAnnotSingleton<T>[];
+  linkedFromAnnots?: UserStoreDocAnnotSingleton<T>[];
+  chunks?: UserStoreDocChunkSingleton<T>[];
+}
 
-export type GeminiResponse = XOR<GeminiError, GeminiSuccess>;
+export interface TTSJobSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<TTSJob, T> {
+  message?: MessageSingleton<T>;
+  attachment?: AttachmentSingleton<T>;
+}
 
+export interface UserStoreDocAnnotSingleton<
+  T extends boolean = false
+> extends UserStoreDocAnnot {
+  doc?: UserStoreDocSingleton<T>;
+  linkedDoc?: UserStoreDocSingleton<T>;
+}
 
+export interface UserStoreDocChunkSingleton<
+  T extends boolean = false
+> extends UserStoreDocChunk {
+  doc?: UserStoreDocSingleton<T>;
+}
 
-export type BigIntOrNumber<T extends boolean = false> = T extends true
-  ? number
-  : bigint;
+export interface ImageSingleton extends ImageMetadata {}
+export interface DocumentSingleton extends DocumentMetadata {}
+export interface VideoSingleton extends VideoMetadata {}
+export interface AudioSingleton extends AudioMetadata {}
 
-export type DocumentSingleton = {
-  title: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  attachmentId: string;
-  format: string;
-  pageCount: number | null;
-  wordCount: number | null;
-  language: string | null;
-  author: string | null;
-  subject: string | null;
-  keywords: string[];
-  pdfVersion: string | null;
-  isEncrypted: boolean;
-  isSearchable: boolean;
-  encoding: string | null;
-  lineCount: number | null;
-  textPreview: string | null;
-};
+export interface AttachmentProviderSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<AttachmentProvider, T> {
+  attachment?: AttachmentSingleton<T>;
+  userKey?: UserKeySingleton<T>;
+}
+export interface MessageBlockSingleton<
+  T extends boolean = false
+> extends MessageBlock {
+  message?: MessageSingleton<T>;
+}
 
-export type ImageSingleton = {
-  createdAt: Date;
-  updatedAt: Date;
-  attachmentId: string;
-  format: "apng" | "png" | "gif" | "bmp" | "webp" | "avif" | "svg" | "ico" | "tiff" | "jpeg" | "heic" | "unknown" | "jxl" | "jp2" | "jpx" | "jxr" | "jls" | "raw" | "dng" | "cr2" | "nef" | "arw" | "hdr" | "pic" | "rgbe" | "xyze";
-  width: number;
-  height: number;
-  aspectRatio: number | null;
-  frames: number;
-  hasAlpha: boolean | null;
-  animated: boolean;
-  orientation: number | null;
-  colorSpace:  "unknown" | "srgb" | "display_p3" | "adobe_rgb" | "prophoto_rgb" | "rec2020" | "rec709" | "cmyk" | "lab" | "xyz" | "gray" | null;
-  exifDateTimeOriginal: Date | null;
-  cameraMake: string | null;
-  cameraModel: string | null;
-  lensModel: string | null;
-  gpsLat: number | null;
-  gpsLon: number | null;
-  dominantColorHex: string | null;
-  iccProfile: string | null;
-};
+export interface ProviderStoreSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<ProviderStore, T> {
+  docs?: ProviderStoreDocumentSingleton<T>[];
+}
 
-export type ConvoSettingsSingleton = {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  conversationId: string;
-  systemPrompt: string | null;
-  temperature: number | null;
-  topP: number | null;
-  maxTokens: number | null;
-  enableThinking: boolean | null;
-  trackUsage: boolean | null;
-  enableWebSearch: boolean | null;
-  enableAssetGen: boolean | null;
-  usageAlerts: boolean | null;
-};
+export interface ProviderStoreDocumentSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<ProviderStoreDocument, T> {
+  store?: ProviderStoreSingleton<T>;
+  attachment?: AttachmentSingleton<T>;
+}
 
-export type AttachmentSingleton<T extends boolean = false> = {
-  id: string;
-  conversationId: string | null;
-  draftId: string | null;
-  batchId: string | null;
-  userId: string;
-  messageId: string | null;
-  s3ObjectId: string | null;
-  origin: "UPLOAD" | "REMOTE" | "GENERATED" | "PASTED" | "SCREENSHOT" | "IMPORTED" | "SCRAPED";
-  status: "REQUESTED" | "PLANNED" | "UPLOADING" | "STORED" | "SCANNING" | "READY" | "FAILED" | "QUARANTINED" | "ATTACHED" | "DELETED";
-  compatKey: string | null;
-  compatStatus: "FAILED" | "PENDING" | "ACTIVE" | "ALIASED" | null;
-  compatCdnUrl: string | null;
-  compatReadyAt: Date | null;
-  compatVersionId: string | null;
-  compatS3ObjectId: string | null;
-  compatMime: string | null;
-  compatExt: string | null;
-  uploadMethod: "GENERATED" | "FETCHED" | "PRESIGNED" | "SERVER";
-  assetType: "DOCUMENT" | "IMAGE" | "VIDEO" | "AUDIO" | "UNKNOWN";
-  uploadDuration: number | null;
-  cdnUrl: string | null;
-  publicUrl: string | null;
-  sourceUrl: string | null;
-  thumbnailKey: string | null;
-  bucket: string;
-  key: string;
-  versionId: string | null;
-  region: string;
-  cacheControl: string | null;
-  contentDisposition: string | null;
-  contentEncoding: string | null;
-  expiresAt: Date | null;
-  size: BigIntOrNumber<T> | null;
-  filename: string | null;
-  ext: string | null;
-  mime: string | null;
-  etag: string | null;
-  checksumAlgo: "CRC32" | "CRC32C" | "SHA1" | "SHA256" | "CRC64NVME";
-  checksumSha256: string | null;
-  storageClass: string | null;
-  sseAlgorithm: string | null;
-  sseKmsKeyId: string | null;
-  s3LastModified: Date | null;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+export interface ConversationMemoryStoreSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<ConversationMemoryStore, T> {
+  contexts?: ConversationMemoryContextSingleton<T>[];
+}
+
+export interface ConversationMemoryContextSingleton<
+  T extends boolean = false
+> extends ConversationMemoryContext {
+  memoryStore?: ConversationMemoryStoreSingleton<T>;
+  conversation?: ConversationSingleton<T>;
+  memoryChunks?: ConversationMemoryChunkSingleton<T>[];
+}
+export interface ConversationMemoryChunkSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<ConversationMemoryChunk, T> {
+  context?: ConversationMemoryContextSingleton<T>;
+  messages?: MessageSingleton<T>[];
+}
+
+export interface ConvoSettingsSingleton<
+  T extends boolean = false
+> extends ConversationSettings {
+  conversation?: ConversationSingleton<T>;
+}
+
+export interface ImageGenJobSingleton<
+  T extends boolean = boolean
+> extends ImageGenJob {
+  outputs?: ImageGenOutputSingleton<T>[];
+  userKey?: UserKeySingleton<T>;
+  requestMessage?: MessageSingleton<T>;
+}
+
+export interface ImageGenOutputSingleton<
+  T extends boolean = false
+> extends ImageGenOutput {
+  job?: ImageGenJobSingleton<T>;
+}
+
+export interface AttachmentSingleton<
+  T extends boolean = false
+> extends SerializeBigInt<Attachment, T> {
+  providerLinks?: AttachmentProviderSingleton<T>[];
+  providerStoreDocs?: ProviderStoreDocumentSingleton<T>[];
   image: ImageSingleton | null;
   document: DocumentSingleton | null;
-};
+  audio: AudioSingleton | null;
+  imageGenOutput: ImageGenOutputSingleton<T> | null;
+  userStoreDoc?: UserStoreDocSingleton<T>;
+  ttsJob?: TTSJobSingleton<T>;
+}
 
-export type MessageSingleton<T extends boolean = false> = {
-  id: string;
-  userId: string | null;
-  provider: "OPENAI" | "GROK" | "GEMINI" | "ANTHROPIC" | "META" | "VERCEL";
-  createdAt: Date;
-  updatedAt: Date;
-  userKeyId: string | null;
-  conversationId: string;
-  model: string | null;
-  senderType:  "USER" | "AI" | "SYSTEM";
-  content: string;
-  thinkingText: string | null;
-  thinkingDuration: number | null;
-  liked: boolean | null;
-  disliked: boolean | null;
-  tryAgain: boolean | null;
+export interface UserKeySingleton<T extends boolean = false> extends UserKey {
+  user?: UserSingleton<T>;
+  messages?: MessageSingleton<T>[];
+  imageGenJobs?: ImageGenJobSingleton<T>[];
+  attachmentProviders?: AttachmentProviderSingleton<T>[];
+}
+
+export interface MessageSingleton<T extends boolean = false> extends Message {
+  imageGenJob?: ImageGenJobSingleton<T> | null;
+  userKey?: UserKeySingleton<T> | null;
   attachments: AttachmentSingleton<T>[];
-};
+  conversationMemoryChunk?: ConversationMemoryChunkSingleton<T>;
+  ttsJob?: TTSJobSingleton<T>;
+  messageBlocks?: MessageBlockSingleton<T>[];
+}
 
-export type ConversationSingleton<T extends boolean = false> = {
-  id: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userKeyId: string | null;
-  title: string | null;
-  branchId: string | null;
-  parentId: string | null;
-  isShared: boolean;
-  shareToken: string | null;
-  apiKey: string | null;
-  conversationSettings: ConvoSettingsSingleton | null;
+export interface ConversationSingleton<
+  T extends boolean = false
+> extends Conversation {
+  conversationSettings: ConvoSettingsSingleton<T> | null;
   messages: MessageSingleton<T>[];
-};
-
-/**
-   attachmentId: string;
-  compatKey: string;
-  compatStatus: $Enums.CompatStatus;
-  compatCdnUrl: string;
-  compatReadyAt: Date;
-  compatVersionId?: string;
-  compatS3ObjectId?: string;
-  compatMime?: string;
-  compatExt?: string;
- */
-
-export type AssetReadyPayload = {
-  publicUrl: string | null;
-  bucket: string;
-  cacheControl: string | null;
-  contentDisposition: string | null;
-  etag: string | null;
-  s3ObjectId: string | null;
-  key: string;
-  cdnUrl: string | null;
-  versionId: string | null;
-  size: bigint | null;
-  storageClass: string | null;
-  id: string;
-  conversationId: string | null;
-  draftId: string | null;
-  batchId: string | null;
-  userId: string;
-  messageId: string | null;
-  origin: "UPLOAD" | "REMOTE" | "GENERATED" | "PASTED" | "SCREENSHOT" | "IMPORTED" | "SCRAPED";
-  status: "REQUESTED" | "PLANNED" | "UPLOADING" | "STORED" | "SCANNING" | "READY" | "FAILED" | "QUARANTINED" | "ATTACHED" | "DELETED";
-  uploadMethod: "GENERATED" | "FETCHED" | "PRESIGNED" | "SERVER";
-  assetType: "IMAGE" | "DOCUMENT" | "AUDIO" | "VIDEO" | "UNKNOWN";
-  uploadDuration: number | null;
-  sourceUrl: string | null;
-  thumbnailKey: string | null;
-  region: string;
-  contentEncoding: string | null;
-  expiresAt: Date | null;
-  filename: string | null;
-  ext: string | null;
-  mime: string | null;
-  checksumAlgo: "CRC32" | "CRC32C" | "SHA1" | "SHA256" | "CRC64NVME";
-  checksumSha256: string | null;
-  sseAlgorithm: string | null;
-  sseKmsKeyId: string | null;
-  s3LastModified: Date | null;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type Signals =
-  | "SIGABRT"
-  | "SIGALRM"
-  | "SIGBREAK"
-  | "SIGBUS"
-  | "SIGCHLD"
-  | "SIGCONT"
-  | "SIGFPE"
-  | "SIGHUP"
-  | "SIGILL"
-  | "SIGINFO"
-  | "SIGINT"
-  | "SIGIO"
-  | "SIGIOT"
-  | "SIGKILL"
-  | "SIGLOST"
-  | "SIGPIPE"
-  | "SIGPOLL"
-  | "SIGPROF"
-  | "SIGPWR"
-  | "SIGQUIT"
-  | "SIGSEGV"
-  | "SIGSTKFLT"
-  | "SIGSTOP"
-  | "SIGSYS"
-  | "SIGTERM"
-  | "SIGTRAP"
-  | "SIGTSTP"
-  | "SIGTTIN"
-  | "SIGTTOU"
-  | "SIGUNUSED"
-  | "SIGURG"
-  | "SIGUSR1"
-  | "SIGUSR2"
-  | "SIGVTALRM"
-  | "SIGWINCH"
-  | "SIGXCPU"
-  | "SIGXFSZ";
+  attachments?: AttachmentSingleton<T>[];
+  user?: UserSingleton<T>;
+  conversationContextState?: ConversationMemoryContextSingleton<T>;
+}
+export interface ConversationSingletonOneOff<
+  T extends boolean = false
+> extends ConversationSingleton<T> {
+  apiKey?: string | null;
+}

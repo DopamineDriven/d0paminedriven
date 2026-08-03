@@ -2,7 +2,7 @@ import type { PDFVersions } from "@/docs/pdf/types/index.ts";
 import { DocImgWorkupService } from "@/docs/doc-img-workup.ts";
 
 export class PdfWorkItUp extends DocImgWorkupService {
-  private linearizedRe = /\/Linearized\s+\d/g;
+  private linearizedRe = /(?:Linearized)/;
   private versionRe = /(?:%PDF+-(\d+[\.]+\d)*)/g;
 
   private isPdfVersion(s: string) {
@@ -25,7 +25,7 @@ export class PdfWorkItUp extends DocImgWorkupService {
     if (Buffer.isBuffer(buff)) {
       return buff.toString("latin1");
     } else {
-      return this.strFromU8(buff, true);
+      return Buffer.from(buff).toString("latin1");
     }
   }
 
@@ -72,10 +72,13 @@ export class PdfWorkItUp extends DocImgWorkupService {
     return rawText.split(`\n`).concat(flateStream).join(`\n`);
   }
 
-  public isLinearized(buffer: Buffer | Uint8Array) {
-    const rawText = this.rawPdfText(buffer);
+  public isLinearized(buffer: Buffer | Uint8Array | string) {
+  if (typeof buffer ==="string") {
+    return this.linearizedRe.test(buffer)
+  } else {
+     const rawText = this.fullText(buffer);
     return this.linearizedRe.test(rawText);
-  }
+  }}
 
   public pdfVersion(fullText: string, toFloat: false): PDFVersions;
   public pdfVersion(

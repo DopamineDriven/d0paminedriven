@@ -5,7 +5,7 @@ import type {
 import { Extract } from "@d0paminedriven/metadata";
 import { Suspense } from "react";
 import { devCdnUrls } from "@/lib/cdn-data";
-import AssetInspector from "./asset-inspector";
+import { AssetInspector } from "@/ui/inspector";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

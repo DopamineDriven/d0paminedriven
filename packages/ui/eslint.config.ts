@@ -1,10 +1,7 @@
-import type { Config } from "typescript-eslint";
-import baseConfig from "@d0paminedriven/eslint-config/base";
-import reactConfig from "@d0paminedriven/eslint-config/react";
+import { defineConfig } from "eslint/config";
+import { baseConfig, reactConfig } from "@d0paminedriven/eslint-config";
 
-export default [
-  ...baseConfig,
-  ...reactConfig,
+export default defineConfig(
   {
     ignores: ["dist/**"],
     rules: {
@@ -12,7 +9,10 @@ export default [
       "@typescript-eslint/prefer-includes": "off",
       "@typescript-eslint/prefer-string-starts-ends-with": "off",
       "@typescript-eslint/require-await": "off",
-      "prefer-const": "off"
+      "prefer-const": "off",
+      "@typescript-eslint/no-empty-object-type": "off"
     }
-  }
-] satisfies Config;
+  },
+  baseConfig(process.cwd()),
+  reactConfig
+);

@@ -29,11 +29,6 @@ export class PdfXmpWorkup extends PdfWorkItUp {
   private xmpProducerRe =
     /(?:<\s*\S*:Producer>\s*([\s\S]*?)\s*<\/\s*\S*:Producer>)/g;
 
-  /**
-   * capturing groups 2 through 8 return -> (2) YYYY (3) MM (4) DD (5) HH (6) MM (7) SS (8) TZ offset (eg, +00, -05)
-   */
-  private createDateDictExtensiveRe =
-    /(?:\/CreationDate\s*\(D:((\d\d\d\d){1}(\d\d){1}(\d\d){1}(\d\d){1}(\d\d){1}(\d\d){1}(\+\d\d){1}[\s\S]*?)\)\s*)/g;
   private createDateDictRe = /(?:\/CreationDate\s*\(D:([\s\S]*?)\)\s*)/g;
   private modifyDateDictRe = /(?:\/ModDate\s*\(D:([\s\S]*?)\)\s*)/g;
   private producerDictRe = /(?:\/Producer\s*\(([\s\S]*?)\)\s*)/g;
@@ -60,36 +55,32 @@ export class PdfXmpWorkup extends PdfWorkItUp {
       const o = info?.[1];
       if (z && o) {
         xmp = {
-          createDate: this.regexIt(z, /(?:CreateDate)/g, this.xmpCreateDateRe),
-          modifyDate: this.regexIt(z, /(?:ModifyDate)/g, this.xmpModifyDateRe),
-          producer: this.regexIt(z, /(?:Producer)/g, this.xmpProducerRe),
-          creatorTool: this.regexIt(
-            z,
-            /(?:CreatorTool)/g,
-            this.xmpCreatorToolRe
-          )
+          createDate: this.regexIt(z, /(?:CreateDate)/, this.xmpCreateDateRe),
+          modifyDate: this.regexIt(z, /(?:ModifyDate)/, this.xmpModifyDateRe),
+          producer: this.regexIt(z, /(?:Producer)/, this.xmpProducerRe),
+          creatorTool: this.regexIt(z, /(?:CreatorTool)/, this.xmpCreatorToolRe)
         };
       }
     }
     if (typeof xmp === "undefined") {
       const createDateFallback = this.regexIt(
         fullText,
-        /(?:CreationDate)/g,
+        /(?:CreationDate)/,
         this.createDateDictRe
       );
       const modDateFallbackRe = this.regexIt(
         fullText,
-        /(?:ModDate)/g,
+        /(?:ModDate)/,
         this.modifyDateDictRe
       );
       const creatorFallback = this.regexIt(
         fullText,
-        /(?:Creator)/g,
+        /(?:Creator)/,
         this.creatorDictRe
       );
       const producerFallback = this.regexIt(
         fullText,
-        /(?:Producer)/g,
+        /(?:Producer)/,
         this.producerDictRe
       );
       if (

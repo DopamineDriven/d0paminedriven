@@ -8,11 +8,7 @@ type NpmLatest = {
   version: string;
   keywords: string[];
   [record: string]:
-    | string
-    | number
-    | boolean
-    | string[]
-    | Record<string, string>;
+    string | number | boolean | string[] | Record<string, string>;
 };
 
 const deps = [
@@ -60,7 +56,8 @@ const devDeps = [
 const localDeps = [
   `@${workspace}/eslint-config`,
   `@${workspace}/prettier-config`,
-  `@${workspace}/tsconfig`
+  `@${workspace}/tsconfig`,
+  `@${workspace}/vitest-config`
 ] as const;
 
 async function fetchLatestVersion<const T extends string>(target: T) {
@@ -99,6 +96,8 @@ async function _resolveAllDeps(
   };
 }
 
-config.resolveAllDeps(deps, devDeps, localDeps, "d0paminedriven", "3020").then(data => {
-  console.log(JSON.stringify(data, null, 2));
-});
+config
+  .resolveAllDeps(deps, devDeps, localDeps, [""], "d0paminedriven", "3020")
+  .then(data => {
+    console.log(JSON.stringify(data, null, 2));
+  });

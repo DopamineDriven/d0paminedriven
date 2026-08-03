@@ -6,9 +6,9 @@
       "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "baseUrl": "./",
-    "rootDir": "./src",
-    "outDir": "dist"
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["*"]
   },
 
   "include": ["src/**/*.ts", "src/**/*.tsx"],

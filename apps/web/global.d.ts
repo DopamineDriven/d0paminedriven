@@ -6,18 +6,6 @@ declare global {
       readonly VERCEL_ENV: "development" | "production" | "preview";
     }
   }
-  interface Window {
-    dataLayer?: object[];
-  }
-  interface JSON {
-    parse<T = unknown>(
-      text: string,
-      reviver?: (this: any, key: string, value: any) => any
-    ): T;
-  }
-  interface Body {
-    json<T = unknown>(): Promise<T>;
-  }
 }
 
 declare module "http" {

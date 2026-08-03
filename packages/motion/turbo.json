@@ -11,7 +11,7 @@
         "package.json",
         "postcss.config.mjs",
         "eslint.config.ts",
-        "tsup.config.ts"
+        "tsdown.config.ts"
       ]
     }
   }

@@ -1,7 +1,7 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
-
 /* eslint-disable @typescript-eslint/await-thenable */
+
 export class UIPackageScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
@@ -796,7 +796,6 @@ export default {
   private get tsConfigTemplate() {
     // prettier-ignore
     return `{
-  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@${this.workspace}/tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
@@ -808,6 +807,8 @@ export default {
       }
     ],
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "ignoreDeprecations":"6.0",
+    "types": ["*"],
     "rootDir": "./src",
     "outDir": "dist"
   },

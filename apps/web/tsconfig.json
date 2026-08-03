@@ -9,13 +9,14 @@
         "name": "next"
       }
     ],
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["*"]
   },
   "include": [
     ".",
     "next-env.d.ts",
     "next.config.ts",
-    "postcss.config.mjs",
+    "postcss.config.ts",
     "tailwind.config.ts",
     "src/**/*.tsx",
     "src/**/*.ts",

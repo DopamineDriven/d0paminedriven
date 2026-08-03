@@ -1,27 +1,109 @@
 import type {
+  GrokLanguageTTS,
+  GrokVoiceTTS,
+  TTSCodec
+} from "@/events-audio.ts";
+import type {
+  AIChatRequestImgGenFields,
+  AIChatResponseImgGenFieldsFinal,
+  ImgGenStage
+} from "@/events-images.ts";
+import type {
   AIChatEventTypeUnion,
   AssetOrigin,
   AssetStatus,
   AssetUploadAbortReason,
   AssetUploadInstructionsMethod,
   AttachmentMetadata,
+  ClientContextWorkupProps,
   MetadataUnion,
   S3ObjectId,
   UserMetadata,
+  UserRxnAction,
   WithExpiry
 } from "@/events-workup.ts";
-import type {AIChatRequestImgGenFields,AIChatResponseImgGenFields, ImgGenStage,} from "@/events-images.ts";
 import type {
-  GetModelUtilRT,
-  ImageGenModelsByProvider,
+  LocalToolCapabilities,
+  LocalToolRequest,
+  LocalToolResult
+} from "@/local-tools.ts";
+import type {
+  AllImgGenFacilitatingModelsUnion,
+  AllImgGenModelsUnion,
+  AllModelsUnion,
   ImageGenProviders,
   Provider
 } from "@/models.ts";
-import type { CTR, DX, Rm } from "@/utils.ts";
+import type { ConversationSingleton } from "@/types.ts";
+import type { CTR, DX, Rm, UTR } from "@/utils.ts";
+import type * as $Enums from "@/enums.ts";
+
+export type ConversationListEntry = {
+  id: string;
+  title: string | null;
+  updatedAt: number;
+  messageCount: number;
+};
+
+export type ConversationList = {
+  type: "conversation_list";
+  take?: number; // server clamps (default 50, max ~100)
+};
+
+export type ConversationListAck = {
+  type: "conversation_list_ack";
+  userId: string;
+  conversations: ConversationListEntry[];
+};
+
+export type ChatChunkAndResMsgBlock = {
+  type: $Enums.MessageBlockType;
+  content: string;
+  ordinal: number;
+  conversationId: string;
+  durationMs: number;
+};
+
+export type HydrateConversation = {
+  type: "hydrate_conversation";
+  conversationId: string;
+  lowestLoadedOrdinal: number;
+  /** clamped server-side; defaults to CONVERSATION_PAGE_SIZE */
+  take?: number;
+};
+
+export type HydrateConversationPage = {
+  /**
+   * Exclusive upper bound / SWR page key cursor.
+   * This page was fetched with: ordinal < cursor.
+   */
+  cursor: number;
+  /**
+   * First ordinal in lookup order.
+   * Because messages are ordinal-desc, this is the newest/highest ordinal in the page.
+   */
+  firstOrdinal: number;
+  /**
+   * Last ordinal in lookup order.
+   * Because messages are ordinal-desc, this is the oldest/lowest ordinal in the page.
+   * The next older page uses cursor = lastOrdinal.
+   */
+  lastOrdinal: number;
+  convo: ConversationSingleton<true>;
+  hasMore: boolean;
+};
+
+export type HydrateConversationAck = {
+  type: "hydrate_conversation_ack";
+  userId: string;
+  pages: HydrateConversationPage[];
+  conversationId: string;
+};
 
 export interface AIChatResEntity<T extends `ai_chat_${AIChatEventTypeUnion}`> {
   type: T;
   conversationId: string;
+  userMsgId: string;
   userId: string;
   chunk?: string;
   done: T extends "ai_chat_error" ? true : boolean;
@@ -32,8 +114,13 @@ export interface AIChatResEntity<T extends `ai_chat_${AIChatEventTypeUnion}`> {
   systemPrompt?: string;
   temperature?: number;
   topP?: number;
+  aiMsgId?: string;
+  messageBlocks?: T extends "ai_chat_response"
+    ? ChatChunkAndResMsgBlock[]
+    : ChatChunkAndResMsgBlock;
+  imgGenAttachmentId?: string;
   imgGenEnabled?: boolean;
-  imgGenFields?: AIChatResponseImgGenFields;
+  imgGenFields?: AIChatResponseImgGenFieldsFinal;
 }
 
 export type AIChatRequest = {
@@ -41,7 +128,7 @@ export type AIChatRequest = {
   conversationId: string;
   prompt: string;
   provider: Provider;
-  model?: GetModelUtilRT<Provider>;
+  model?: AllModelsUnion;
   systemPrompt?: string;
   temperature?: number;
   topP?: number;
@@ -50,8 +137,11 @@ export type AIChatRequest = {
   isDefaultProvider?: boolean;
   metadata?: UserMetadata;
   batchId?: string;
+  // TODO
+  // enableVideoGen?: boolean
   imgGenEnabled?: boolean;
   imgGenFields?: AIChatRequestImgGenFields;
+  localTools?: LocalToolCapabilities;
 };
 
 export type AIChatInlineData = DX<
@@ -68,9 +158,23 @@ export type AIChatChunk = DX<
 
 export type AIChatResponse = DX<
   CTR<AIChatResEntity<"ai_chat_response">, "chunk"> & {
+    /**
+     * only contains a single message within, the most recent one (the ai model's response)
+     */
+    convo: ConversationSingleton<true>;
     usage?: number;
     thinkingDuration?: number;
     thinkingText?: string;
+  }
+>;
+
+export type AIChatResponseDb = DX<
+  Rm<CTR<AIChatResEntity<"ai_chat_response">, "chunk">, "imgGenFields"> & {
+    usage?: number;
+    thinkingDuration?: number;
+    thinkingText?: string;
+    responseOutput?: string;
+    imgGenFields?: AIChatResponseImgGenFieldsFinal;
   }
 >;
 
@@ -92,6 +196,42 @@ export type PingMessage = {
   type: "ping";
 };
 
+export type ConnectionEstablished = {
+  type: "connection_established";
+  providerContext: ClientContextWorkupProps;
+};
+
+export type ProviderContextUpdate = {
+  type: "provider_context_update";
+};
+
+export type ProviderContextUpdateAck = {
+  type: "provider_context_update_ack";
+  providerContext: ClientContextWorkupProps;
+};
+
+export type ProviderContextPing = {
+  type: "provider_context_ping";
+};
+
+export type ProviderContextPong = {
+  type: "provider_context_pong";
+  providerContext: ClientContextWorkupProps;
+};
+
+export type UserRxnUpdate = {
+  type: "user_rxn_update";
+  conversationId: string;
+  messageId: string;
+  action: UserRxnAction;
+};
+export type UserRxnUpdateAck = {
+  type: "user_rxn_update_ack";
+  conversationId: string;
+  messageId: string;
+  liked: boolean | null;
+  disliked: boolean | null;
+};
 /**
  * Server notifies client that an asset was uploaded server-side
  * (After successful upload via API route or server action)
@@ -410,10 +550,7 @@ export type ImageGenRequest = {
   conversationId: string;
   prompt: string;
   provider: ImageGenProviders;
-  model?:
-    | ImageGenModelsByProvider<"gemini">
-    | ImageGenModelsByProvider<"openai">
-    | ImageGenModelsByProvider<"grok">;
+  model?: AllImgGenFacilitatingModelsUnion | AllImgGenModelsUnion;
   systemPrompt?: string;
   temperature?: number;
   topP?: number;
@@ -423,39 +560,30 @@ export type ImageGenRequest = {
   batchId?: string;
   metadata?: UserMetadata;
   /**
-   * gpt-image-1 only
+   * gpt-image-2, gpt-image-1.5 & gpt-image-1 only
    *
    * values include "high" | "low" | null
    */
   input_fidelity?: string;
   /**
-   * gpt-image-1 & gpt-image-1-mini only
+   * gpt-image-2, gpt-image-1.5, gpt-image-1, and gpt-image-1-mini only
    *
    * values include "low" | "auto"
    */
   moderation?: string;
   /**
-   * gpt-image-1, gpt-image-1-mini, dall-e-2:
+   * gpt-image-2, gpt-image-1.5, gpt-image-1, gpt-image-1-mini:
    *
    * n=1 (default),
    * n=10 (max)
    *
-   * dall-e-3:
-   *
-   * n=1 (default),
-   * n=1 (max)
-   *
-   * gemini-2.5-flash-image:
+   * gemini-3.1-flash-image-preview (Nano Banana 2), gemini-3-pro-image-preview (Nano Banana Pro), and gemini-2.5-flash-image (Nano Banana):
    *
    * n=1 (default),
    * n=10 (max)
    *
-   * imagen-3.0-generate-002, imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001:
    *
-   * n=1 (default),
-   * n=4 (max)
-   *
-   * grok-2-image-1212
+   * grok-imagine-image (uncertain as to how xAI caps grok-imagine-image-quality)
    *
    * n=1 (default),
    * n=10 (max)
@@ -463,7 +591,7 @@ export type ImageGenRequest = {
   n?: number;
   negativePrompt?: string;
   /**
-   * gpt-image-1 & gpt-image-1-mini only:
+   * gpt-image-1.5, gpt-image-1, gpt-image-1-mini:
    *
    * n=0 (default),
    * n=3 (max)
@@ -477,7 +605,7 @@ export type ImageGenRequest = {
    * "png" (default);
    * "png" | "jpeg" | "webp"
    *
-   * imagen-3.0-generate-002, imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001:
+   *  imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001:
    *
    * "png" (default);
    * "png" | "jpeg"
@@ -485,21 +613,15 @@ export type ImageGenRequest = {
   output_format?: string;
   /**
    *
-   * gpt-image-1, gpt-image-1-mini:
+   * gpt-image-2, gpt-image-1.5, gpt-image-1, gpt-image-1-mini:
    *
    * output must be of type jpeg or webp
    *
    * Range: 0-100. Default: 100
-   *
-   *
-   * imagen-3.0-generate-002, imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001:
-   *
-   * Only applies if mimeType is "image/jpeg",
-   * Range: 0-100. Default: 75
    */
   output_compression?: number;
   /**
-   * gpt-image-1, gpt-image-1-mini:
+   * gpt-image-2, gpt-image-1.5, gpt-image-1, gpt-image-1-mini:
    *
    * "auto" (default); "transparent" | "opaque" | "auto"
    *
@@ -507,17 +629,9 @@ export type ImageGenRequest = {
    */
   output_background?: "transparent" | "opaque" | "auto";
   /**
-   *  gpt-image-1, gpt-image-1-mini:
+   *  gpt-image-2, gpt-image-1.5, gpt-image-1, gpt-image-1-mini:
    *
    * "auto" (default); "low" | "medium" | "high" | "auto"
-   *
-   * dall-e-3:
-   *
-   * "auto" (default); "standard" | "hd" | "auto"
-   *
-   * dall-e-2:
-   *
-   * "auto" (default); "standard" | "auto"
    *
    * imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001:
    *
@@ -525,21 +639,9 @@ export type ImageGenRequest = {
    */
   output_quality: string;
   /**
-   *  gpt-image-1, gpt-image-1-mini:
+   *  gpt-image-2, gpt-image-1.5, gpt-image-1, gpt-image-1-mini:
    *
    * "auto" (default); "1024x1024" | "1536x1024" | "1024x1536" | "auto"
-   *
-   * dall-e-3:
-   *
-   * "auto" (default); "1024x1024" | "1792x1024" | "1024x1792" | "auto"
-   *
-   * dall-e-2:
-   *
-   * "auto" (default); "1024x1024" | "256x256" | "512x512" | "auto"
-   *
-   * imagen-3.0-generate-002, imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001:
-   *
-   * "1:1" (default); "1:1" | "9:16" | "16:9" | "3:4" | "4:3"
    *
    * gemini-2.5-flash-image:
    *
@@ -549,7 +651,7 @@ export type ImageGenRequest = {
   /**
    * **Imagen 3 & 4 models only**
    *
-   * imagen-3.0-generate-002, imagen-4.0-generate-001,
+   *  imagen-4.0-generate-001,
    * imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001
    *
    * "dont_allow": Disallow the inclusion of people or faces in images.
@@ -674,6 +776,74 @@ export type ImageGenProgress = {
   eta?: number;
 };
 
+export type UserTTSRequest = {
+  type: "user_tts_request";
+  conversationId: string;
+  messageId: string;
+  /**
+   * defaults to `"auto"`
+   */
+  language?: GrokLanguageTTS;
+  /**
+   * defaults to mp3
+   */
+  codec?: TTSCodec;
+  /**
+   * defaults to eve
+   */
+  voice?: GrokVoiceTTS;
+  /**
+   * defaults to 128000 (bps)
+   */
+  bitRate?: number;
+  /**
+   * defaults to 24000 (Hz)
+   */
+  sampleRate?: number;
+};
+
+export type UserTTSChunk = {
+  type: "user_tts_chunk";
+  ttsJobId: string;
+  conversationId: string;
+  messageId: string;
+  audioChunk: string;
+  generationMs: number;
+};
+
+export type UserTTSError = {
+  type: "user_tts_error";
+  status: number;
+  statusText: string;
+  ttsJobId?: string;
+  conversationId: string;
+  messageId: string;
+};
+
+export type UserTTSResponse = {
+  type: "user_tts_response";
+  ttsJobId: string;
+  attachmentId: string;
+  conversationId: string;
+  messageId: string;
+  durationMs: number;
+  generationMs: number;
+  size: number;
+  cdnUrl: string;
+  codec: TTSCodec;
+};
+export type UserTTSResponsePreexisting = {
+  type: "user_tts_response_preexisting";
+  ttsJobId: string;
+  attachmentId: string;
+  conversationId: string;
+  messageId: string;
+  durationMs: number;
+  generationMs: number;
+  size: number;
+  cdnUrl: string;
+  codec: TTSCodec;
+};
 /**
  * Batch upload notification
  */
@@ -712,12 +882,28 @@ export type AnyEvent =
   | AssetUploadProgress
   | AssetUploadRequest
   | AssetUploadResponse
+  | ConnectionEstablished
+  | ConversationList
+  | ConversationListAck
+  | HydrateConversation
+  | HydrateConversationAck
   | ImageGenError
   | ImageGenProgress
   | ImageGenRequest
   | ImageGenResponse
+  | LocalToolRequest
+  | LocalToolResult
   | PingMessage
-  | TypingIndicator;
+  | ProviderContextPing
+  | ProviderContextPong
+  | ProviderContextUpdate
+  | ProviderContextUpdateAck
+  | TypingIndicator
+  | UserTTSChunk
+  | UserTTSRequest
+  | UserTTSError
+  | UserTTSResponse
+  | UserTTSResponsePreexisting;
 
 export type AnyEventTypeUnion = AnyEvent["type"];
 
@@ -731,38 +917,7 @@ export type ChatWsEvent = AnyEvent;
  */
 export type ChatWsEventTypeUnion = ChatWsEvent["type"];
 
-export type EventTypeMap = {
-  ai_chat_chunk: AIChatChunk;
-  ai_chat_error: AIChatError;
-  ai_chat_inline_data: AIChatInlineData;
-  ai_chat_request: AIChatRequest;
-  ai_chat_response: AIChatResponse;
-  asset_attached: AssetAttachedToMessage;
-  asset_batch_upload: AssetBatchUpload;
-  asset_deleted: AssetDeleted;
-  asset_fetch_error: AssetFetchError;
-  asset_fetch_request: AssetFetchRequest;
-  asset_fetch_response: AssetFetchResponse;
-  asset_paste: AssetPasteEvent;
-  asset_ready: AssetReady;
-  asset_upload_abort: AssetUploadAbort;
-  asset_upload_aborted: AssetUploadAborted;
-  asset_upload_complete: AssetUploadComplete;
-  asset_upload_complete_error: AssetUploadCompleteError;
-  asset_upload_error: AssetUploadError;
-  asset_upload_instructions: AssetUploadInstructions;
-  asset_upload_prepare: AssetUploadPrepare;
-  asset_upload_progress: AssetUploadProgress;
-  asset_upload_request: AssetUploadRequest;
-  asset_upload_response: AssetUploadResponse;
-  asset_uploaded: AssetUploadedNotification;
-  image_gen_error: ImageGenError;
-  image_gen_progress: ImageGenProgress;
-  image_gen_request: ImageGenRequest;
-  image_gen_response: ImageGenResponse;
-  ping: PingMessage;
-  typing: TypingIndicator;
-};
+export type EventTypeMap = UTR<AnyEvent, "type">;
 
 export type EventMap<T extends keyof EventTypeMap> = {
   [P in T]: EventTypeMap[P];

@@ -1,39 +1,41 @@
 import { relative } from "node:path";
-import type { UserConfig as Options } from "tsdown";
+import type { InlineConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
 export default defineConfig(
-  (
-    options: Omit<
-      Options,
-      | "entry"
-      | "target"
-      | "dts"
-      | "watch"
-      | "format"
-      | "cwd"
-      | "sourcemap"
-      | "clean"
-      | "outDir"
-      | "tsconfig"
-    >
-  ) =>
+  options =>
     ({
       ...options,
       entry: [
         "src/index.ts",
+        "src/codegen-types.ts",
+        "src/enums.ts",
+        "src/events-audio.ts",
         "src/events-images.ts",
         "src/events-workup.ts",
         "src/events.ts",
         "src/utils.ts",
+        "src/local-tools.ts",
         "src/models.ts",
         "src/types.ts",
-        "src/codegen/**/*.ts"
+        "src/types-workup.ts",
+        "src/codegen/__gen__/display-name-to-model-id-img-gen.ts",
+        "src/codegen/__gen__/display-name-to-model-id-video-gen.ts",
+        "src/codegen/__gen__/display-name-to-model-id.ts",
+        "src/codegen/__gen__/display-names-by-provider-img-gen.ts",
+        "src/codegen/__gen__/display-names-by-provider-video-gen.ts",
+        "src/codegen/__gen__/display-names-by-provider.ts",
+        "src/codegen/__gen__/model-id-to-display-name-img-gen.ts",
+        "src/codegen/__gen__/model-id-to-display-name-video-gen.ts",
+        "src/codegen/__gen__/model-id-to-display-name.ts",
+        "src/codegen/__gen__/model-ids-by-provider-img-gen.ts",
+        "src/codegen/__gen__/model-ids-by-provider-video-gen.ts",
+        "src/codegen/__gen__/model-ids-by-provider.ts"
       ],
       cwd: process.cwd(),
-      target: ["node25"],
+      target: ["node26"],
       fixedExtension: false,
-      dts:{ tsgo: true },
+      dts: { tsgo: true },
       watch: process.env.NODE_ENV === "development",
       format: ["esm"],
       sourcemap: true,
@@ -41,5 +43,5 @@ export default defineConfig(
       clean: true,
       outDir: "dist",
       unbundle: true
-    }) satisfies Options
+    }) satisfies InlineConfig
 );

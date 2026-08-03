@@ -1,11 +1,11 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig.json",
   "extends": "@d0paminedriven/tsconfig/node-pkg.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
     },
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["*"]
   },
   "include": [
     "src/**/*.ts",

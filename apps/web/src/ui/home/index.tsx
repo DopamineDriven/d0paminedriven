@@ -1,14 +1,22 @@
 "use client";
 
-import { Button, Icon } from "@d0paminedriven/ui";
 import Link from "next/link";
+import {
+  ArrowRight,
+  Button,
+  Code,
+  Layers,
+  Package,
+  Terminal,
+  Zap
+} from "@d0paminedriven/ui";
 import { motion } from "motion/react";
 
 export function LandingPage() {
   return (
     <div className="relative isolate overflow-y-scroll">
-      <section className="font-cal-sans mx-auto flex justify-center space-y-6 pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32 overflow-y-scroll">
-        <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
+      <section className="font-cal-sans mx-auto flex justify-center space-y-6 overflow-y-scroll pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
+        <div className="container flex max-w-5xl flex-col items-center gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -22,7 +30,7 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="font-cal-sans text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
             Welcome to your&nbsp;
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Turbo
             </span>
             &nbsp; powered workspace
@@ -31,19 +39,19 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-muted-foreground max-w-[42rem] leading-normal sm:text-xl sm:leading-8">
+            className="text-muted-foreground max-w-2xl leading-normal sm:text-xl sm:leading-8">
             A high-performance monorepo with pnpm workspaces, powered by
             Turborepo. Pre-configured with ESLint, Prettier, TypeScript, and
-            Jest.
+            Vitest.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-x-4">
-            <Button asChild>
+            <Button asChild variant="secondary">
               <Link href="#" scroll={false}>
-                Get Started <Icon.ArrowRight className="ml-2 size-4" />
+                Get Started <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild>
@@ -64,7 +72,7 @@ export function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
+          className="mx-auto flex max-w-232 flex-col items-center space-y-4 text-center">
           <h2 className="font-cal-sans text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
             Everything you need to build at scale
           </h2>
@@ -73,7 +81,7 @@ export function LandingPage() {
             on developer experience and performance.
           </p>
         </motion.div>
-        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+        <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-5xl md:grid-cols-3">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -81,7 +89,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Icon.Zap className="size-6 text-purple-600" />
+              <Zap className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">High Performance</h3>
@@ -99,7 +107,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Icon.Layers className="size-6 text-purple-600" />
+              <Layers className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Monorepo Structure</h3>
@@ -117,7 +125,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Icon.Code className="size-6 text-purple-600" />
+              <Code className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Tooling Included</h3>
@@ -136,7 +144,7 @@ export function LandingPage() {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="mx-auto max-w-[58rem] space-y-6 text-center">
+          className="mx-auto max-w-232 space-y-6 text-center">
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-5xl">
             Ready to start building?
           </h2>
@@ -150,9 +158,9 @@ export function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="bg-muted/50 mx-auto mt-12 max-w-[58rem] rounded-lg border p-6 md:p-8">
+          className="bg-muted/50 mx-auto mt-12 max-w-232 rounded-lg border p-6 md:p-8">
           <div className="flex items-center">
-            <Icon.Terminal className="mr-2 size-5" />
+            <Terminal className="mr-2 size-5" />
             <h3 className="font-bold">Start developing</h3>
           </div>
           <div className="mt-4 space-y-4">
@@ -174,7 +182,7 @@ pnpm run:web`}</code>
       </section>
 
       <section className="container py-8 md:py-12 lg:py-24">
-        <div className="bg-background mx-auto max-w-[58rem] rounded-lg border p-8">
+        <div className="bg-background mx-auto max-w-232 rounded-lg border p-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -182,7 +190,7 @@ pnpm run:web`}</code>
             viewport={{ once: true }}
             className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="bg-muted rounded-full p-3">
-              <Icon.Package className="size-6 text-purple-600" />
+              <Package className="size-6 text-purple-600" />
             </div>
             <h3 className="font-heading text-2xl leading-[1.1]">
               Explore your workspace
@@ -199,16 +207,16 @@ pnpm run:web`}</code>
 │   └── ui/
 └── tooling/
     ├── eslint/
-    ├── jest-presets/
     ├── prettier/
-    └── typescript/`}
+    ├── typescript/
+    └── vitest/`}
                 </code>
               </pre>
             </div>
-            <Button asChild>
+            <Button variant="secondary" asChild>
               <Link href="#" scroll={false}>
                 Learn more about the structure&nbsp;
-                <Icon.ArrowRight className="ml-2 size-4" />
+                <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
           </motion.div>

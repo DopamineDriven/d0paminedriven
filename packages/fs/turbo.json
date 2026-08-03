@@ -10,7 +10,7 @@
         "tsconfig.json",
         "package.json",
         "eslint.config.ts",
-        "tsup.config.ts"
+        "tsdown.config.ts"
       ]
     }
   }

@@ -7,7 +7,6 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator";
 interface SeparatorProps
   extends React.ComponentPropsWithRef<typeof SeparatorPrimitive.Root> {}
 
-
 function Separator({
   className,
   orientation = "horizontal",
@@ -25,7 +24,7 @@ function Separator({
       )}
       {...props}
     />
-  )
+  );
 }
 
 export { Separator, type SeparatorProps };

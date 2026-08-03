@@ -2,6 +2,7 @@ import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
 /* eslint-disable @typescript-eslint/await-thenable */
+
 export class RootScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
@@ -46,7 +47,8 @@ export class RootScaffolder {
     return [
       `@${this.workspace}/eslint-config`,
       `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`
+      `@${this.workspace}/tsconfig`,
+      `@${this.workspace}/vitest-config`
     ] as const;
   }
 
@@ -64,36 +66,6 @@ export class RootScaffolder {
       "turbo",
       "typescript"
     ] as const;
-  }
-
-  private get eslintTemplate() {
-    // prettier-ignore
-    return `import baseConfig from "@${this.workspace}/eslint-config/base";
-
-/** @type {import('typescript-eslint').Config} */
-export default [
-  {
-    rules: {
-      "@typescript-eslint/consistent-type-definitions": "off"
-    },
-    ignores: ["**node_modules**"]
-  },
-  ...baseConfig
-];
-` as const;
-  }
-
-  private get tsconfigTemplate() {
-    // prettier-ignore
-    return `{
-  "extends": "@${this.workspace}/tsconfig/base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
-}
-`as const;
   }
 
   private get vscodeExtensionsTemplate() {
@@ -192,7 +164,6 @@ export default [
     }
   ],
   "files.autoSave": "afterDelay",
-  "javascript.referencesCodeLens.showOnAllFunctions": true,
   "openInDefaultBrowser.run.openWithLocalHttpServer": false,
   "tailwindCSS.experimental.classRegex": [
     [
@@ -214,20 +185,30 @@ export default [
     ".*variant.*",
     ".*Styles.*"
   ],
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsserver.web.typeAcquisition.enabled": true,
-  "typescript.implementationsCodeLens.enabled": true,
-  "typescript.implementationsCodeLens.showOnInterfaceMethods": true,
-  "typescript.locale": "en",
-  "typescript.referencesCodeLens.enabled": true,
-  "typescript.referencesCodeLens.showOnAllFunctions": true,
-  "typescript.experimental.useTsgo": false,
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsserver.web.typeAcquisition.enabled": true,
+  "js/ts.implementationsCodeLens.enabled": true,
+  "js/ts.implementationsCodeLens.showOnInterfaceMethods": true,
+  "js/ts.locale": "en",
+  "js/ts.referencesCodeLens.enabled": true,
+  "js/ts.referencesCodeLens.showOnAllFunctions": true,
+  "js/ts.experimental.useTsgo": false,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
   "yaml.hover": true,
   "yaml.validate": true,
   "workbench.editor.autoLockGroups": {
     "default": false
   },
+  "json.schemaDownload.trustedDomains": {
+    "https://schemastore.azurewebsites.net/": true,
+    "https://turborepo.com/schema.json": true,
+    "https://raw.githubusercontent.com/": true,
+    "https://www.schemastore.org/": true,
+    "https://json.schemastore.org/": true,
+    "https://json-schema.org/": true,
+    "https://docs.renovatebot.com/": true,
+    "https://turborepo.org/schema.json": true
+  }
   "github.copilot.enable": {
     "*": false,
     "plaintext": false,
@@ -284,17 +265,13 @@ max_line_length = 40
       "outputs": ["coverage/**"],
       "dependsOn": []
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
+    "lint": {},
     "dev": {
       "cache": false,
       "dependsOn": ["^build"],
       "persistent": true
     },
-    "typecheck": {
-      "dependsOn": ["^build"]
-    },
+    "typecheck": {},
     "clean": {
       "cache": false
     }
@@ -314,7 +291,23 @@ max_line_length = 40
     return `packages:
   - apps/*
   - packages/*
-  - tooling/*` as const;
+  - tooling/*
+
+enablePrePostScripts: true
+nodeLinker: hoisted
+autoInstallPeers: true
+minimumReleaseAge: 0
+trustPolicy: "off"
+trustLockfile: true
+blockExoticSubdeps: false
+ignorePatchFailures: true
+dangerouslyAllowAllBuilds: true
+verifyStoreIntegrity: false
+
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  sharp: true` as const;
   }
 
   private get gitignoreTemplate() {
@@ -394,12 +387,10 @@ pnpm-lock.yaml
   private getPaths() {
     return {
       editorConfig: `.editorconfig`,
-      eslint: `eslint.config.mjs`,
       gitignore: ".gitignore",
       packageJson: "package.json",
       pnpmWorkspaceYaml: "pnpm-workspace.yaml",
       prettierignore: ".prettierignore",
-      tsconfig: `tsconfig.json`,
       turboJson: `turbo.json`,
       manage: "manage.sh",
       readme: "README.md",
@@ -432,6 +423,7 @@ pnpm-lock.yaml
       ),
       this.fetchShellScript(this.workspace)
     ]);
+
     return Promise.all([
       this.configHandler.handleNpmrc(),
       this.writeTarget(".prettierignore", this.prettierignoreTemplate),
@@ -443,10 +435,8 @@ pnpm-lock.yaml
       this.writeTarget(".vscode/settings.json", this.vscodeSettingsTemplate),
       this.writeTarget(".editorconfig", this.editorConfigTemplate),
       this.writeTarget(".gitignore", this.gitignoreTemplate),
-      this.writeTarget("eslint.config.mjs", this.eslintTemplate),
       this.writeTarget("package.json", JSON.stringify(pkgJson, null, 2)),
       this.writeTarget("pnpm-workspace.yaml", this.pnpmWorkspaceYamlTemplate),
-      this.writeTarget("tsconfig.json", this.tsconfigTemplate),
       this.writeTarget("turbo.json", this.turboJsonTemplate),
       this.writeTarget("README.md", this.readmeMinimal)
     ]);

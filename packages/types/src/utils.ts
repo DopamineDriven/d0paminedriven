@@ -1,7 +1,28 @@
+import type * as $Enums from "@/enums.ts";
+
 export type Unenumerate<T> = T extends (infer U)[] | readonly (infer U)[]
   ? U
   : T;
 
+export type BigIntKeys<T> = {
+  [K in keyof T]: T[K] extends bigint ? K : never;
+}[keyof T];
+
+export type SerializeBigInt<T, Serialized extends boolean = boolean> = {
+  [K in keyof T]: T[K] extends bigint | null | undefined
+    ? Serialized extends true
+      ? Exclude<T[K], bigint> | number
+      : T[K]
+    : T[K];
+};
+
+export type NormalizeAndInject<V, Q = object, P extends boolean = boolean> = DX<
+  SerializeBigInt<V, P> & Q
+>;
+
+/**
+ * Superior form of Omit
+ */
 export type Rm<T, P extends keyof T = keyof T> = {
   [S in keyof T as Exclude<S, P>]: T[S];
 };
@@ -11,6 +32,8 @@ export type Rm<T, P extends keyof T = keyof T> = {
  * makes properties from U optional and undefined in T, and vice versa
  */
 export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+
+export type Include<T, U extends T> = Exclude<T, Exclude<T, U>>;
 
 /**
  * enforces mutual exclusivity of T | U
@@ -22,7 +45,10 @@ export type XOR<T, U> =
     : T | U
 
 /**
- * Conditional to Required
+ * CTR (Conditional to Required)
+ *
+ * - By default: makes all **optional** properties required.
+ * - With K: makes only the specified optional keys required.
  */
 export type CTR<
   T,
@@ -32,7 +58,10 @@ export type CTR<
 };
 
 /**
- * Required to Conditional
+ * RTC (Required to Conditional)
+ *
+ * - By default: makes all **required** properties optional.
+ * - With K: makes only the specified required keys optional.
  */
 export type RTC<
   T,
@@ -45,8 +74,17 @@ export type IsExact<T, U> = [T] extends [U]
     ? true
     : false
   : false;
+
+export type UTR<
+  TUnion extends Record<TKey, string>,
+  TKey extends string = "kind",
+  TDiscriminant extends string = TUnion[TKey]
+> = {
+  [K in TDiscriminant]: Extract<TUnion, Record<TKey, K>>;
+};
+
 /**
- * To Conditionally never
+ * TCN (To Conditionally Never)
  */
 export type TCN<T, X extends keyof T = keyof T> = Rm<T, X> & {
   [Q in X]?: XOR<T[Q], never>;
@@ -164,6 +202,7 @@ export type RequireNested<
     ? Rm<T, Path> & Record<Path, Required<T>[Path]>
     : T;
 
+export type FlexiCase<T extends string> = Lowercase<T> | Uppercase<T>;
 
 export function createDraftId(
   userId: string,
@@ -198,3 +237,86 @@ export function parseDraftId(draftId: string) {
     o !== toArr.length - 1 ? v : Number.parseInt(v, 10)
   ) as [string, string, string, number];
 }
+
+export function instanceFunc<const Type>(c: new (...args: Type[]) => Type) {
+  return new c();
+}
+
+export type CommonDiscriminants =
+  "type" | "kind" | "event" | "tag" | "provider" | "_tag" | "__typename";
+
+export type LiteralUnion<TKnown extends string> = TKnown | string;
+
+export type DiscriminatedUnionToRecord<
+  TUnion extends Record<TKey, string>,
+  TKey extends LiteralUnion<CommonDiscriminants> =
+    LiteralUnion<CommonDiscriminants>
+> = TKey extends keyof TUnion
+  ? { [K in TUnion[TKey] & string]: Extract<TUnion, Record<TKey, K>> }
+  : never;
+
+export type UnionToRecord<
+  TUnion extends Record<"type", string>,
+  TDiscriminant extends string = TUnion["type"]
+> = {
+  [K in TDiscriminant]: Extract<TUnion, { type: K }>;
+};
+export type Signals =
+  | "SIGABRT"
+  | "SIGALRM"
+  | "SIGBREAK"
+  | "SIGBUS"
+  | "SIGCHLD"
+  | "SIGCONT"
+  | "SIGFPE"
+  | "SIGHUP"
+  | "SIGILL"
+  | "SIGINFO"
+  | "SIGINT"
+  | "SIGIO"
+  | "SIGIOT"
+  | "SIGKILL"
+  | "SIGLOST"
+  | "SIGPIPE"
+  | "SIGPOLL"
+  | "SIGPROF"
+  | "SIGPWR"
+  | "SIGQUIT"
+  | "SIGSEGV"
+  | "SIGSTKFLT"
+  | "SIGSTOP"
+  | "SIGSYS"
+  | "SIGTERM"
+  | "SIGTRAP"
+  | "SIGTSTP"
+  | "SIGTTIN"
+  | "SIGTTOU"
+  | "SIGUNUSED"
+  | "SIGURG"
+  | "SIGUSR1"
+  | "SIGUSR2"
+  | "SIGVTALRM"
+  | "SIGWINCH"
+  | "SIGXCPU"
+  | "SIGXFSZ";
+
+export type FlexiProvider = FlexiCase<$Enums.Provider>;
+/**
+ * retained to support repos still using it
+ */
+export type BigIntOrNumber<T extends boolean = false> = T extends true
+  ? number
+  : bigint;
+
+// export type FilterBySelect<Q extends keyof ModelIdToModelDisplayName> = Exclude<
+//   Exclude<Q, ProductDataFull>,
+//   ProductDataFull
+// >;
+
+// export type FilterResults<S extends keyof ProductDataFull> = Rm<
+//   ProductDataFull,
+//   Exclude<keyof ProductDataFull, FilterBySelect<S>>
+// >;
+/**
+ *
+ */

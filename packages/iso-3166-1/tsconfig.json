@@ -4,7 +4,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["*"]
   },
   "include": [
     "**/*.ts",

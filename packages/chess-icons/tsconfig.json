@@ -5,7 +5,7 @@
       "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "baseUrl": "./"
+    "types": ["*"]
   },
   "include": [
     "**/*.ts",
