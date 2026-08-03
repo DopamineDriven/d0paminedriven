@@ -1,5 +1,6 @@
 import { ConfigHandler } from "@/config/index.ts";
 import { PromptPropsBase } from "@/types/index.ts";
+/* eslint-disable @typescript-eslint/await-thenable */
 
 /* eslint-disable no-useless-escape */
 export class WebAppScaffolder {

@@ -1,10 +1,63 @@
 import "./globals.css";
 import type { Properties } from "csstype";
 
+export {
+  BaseAccordion,
+  BaseAccordionContent,
+  BaseAccordionItem,
+  BaseAccordionTrigger
+} from "@/base/accordion";
+export {
+  BaseAlertDialog,
+  BaseAlertDialogAction,
+  BaseAlertDialogCancel,
+  BaseAlertDialogContent,
+  BaseAlertDialogDescription,
+  BaseAlertDialogFooter,
+  BaseAlertDialogHeader,
+  BaseAlertDialogMedia,
+  BaseAlertDialogOverlay,
+  BaseAlertDialogPortal,
+  BaseAlertDialogTitle,
+  BaseAlertDialogTrigger
+} from "@/base/alert-dialog";
 export { BaseAspectRatio } from "@/base/aspect-ratio";
 export type { BaseAspectRatioProps } from "@/base/aspect-ratio";
+export {
+  BaseAvatar,
+  BaseAvatarBadge,
+  BaseAvatarFallback,
+  BaseAvatarGroup,
+  BaseAvatarGroupCount,
+  BaseAvatarImage
+} from "@/base/avatar";
 export { BaseBadge, baseBadgeVariants } from "@/base/badge";
+export {
+  BaseBreadcrumb,
+  BaseBreadcrumbList,
+  BaseBreadcrumbItem,
+  BaseBreadcrumbLink,
+  BaseBreadcrumbPage,
+  BaseBreadcrumbSeparator,
+  BaseBreadcrumbEllipsis
+} from "@/base/breadcrumb";
+export {
+  BaseBubble,
+  BaseBubbleContent,
+  BaseBubbleGroup,
+  BaseBubbleReactions
+} from "@/base/bubble";
 export { BaseButton, baseButtonVariants } from "@/base/button";
+export {
+  BaseCard,
+  BaseCardAction,
+  BaseCardContent,
+  BaseCardDescription,
+  BaseCardFooter,
+  BaseCardHeader,
+  BaseCardTitle
+} from "@/base/card";
+export { BaseCheckbox } from "@/base/checkbox";
 export {
   BaseCommand,
   BaseCommandDialog,
@@ -28,6 +81,20 @@ export {
   BaseDialogTitle,
   BaseDialogTrigger
 } from "@/base/dialog";
+export {
+  BaseDrawer,
+  BaseDrawerPortal,
+  BaseDrawerOverlay,
+  BaseDrawerSwipeHandle,
+  BaseDrawerTrigger,
+  BaseDrawerClose,
+  BaseDrawerContent,
+  BaseDrawerHeader,
+  BaseDrawerFooter,
+  BaseDrawerTitle,
+  BaseDrawerDescription
+} from "@/base/drawer";
+export type { BaseDrawerContextProps } from "@/base/drawer";
 export {
   BaseDropdown,
   BaseDropdownPortal,
@@ -57,6 +124,7 @@ export {
   baseInputGroupButtonVariants
 } from "@/base/input-group";
 export { BaseKbd, BaseKbdGroup } from "@/base/kbd";
+export { BaseLabel } from "@/base/label";
 export {
   BasePopover,
   BasePopoverContent,
@@ -72,6 +140,7 @@ export {
   BaseProgressLabel,
   BaseProgressValue
 } from "@/base/progress";
+export { BaseRadioGroup, BaseRadioGroupItem } from "@/base/radio-group";
 export { BaseScrollArea, BaseScrollBar } from "@/base/scroll";
 export {
   BaseSelect,
@@ -96,6 +165,9 @@ export {
   BaseSheetTitle,
   BaseSheetDescription
 } from "@/base/sheet";
+export { BaseSkeleton } from "@/base/skeleton";
+export { BaseSlider } from "@/base/slider";
+export { BaseSwitch } from "@/base/switch";
 export {
   BaseTable,
   BaseTableHeader,
@@ -106,7 +178,29 @@ export {
   BaseTableCell,
   BaseTableCaption
 } from "@/base/table";
+export {
+  BaseTabs,
+  BaseTabsContent,
+  BaseTabsList,
+  BaseTabsTrigger,
+  tabsListVariants
+} from "@/base/tabs";
 export { BaseTextarea } from "@/base/textarea";
+export {
+  BaseToast,
+  BaseToastAction,
+  BaseToastClose,
+  BaseToastContent,
+  BaseToastDescription,
+  BaseToastPortal,
+  BaseToastProvider,
+  BaseToastTitle,
+  BaseToastViewport,
+  BaseToaster,
+  createBaseToastManager,
+  toast,
+  useBaseToastManager
+} from "@/base/toast";
 export { BaseToggle, baseToggleVariants } from "@/base/toggle";
 export {
   BaseToggleGroup,
@@ -152,8 +246,9 @@ export { Check } from "@/icons/check";
 export { ChevronDown } from "@/icons/chevron-down";
 export { ChevronRight } from "@/icons/chevron-right";
 export { ChevronUp } from "@/icons/chevron-up";
-export { CirclePlus } from "@/icons/circle-plus";
 export { Circle } from "@/icons/circle";
+export { CircleCheck } from "@/icons/circle-check";
+export { CirclePlus } from "@/icons/circle-plus";
 export { ClaudeIcon } from "@/icons/claude";
 export { Code } from "@/icons/code";
 export { CohereIcon, CohereIconCurrentColor } from "@/icons/cohere";
@@ -178,6 +273,7 @@ export { GripVertical } from "@/icons/grip-vertical";
 export { History } from "@/icons/history";
 export { ImageGen } from "@/icons/image-gen";
 export { ImageIcon } from "@/icons/image-icon";
+export { Info } from "@/icons/info";
 export { KeyRound } from "@/icons/key-round";
 export { Key } from "@/icons/key";
 export { Kimi } from "@/icons/kimi";
@@ -196,6 +292,8 @@ export { Mic } from "@/icons/mic";
 export { MinimaxIcon } from "@/icons/minimax";
 export { MistralIcon } from "@/icons/mistral";
 export { Moon } from "@/icons/moon";
+export { MoreHorizontal } from "@/icons/more-horizontal";
+export { OctagonX } from "@/icons/octagon-x";
 export { OpenAiIcon } from "@/icons/openai";
 export { Package } from "@/icons/package";
 export { Palette } from "@/icons/palette";
@@ -229,6 +327,7 @@ export { ThumbsUp } from "@/icons/thumbs-up";
 export { Tools } from "@/icons/tools";
 export { Trash } from "@/icons/trash";
 export { TrashSimple } from "@/icons/trash-simple";
+export { TriangleAlert } from "@/icons/triangle-alert";
 export { User } from "@/icons/user";
 export { VercelIcon } from "@/icons/vercel";
 export { X } from "@/icons/x";

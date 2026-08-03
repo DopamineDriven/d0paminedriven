@@ -47,13 +47,14 @@ if (process.argv[2] === "init") {
   const handler = new ConfigHandler(process.cwd());
   Promise.all([
     exeInquirer().then(async v => {
-      const { eslint, prettier, root, typescript, ui, web } = scaffoldService(
+      const { eslint, prettier, root, typescript, ui, web, vitest } = scaffoldService(
         v,
         handler
       );
       eslint.exeEslint();
       prettier.exePrettier();
       typescript.exeTs();
+      vitest.exeVitest();
       root.exeRoot();
       ui.exeUIPkg();
       web.exeWebApp();

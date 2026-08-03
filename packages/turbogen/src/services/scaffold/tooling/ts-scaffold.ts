@@ -1,5 +1,6 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
+/* eslint-disable @typescript-eslint/await-thenable */
 
 export class TsScaffolder {
   constructor(public baseProps: PromptPropsBase,     protected configHandler: ConfigHandler) {
@@ -21,7 +22,18 @@ export class TsScaffolder {
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "isolatedModules": true,
-    "lib": ["ES2024", "ScriptHost", "ESNext"],
+    "lib": [
+      "ES2024",
+      "ScriptHost",
+      "ESNext",
+      "ES2018.AsyncGenerator",
+      "ES2024.Collection",
+      "ES2024.Object",
+      "ESNext.Iterator",
+      "ESNext.AsyncIterable",
+      "ESNext.Collection",
+      "ES2018.AsyncIterable"
+    ],
     "module": "Preserve",
     "moduleDetection": "auto",
     "moduleResolution": "Bundler",
@@ -29,14 +41,15 @@ export class TsScaffolder {
     "noUncheckedIndexedAccess": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
+    "pretty": true,
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "ESNext"
+    "useUnknownInCatchVariables": true,
+    "target": "esnext"
   },
   "exclude": ["node_modules", "build", "dist", ".next"]
-}
-` as const;
+}` as const;
   }
 
   private get nodePkgTemplate() {

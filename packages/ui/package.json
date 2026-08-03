@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/ui",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "convenient ui helpers",
   "files": [
     "dist/**/*.{js,mjs,cjs,d.mts,d.ts,d.cts,css}"

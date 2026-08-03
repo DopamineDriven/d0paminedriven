@@ -1,6 +1,8 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
 
+/* eslint-disable @typescript-eslint/await-thenable */
+
 export class EslintScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
@@ -11,10 +13,7 @@ export class EslintScaffolder {
     return this.baseProps.workspace;
   }
   private get localDeps() {
-    return [
-      `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`
-    ] as const;
+    return [`@${this.workspace}/tsconfig`] as const;
   }
   private get devDeps() {
     return [
@@ -22,6 +21,9 @@ export class EslintScaffolder {
       "@typescript/native-preview",
       "eslint",
       "prettier",
+      "tsdown",
+      "tslib",
+      "tsx",
       "typescript"
     ] as const;
   }
@@ -29,13 +31,12 @@ export class EslintScaffolder {
   private get deps() {
     return [
       "@eslint/compat",
+      "@eslint/config-helpers",
       "@eslint/js",
       "@next/eslint-plugin-next",
-      "eslint-config-turbo",
       "eslint-plugin-import",
       "eslint-plugin-jsx-a11y",
       "eslint-plugin-react",
-      "eslint-plugin-react-compiler",
       "eslint-plugin-react-hooks",
       "eslint-plugin-turbo",
       "jiti",
@@ -45,38 +46,23 @@ export class EslintScaffolder {
 
   private get baseScaffold() {
     // prettier-ignore
-    return `/// <reference types="./types.d.ts" />
-
-import { join, relative } from "node:path";
+    return `import { join } from "node:path";
+import { includeIgnoreFile } from "@eslint/config-helpers";
 import eslint from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import turboPlugin from "eslint-plugin-turbo";
+import { defineConfig } from "@eslint/config-helpers";
 import tseslint from "typescript-eslint";
-import { includeIgnoreFile } from "@eslint/compat";
 
-const _project = relative(process.cwd(), "tsconfig.json");
-
-export default tseslint.config(
-  includeIgnoreFile(join(import.meta.dirname, "../../.gitignore")),
-  {
-    // Globally ignored files
-    ignores: [
-      "**/*.config.*",
-      "**/public/**",
-      ".vscode/**/*.json",
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/build/**",
-      "**/.next/cache/**"
-    ]
-  },
+export const baseConfig = (cwd=process.cwd()) => defineConfig(
+  includeIgnoreFile(join(cwd, "../../.gitignore")),
+  { ignores: ["**/*.config.*"] },
   {
     files: ["**/*.js", "**/*.mjs", "**/*.ts", "**/*.tsx"],
     plugins: {
       import: importPlugin,
       turbo: turboPlugin
     },
-    ignores: ["**/*.config.*", "public/**/*.js", "**/node_modules/**", ".vscode/**/*.json"],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -84,34 +70,53 @@ export default tseslint.config(
       ...tseslint.configs.stylisticTypeChecked
     ],
     rules: {
-      ...turboPlugin.configs.recommended.rules,
+      "turbo/no-undeclared-env-vars": [
+        1,
+        {
+          allowList: ["^ENV_[A-Z]+$"]
+        }
+      ],
       "@typescript-eslint/no-unused-vars": [
-        "error",
+        1,
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }
       ],
       "@typescript-eslint/no-misused-promises": [
-        2,
+        0,
         { checksVoidReturn: { attributes: false } }
       ],
       "@typescript-eslint/no-unnecessary-type-assertion": "off",
       "@typescript-eslint/no-non-null-assertion": "error",
-      "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
       "@typescript-eslint/consistent-indexed-object-style": "off",
       "@typescript-eslint/consistent-type-definitions": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/consistent-type-assertions": "off",
       "@typescript-eslint/consistent-type-imports": "off",
       "no-unsafe-finally": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
       "@next/next/no-page-custom-font": "off",
-      // the following three rules are turned off due to existing errors eslint has when reading the source files
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/dot-notation": "off",
-      "@typescript-eslint/no-empty-function": "off"
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/require-await": "off",
+      "preserve-caught-error": "off",
+      "no-const": "off",
+      "prefer-const": "off",
+      "no-useless-assignment":"off",
+      "@typescript-eslint/prefer-regexp-exec": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "import/consistent-type-specifier-style": ["warn", "prefer-top-level"]
     }
   },
   {
     linterOptions: { reportUnusedDisableDirectives: true },
-    languageOptions: { parserOptions: { project: true } }
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname
+      }
+    }
   }
 );
 ` as const;
@@ -120,124 +125,136 @@ export default tseslint.config(
   private get nextScaffold() {
     // prettier-ignore
     return `import nextPlugin from "@next/eslint-plugin-next";
+import { defineConfig } from "@eslint/config-helpers";
 
-/** @type {Awaited<import('typescript-eslint').Config>} */
-export default [
-  {
-    files: ["**/*.ts", "**/*.tsx"],
-    plugins: {
-      "@next/next": nextPlugin
-    },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs["core-web-vitals"].rules,
-      // TypeError: context.getAncestors is not a function
-      "@next/next/no-duplicate-head": "off",
-      "import/no-default-export": "off"
-    }
+export const nextjsConfig = defineConfig({
+  files: ["**/*.ts", "**/*.tsx"],
+  plugins: {
+    "@next/next": nextPlugin
+  },
+  rules: {
+    ...nextPlugin.configs.recommended.rules,
+    ...nextPlugin.configs["core-web-vitals"].rules,
+    "@next/next/no-duplicate-head": "off",
+    "@next/next/no-img-element": "off"
   }
-];` as const;
+});
+` as const;
   }
 
   private get reactScaffold() {
     // prettier-ignore
     return `import reactPlugin from "eslint-plugin-react";
-import compilerPlugin from "eslint-plugin-react-compiler";
-import hooksPlugin from "eslint-plugin-react-hooks";
+import reactHooks from "eslint-plugin-react-hooks";
+import { defineConfig } from "@eslint/config-helpers";
 
-/** @type {Awaited<import('typescript-eslint').Config>} */
-export default [
+export const reactConfig = defineConfig(
   {
     files: ["**/*.ts", "**/*.tsx"],
-    plugins: {
-      react: reactPlugin,
-      "react-compiler": compilerPlugin,
-      "react-hooks": hooksPlugin
-    },
-    rules: {
-      ...reactPlugin.configs["jsx-runtime"].rules,
-      ...hooksPlugin.configs.recommended.rules,
-      "react-compiler/react-compiler": "error"
-    },
+    ...reactPlugin.configs.flat.recommended,
+    ...reactPlugin.configs.flat["jsx-runtime"],
     languageOptions: {
+      ...reactPlugin.configs.flat.recommended?.languageOptions,
+      ...reactPlugin.configs.flat["jsx-runtime"]?.languageOptions,
       globals: {
         React: "writable"
       }
     }
-  }
-];
+  },
+  reactHooks.configs.flat["recommended-latest"]
+);
 ` as const;
   }
 
   private get tsconfigScaffold() {
     // prettier-ignore
     return `{
-  "extends": "@${this.workspace}/tsconfig/base.json",
+  "extends": "@${this.workspace}/tsconfig/node-pkg.json",
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "types": ["node"]
+    "types": ["*"]
   },
-  "include": ["."],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules"]
 }`as const;
   }
 
-  private get dtsScaffold() {
+  private get turboConfigTemplate() {
     // prettier-ignore
-    return `declare module "eslint-plugin-import" {
-  import type { Linter, Rule } from "eslint";
-
-  export const configs: {
-    recommended: { rules: Linter.RulesRecord };
-  };
-  export const rules: Record<string, Rule.RuleModule>;
+    return `{
+  "$schema": "https://turborepo.org/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "base.ts",
+        "next.ts",
+        "react.ts",
+        "index.ts",
+        "tsconfig.json",
+        "package.json",
+        "eslint.config.ts",
+        "tsdown.config.ts"
+      ]
+    }
+  }
 }
+` as const;
+  }
 
-declare module "eslint-plugin-react" {
-  import type { Linter, Rule } from "eslint";
+  private get tsdownTemplate() {
+    // prettier-ignore
+    return `import { relative } from "node:path";
+import type { InlineConfig } from "tsdown";
+import { defineConfig } from "tsdown";
 
-  export const configs: {
-    recommended: { rules: Linter.RulesRecord };
-    all: { rules: Linter.RulesRecord };
-    "jsx-runtime": { rules: Linter.RulesRecord };
-  };
-  export const rules: Record<string, Rule.RuleModule>;
-}
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: ["index.ts", "react.ts", "next.ts", "base.ts"],
+      cwd: process.cwd(),
+      target: ["node26"],
+      fixedExtension: false,
+      dts: { tsgo: true },
+      format: ["esm"],
+      sourcemap: true,
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      clean: true,
+      outDir: "dist",
+      unbundle: true
+    }) satisfies InlineConfig
+);` as const;
+  }
 
-declare module "eslint-plugin-react-compiler" {}
+  private get eslintConfigTemplate() {
+    return `import { defineConfig } from "@eslint/config-helpers";
+import { baseConfig } from "./base.ts";
 
-declare module "eslint-plugin-react-hooks" {
-  import type { Linter, Rule } from "eslint";
+export default defineConfig(
+  {
+    rules: {
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/prefer-includes": "off",
+      "@typescript-eslint/require-await": "off",
+      "prefer-const": "off",
+      "@typescript-eslint/no-duplicate-type-constituents": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-empty-object-type": "off"
+    },
+    ignores: ["dist/**"]
+  },
+  baseConfig(process.cwd())
+);
+` as const;
+  }
 
-  export const configs: {
-    recommended: {
-      rules: {
-        "rules-of-hooks": Linter.RuleEntry;
-        "exhaustive-deps": Linter.RuleEntry;
-      };
-    };
-  };
-  export const rules: Record<string, Rule.RuleModule>;
-}
-
-declare module "@next/eslint-plugin-next" {
-  import type { Linter, Rule } from "eslint";
-
-  export const configs: {
-    recommended: { rules: Linter.RulesRecord };
-    "core-web-vitals": { rules: Linter.RulesRecord };
-  };
-  export const rules: Record<string, Rule.RuleModule>;
-}
-
-declare module "eslint-plugin-turbo" {
-  import type { Linter, Rule } from "eslint";
-
-  export const configs: {
-    recommended: { rules: Linter.RulesRecord };
-  };
-  export const rules: Record<string, Rule.RuleModule>;
-}
+  private get IndexTemplate() {
+    return `export { baseConfig } from "./base.ts";
+export { nextjsConfig } from "./next.ts";
+export { reactConfig } from "./react.ts";
 ` as const;
   }
 
@@ -247,12 +264,15 @@ declare module "eslint-plugin-turbo" {
 
   private get getPaths() {
     return {
-      base: this.eslintPath("base.mjs"),
-      next: this.eslintPath("next.mjs"),
+      base: this.eslintPath("base.ts"),
+      next: this.eslintPath("next.ts"),
       packageJson: this.eslintPath("package.json"),
-      react: this.eslintPath("react.mjs"),
+      react: this.eslintPath("react.ts"),
       tsconfig: this.eslintPath("tsconfig.json"),
-      types: this.eslintPath("types.d.ts")
+      tsdown: this.eslintPath("tsdown.config.ts"),
+      eslintConfig: this.eslintPath("eslint.config.ts"),
+      index: this.eslintPath("index.ts"),
+      turbo: this.eslintPath("turbo.json")
     } as const;
   }
 
@@ -275,15 +295,19 @@ declare module "eslint-plugin-turbo" {
       this.workspace
     );
     return Promise.all([
-      this.writeTarget("tooling/eslint/base.mjs", this.baseScaffold),
-      this.writeTarget("tooling/eslint/next.mjs", this.nextScaffold),
+      this.writeTarget("tooling/eslint/base.ts", this.baseScaffold),
+      this.writeTarget("tooling/eslint/next.ts", this.nextScaffold),
       this.writeTarget(
         "tooling/eslint/package.json",
         JSON.stringify(pkgJson, null, 2)
       ),
-      this.writeTarget("tooling/eslint/react.mjs", this.reactScaffold),
+      this.writeTarget("tooling/eslint/tsdown.config.ts", this.tsdownTemplate),
+
+      this.writeTarget("tooling/eslint/react.ts", this.reactScaffold),
       this.writeTarget("tooling/eslint/tsconfig.json", this.tsconfigScaffold),
-      this.writeTarget("tooling/eslint/types.d.ts", this.dtsScaffold)
+      this.writeTarget("tooling/eslint/index.ts", this.eslintConfigTemplate),
+      this.writeTarget("tooling/eslint/turbo.json", this.turboConfigTemplate),
+      this.writeTarget("tooling/eslint/index.ts", this.IndexTemplate)
     ]);
   }
 }

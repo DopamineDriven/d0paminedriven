@@ -387,12 +387,10 @@ pnpm-lock.yaml
   private getPaths() {
     return {
       editorConfig: `.editorconfig`,
-      eslint: `eslint.config.mjs`,
       gitignore: ".gitignore",
       packageJson: "package.json",
       pnpmWorkspaceYaml: "pnpm-workspace.yaml",
       prettierignore: ".prettierignore",
-      tsconfig: `tsconfig.json`,
       turboJson: `turbo.json`,
       manage: "manage.sh",
       readme: "README.md",

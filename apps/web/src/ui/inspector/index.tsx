@@ -1,28 +1,26 @@
 "use client";
 
-import type {
-  ExpandedDocSpecs,
-  ExpandedImgSpecs
-} from "@d0paminedriven/metadata";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Icon,
-  Input,
-  ScrollArea,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Separator
-} from "@d0paminedriven/ui";
+import type { ExpandedDocSpecs, ExpandedImgSpecs } from "@d0paminedriven/metadata";
 import { useMemo, useState } from "react";
+import {
+  BaseBadge as Badge,
+  BaseButton as Button,
+  BaseCard as Card,
+  BaseCardContent as CardContent,
+  BaseCardDescription as CardDescription,
+  BaseCardHeader as CardHeader,
+  BaseCardTitle as CardTitle,
+  FileText,
+  ImageIcon,
+  BaseInput as Input,
+  BaseScrollArea as ScrollArea,
+  BaseSelect as Select,
+  BaseSelectContent as SelectContent,
+  BaseSelectItem as SelectItem,
+  BaseSelectTrigger as SelectTrigger,
+  BaseSelectValue as SelectValue,
+  BaseSeparator as Separator
+} from "@d0paminedriven/ui";
 
 type AssetOk = {
   url: string;
@@ -72,9 +70,9 @@ function AssetCard({ item }: { item: AssetResult }) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             {isImage ? (
-              <Icon.ImageIcon className="size-4" />
+              <ImageIcon className="size-4" />
             ) : (
-              <Icon.FileText className="size-4" />
+              <FileText className="size-4" />
             )}
             <span className="capitalize">
               {isImage
@@ -92,7 +90,6 @@ function AssetCard({ item }: { item: AssetResult }) {
         {isImage ? (
           <div className="bg-muted/40 flex items-center justify-center overflow-hidden rounded-md border">
             {/* Use plain img to avoid remote patterns config */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={src}
               alt={meta.format}
@@ -102,7 +99,7 @@ function AssetCard({ item }: { item: AssetResult }) {
           </div>
         ) : (
           <div className="bg-muted/40 flex items-center justify-center rounded-md border p-6">
-            <Icon.FileText className="text-muted-foreground size-10" />
+            <FileText className="text-muted-foreground size-10" />
           </div>
         )}
 
@@ -145,7 +142,7 @@ function AssetCard({ item }: { item: AssetResult }) {
   );
 }
 
-export default function AssetInspector({
+export function AssetInspector({
   initialResults
 }: {
   initialResults: AssetResult[];
@@ -231,7 +228,7 @@ export default function AssetInspector({
         <Select
           value={type}
           onValueChange={v => setType(v as "all" | "image" | "document")}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-40">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
@@ -240,8 +237,8 @@ export default function AssetInspector({
             <SelectItem value="document">Documents</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={format} onValueChange={setFormat}>
-          <SelectTrigger className="w-[200px]">
+        <Select value={format} onValueChange={e => (e ? setFormat(e) : null)}>
+          <SelectTrigger className="w-50">
             <SelectValue placeholder="Format" />
           </SelectTrigger>
           <SelectContent>

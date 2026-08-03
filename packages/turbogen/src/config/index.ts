@@ -1,5 +1,5 @@
-import { Fs } from "@d0paminedriven/fs";
 import type { NpmLatest, ToPascalCase } from "@/types/index.ts";
+import { Fs } from "@d0paminedriven/fs";
 
 export class ConfigHandler extends Fs {
   constructor(public override cwd: string) {
@@ -93,9 +93,7 @@ auto-install-peers=true
     const url = `https://registry.npmjs.org/${encodeURIComponent(target)}/latest`;
     const res = await fetch(url);
     if (!res.ok) {
-      console.log(
-        `failed to fetch ${target}: ${res.status} ${res.statusText}`
-      );
+      console.log(`failed to fetch ${target}: ${res.status} ${res.statusText}`);
       /** */
     }
     const data = (await res.json()) as NpmLatest;
@@ -248,23 +246,48 @@ auto-install-peers=true
     const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
     return {
       name: `@${workspace}/eslint-config`,
-      private: true,
       version: "0.1.0",
       type: "module",
+      module: "./dist/index.js",
+      types: "./dist/index.d.ts",
+      sideEffects: false,
+      files: ["dist/**/*.{js,cjs,mjs,d.ts,d.cts,d.mts}"],
+      publishConfig: {
+        access: "public",
+        typesVersions: {
+          "*": {
+            "*": ["dist/index.d.ts"],
+            base: ["dist/base.d.ts"],
+            next: ["dist/next.d.ts"],
+            react: ["dist/react.d.ts"]
+          }
+        }
+      },
+      typesVersions: {
+        "*": {
+          "*": ["dist/index.d.ts"],
+          base: ["dist/base.d.ts"],
+          next: ["dist/next.d.ts"],
+          react: ["dist/react.d.ts"]
+        }
+      },
+      source: "index.ts",
       exports: {
-        "./base": "./base.mjs",
-        "./next": "./next.mjs",
-        "./react": "./react.mjs"
+        ".": "./dist/index.js",
+        "./base": "./dist/base.js",
+        "./next": "./dist/next.js",
+        "./react": "./dist/react.js"
       },
       license: "MIT",
       scripts: {
-        clean: "git clean -xdf .cache .turbo node_modules",
+        build: "tsdown",
+        clean: "git clean -xdf .cache .turbo node_modules dist",
+        lint: "eslint",
         format: "prettier --check . --ignore-path ../../.gitignore",
         typecheck: "tsgo --noEmit"
       },
       dependencies: Object.fromEntries(entries),
-      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
-      prettier: `@${workspace}/prettier-config`
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries])
     };
   }
 
@@ -289,14 +312,33 @@ auto-install-peers=true
     const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
     return {
       name: `@${workspace}/prettier-config`,
-      private: true,
       version: "0.1.0",
       type: "module",
+      module: "./dist/index.js",
+      types: "./dist/index.d.ts",
+      sideEffects: false,
+      files: ["dist/**/*.{js,cjs,mjs,d.ts,d.cts,d.mts}"],
+      publishConfig: {
+        access: "public",
+        typesVersions: {
+          "*": {
+            "*": ["dist/index.d.ts"]
+          }
+        }
+      },
+      typesVersions: {
+        "*": {
+          "*": ["dist/index.d.ts"]
+        }
+      },
+      source: "index.ts",
       exports: {
-        ".": "./index.mjs"
+        ".": "./dist/index.js"
       },
       scripts: {
-        clean: "git clean -xdf .turbo node_modules",
+        build: "tsdown",
+        clean: "git clean -xdf .turbo node_modules dist",
+        lint: "eslint",
         format: "prettier --check . --ignore-path ../../.gitignore",
         typecheck: "tsgo --noEmit"
       },
@@ -305,7 +347,65 @@ auto-install-peers=true
       prettier: `@${workspace}/prettier-config`
     };
   }
-
+  public async resolveAllDepsVitest(
+    deps: readonly string[],
+    devDeps: readonly string[],
+    localDeps: readonly string[],
+    workspace = "placeholder"
+  ) {
+    const entries = await Promise.all(
+      deps.map(async pkg => {
+        const version = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${version}`] as const;
+      })
+    );
+    const devEntries = await Promise.all(
+      devDeps.map(async pkg => {
+        const v = (await this.fetchLatestVersion(pkg)).version;
+        return [pkg, `^${v}`] as const;
+      })
+    );
+    const localEntries = localDeps.map(p => [p, "workspace:*"] as const);
+    return {
+      name: `@${workspace}/vitest-config`,
+      version: "0.1.0",
+      type: "module",
+      module: "./dist/index.js",
+      types: "./dist/index.d.ts",
+      sideEffects: false,
+      files: ["dist/**/*.{js,cjs,mjs,d.ts,d.cts,d.mts}"],
+      publishConfig: {
+        access: "public",
+        typesVersions: {
+          "*": {
+            "*": ["dist/index.d.ts"]
+          }
+        }
+      },
+      typesVersions: {
+        "*": {
+          "*": ["dist/index.d.ts"]
+        }
+      },
+      source: "index.ts",
+      exports: {
+        ".": "./dist/index.js"
+      },
+      license: "MIT",
+      scripts: {
+        build: "tsdown",
+        dev: "tsdown --config tsdown-dev.config.ts",
+        lint: "eslint",
+        clean: "git clean -xdf .cache .turbo node_modules dist",
+        format:
+          'prettier --write "src/**/*.{ts,cts,mts,js,mjs,cjs,json,yaml,yml}" --ignore-unknown --cache',
+        typecheck: "tsgo --noEmit"
+      },
+      dependencies: Object.fromEntries(entries),
+      devDependencies: Object.fromEntries([...localEntries, ...devEntries]),
+      prettier: `@${workspace}/prettier-config`
+    };
+  }
   public async resolveAllDepsUIPkg(
     deps: readonly string[],
     devDeps: readonly string[],

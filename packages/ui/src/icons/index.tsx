@@ -13,6 +13,7 @@ import { ChevronDown } from "@/icons/chevron-down";
 import { ChevronRight } from "@/icons/chevron-right";
 import { ChevronUp } from "@/icons/chevron-up";
 import { Circle } from "@/icons/circle";
+import { CircleCheck } from "@/icons/circle-check";
 import { CirclePlus } from "@/icons/circle-plus";
 import { ClaudeIcon } from "@/icons/claude";
 import { Code } from "@/icons/code";
@@ -38,6 +39,7 @@ import { GripVertical } from "@/icons/grip-vertical";
 import { History } from "@/icons/history";
 import { ImageGen } from "@/icons/image-gen";
 import { ImageIcon } from "@/icons/image-icon";
+import { Info } from "@/icons/info";
 import { Key } from "@/icons/key";
 import { KeyRound } from "@/icons/key-round";
 import { Kimi } from "@/icons/kimi";
@@ -56,6 +58,8 @@ import { Mic } from "@/icons/mic";
 import { MinimaxIcon } from "@/icons/minimax";
 import { MistralIcon } from "@/icons/mistral";
 import { Moon } from "@/icons/moon";
+import { MoreHorizontal } from "@/icons/more-horizontal";
+import { OctagonX } from "@/icons/octagon-x";
 import { OpenAiIcon } from "@/icons/openai";
 import { Package } from "@/icons/package";
 import { Palette } from "@/icons/palette";
@@ -89,6 +93,7 @@ import { ThumbsUp } from "@/icons/thumbs-up";
 import { Tools } from "@/icons/tools";
 import { Trash } from "@/icons/trash";
 import { TrashSimple } from "@/icons/trash-simple";
+import { TriangleAlert } from "@/icons/triangle-alert";
 import { User } from "@/icons/user";
 import { VercelIcon } from "@/icons/vercel";
 import { X } from "@/icons/x";
@@ -112,6 +117,7 @@ const IconComponents = {
   ChevronUp,
   CirclePlus,
   Circle,
+  CircleCheck,
   ClaudeIcon,
   Code,
   CohereIcon,
@@ -137,6 +143,7 @@ const IconComponents = {
   History,
   ImageGen,
   ImageIcon,
+  Info,
   Key,
   KeyRound,
   Kimi,
@@ -155,6 +162,8 @@ const IconComponents = {
   MinimaxIcon,
   MistralIcon,
   Moon,
+  MoreHorizontal,
+  OctagonX,
   OpenAiIcon,
   Package,
   Palette,
@@ -188,6 +197,7 @@ const IconComponents = {
   Tools,
   Trash,
   TrashSimple,
+  TriangleAlert,
   User,
   VercelIcon,
   X,
@@ -245,6 +255,7 @@ export {
   ChevronUp,
   CirclePlus,
   Circle,
+  CircleCheck,
   ClaudeIcon,
   Code,
   CohereIcon,
@@ -270,6 +281,7 @@ export {
   History,
   ImageGen,
   ImageIcon,
+  Info,
   Key,
   KeyRound,
   Kimi,
@@ -288,6 +300,8 @@ export {
   MinimaxIcon,
   MistralIcon,
   Moon,
+  MoreHorizontal,
+  OctagonX,
   OpenAiIcon,
   Package,
   Palette,
@@ -321,6 +335,7 @@ export {
   Tools,
   Trash,
   TrashSimple,
+  TriangleAlert,
   User,
   VercelIcon,
   X,

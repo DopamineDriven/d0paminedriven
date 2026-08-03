@@ -202,63 +202,6 @@ export type RequireNested<
 
 export type FlexiCase<T extends string> = Lowercase<T> | Uppercase<T>;
 
-export function createDraftId(
-  userId: string,
-  conversationId: string,
-  batchId: string,
-  ordinal: number
-) {
-  if (!Number.isInteger(ordinal) || ordinal < 0) {
-    throw new Error("ordinal must be a non-negative integer");
-  }
-  if (
-    ![userId, conversationId, batchId].every(s => /^[A-Za-z0-9_-]+$/.test(s))
-  ) {
-    throw new Error("ids must be [A-Za-z0-9_-]+");
-  }
-  return `${userId}~${conversationId}~${batchId}~${ordinal}` as const;
-}
-/**
- * returns `[string, string, string, number]`
- *
- * corresponds to `[userId, conversationId, batchId, ordinal (asset count)]`
- *
- * which is the anatomy of an asset draftId
- */
-export function parseDraftId(draftId: string) {
-  if (/^(?:[A-Za-z0-9_-]+~){3}(?:0|[1-9][0-9]*)$/.test(draftId) === false) {
-    throw new Error(`invalid draftId ${draftId}`);
-  }
-  const toArr = draftId.split("~");
-
-  return toArr.map((v, o) =>
-    o !== toArr.length - 1 ? v : Number.parseInt(v, 10)
-  ) as [string, string, string, number];
-}
-
-export function instanceFunc<const Type>(c: new (...args: Type[]) => Type) {
-  return new c();
-}
-
-export type CommonDiscriminants =
-  "type" | "kind" | "event" | "tag" | "provider" | "_tag" | "__typename";
-
-export type LiteralUnion<TKnown extends string> = TKnown | string;
-
-export type DiscriminatedUnionToRecord<
-  TUnion extends Record<TKey, string>,
-  TKey extends LiteralUnion<CommonDiscriminants> =
-    LiteralUnion<CommonDiscriminants>
-> = TKey extends keyof TUnion
-  ? { [K in TUnion[TKey] & string]: Extract<TUnion, Record<TKey, K>> }
-  : never;
-
-export type UnionToRecord<
-  TUnion extends Record<"type", string>,
-  TDiscriminant extends string = TUnion["type"]
-> = {
-  [K in TDiscriminant]: Extract<TUnion, { type: K }>;
-};
 export type Signals =
   | "SIGABRT"
   | "SIGALRM"
@@ -305,15 +248,3 @@ export type BigIntOrNumber<T extends boolean = false> = T extends true
   ? number
   : bigint;
 
-// export type FilterBySelect<Q extends keyof ModelIdToModelDisplayName> = Exclude<
-//   Exclude<Q, ProductDataFull>,
-//   ProductDataFull
-// >;
-
-// export type FilterResults<S extends keyof ProductDataFull> = Rm<
-//   ProductDataFull,
-//   Exclude<keyof ProductDataFull, FilterBySelect<S>>
-// >;
-/**
- *
- */

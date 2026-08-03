@@ -11,10 +11,8 @@ export default defineConfig(
       target: ["node26"],
       fixedExtension: false,
       dts: { tsgo: true },
-      watch: process.env.NODE_ENV === "development",
       format: ["esm"],
       sourcemap: true,
-
       tsconfig: relative(process.cwd(), "tsconfig.json"),
       clean: true,
       outDir: "dist",

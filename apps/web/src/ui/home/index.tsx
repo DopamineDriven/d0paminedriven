@@ -42,14 +42,14 @@ export function LandingPage() {
             className="text-muted-foreground max-w-2xl leading-normal sm:text-xl sm:leading-8">
             A high-performance monorepo with pnpm workspaces, powered by
             Turborepo. Pre-configured with ESLint, Prettier, TypeScript, and
-            Jest.
+            Vitest.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-x-4">
-            <Button asChild>
+            <Button asChild variant="secondary">
               <Link href="#" scroll={false}>
                 Get Started <ArrowRight className="ml-2 size-4" />
               </Link>
@@ -207,13 +207,13 @@ pnpm run:web`}</code>
 │   └── ui/
 └── tooling/
     ├── eslint/
-    ├── jest-presets/
     ├── prettier/
-    └── typescript/`}
+    ├── typescript/
+    └── vitest/`}
                 </code>
               </pre>
             </div>
-            <Button asChild>
+            <Button variant="secondary" asChild>
               <Link href="#" scroll={false}>
                 Learn more about the structure&nbsp;
                 <ArrowRight className="ml-2 size-4" />

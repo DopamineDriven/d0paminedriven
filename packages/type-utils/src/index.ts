@@ -3,12 +3,10 @@ export type {
   BigIntOrNumber,
   BigIntKeys,
   CTR,
-  CommonDiscriminants,
   DeepPartial,
   DeepPartialFields,
   DeepReplace,
   DX,
-  DiscriminatedUnionToRecord,
   Equal,
   Expect,
   Extends,
@@ -18,7 +16,6 @@ export type {
   Include,
   IsExact,
   IsOptional,
-  LiteralUnion,
   NormalizeAndInject,
   OnlyOptional,
   OnlyRequired,
@@ -30,11 +27,9 @@ export type {
   TCN,
   UTR,
   Unenumerate,
-  UnionToRecord,
   Without,
   XOR
 } from "@/utils.ts";
-export { createDraftId, instanceFunc, parseDraftId } from "@/utils.ts";
 
 declare global {
   interface JSON {

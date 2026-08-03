@@ -6,6 +6,7 @@ import { RootScaffolder } from "@/services/scaffold/root/root-scaffolder.ts";
 import { EslintScaffolder } from "@/services/scaffold/tooling/eslint-scaffold.ts";
 import { PrettierScaffolder } from "@/services/scaffold/tooling/prettier-scaffold.ts";
 import { TsScaffolder } from "@/services/scaffold/tooling/ts-scaffold.ts";
+import { VitestScaffolder } from "@/services/scaffold/tooling/vitest-config.ts";
 
 export interface ScaffoldServiceProps {
   eslint: EslintScaffolder;
@@ -13,6 +14,7 @@ export interface ScaffoldServiceProps {
   root: RootScaffolder;
   typescript: TsScaffolder;
   ui: UIPackageScaffolder;
+  vitest: VitestScaffolder;
   web: WebAppScaffolder;
 }
 
@@ -26,6 +28,7 @@ export function scaffoldService(
     root: new RootScaffolder(promptBase, configHandler),
     typescript: new TsScaffolder(promptBase, configHandler),
     ui: new UIPackageScaffolder(promptBase, configHandler),
+    vitest: new VitestScaffolder(promptBase, configHandler),
     web: new WebAppScaffolder(promptBase, configHandler)
   };
 }

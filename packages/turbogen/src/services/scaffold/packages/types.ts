@@ -730,21 +730,17 @@ export function Zap({
   private get turboJson() {
     // prettier-ignore
     return `{
-  "$schema": "https://turborepo.org/schema.json",
   "extends": ["//"],
   "tasks": {
-    "build": {
+   "build": {
       "outputs": ["dist/**"],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "src/**/*.tsx",
         "src/**/*.ts",
-        "src/**/*.css",
         "tsconfig.json",
         "package.json",
-        "postcss.config.mjs",
-        "eslint.config.mjs",
-        "tsup.config.ts"
+        "eslint.config.ts",
+        "tsdown.config.ts"
       ]
     }
   }
@@ -753,35 +749,28 @@ export function Zap({
 
   private get eslintConfigTs() {
     // prettier-ignore
-    return `import type { Config } from "typescript-eslint";
-import baseConfig from "@${this.workspace}/eslint-config/base";
-import reactConfig from "@${this.workspace}/eslint-config/react";
+    return `import { defineConfig } from "eslint/config";
+import { baseConfig } from "@${this.workspace}/eslint-config/base";
 
-export default [
-  ...baseConfig,
-  ...reactConfig,
+export default defineConfig(
   {
-    ignores: ["dist/**"],
     rules: {
       "@typescript-eslint/no-floating-promises": "off",
       "@typescript-eslint/prefer-includes": "off",
-      "@typescript-eslint/prefer-string-starts-ends-with": "off",
       "@typescript-eslint/require-await": "off",
       "prefer-const": "off",
+      "@typescript-eslint/no-duplicate-type-constituents": "off",
+      "@typescript-eslint/no-namespace": "off",
       "@typescript-eslint/no-empty-object-type": "off"
-    }
-  }
-] satisfies Config;` as const;
+    },
+    ignores: ["dist/**"]
+  },
+  baseConfig(process.cwd())
+);
+` as const;
   }
 
-  private get nextEnvDts() {
-    // prettier-ignore
-    return `/// <reference types="next" />
-/// <reference types="next/image-types/global" />
 
-// NOTE: This file should not be edited
-// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.` as const;
-  }
 
   private get postcssConfigMjs() {
     // prettier-ignore
@@ -818,37 +807,29 @@ export default {
 ` as const;
   }
 
-  private get tsupConfigTemplate() {
+  private get tsdownConfigTemplate() {
     // prettier-ignore
     return `import { relative } from "node:path";
-import type { Options } from "tsup";
-import { defineConfig } from "tsup";
+import type { UserConfig as Options } from "tsdown";
+import { defineConfig } from "tsdown";
 
-const tsupConfig = (options: Options) =>
-  ({
-    ...options,
-    entry: [
-      "src/globals.css",
-      "src/index.ts",
-      "src/icons/*.tsx",
-      "src/lib/*.ts",
-      "src/ui/*.tsx",
-      "!src/services/icon-workup.ts",
-      "!src/services/postbuild.ts"
-    ],
-    dts: true,
-    external: ["react", "react-dom"],
-    watch: process.env.NODE_ENV === "development",
-    keepNames: true,
-    target: ["esnext"],
-    format: ["esm"],
-    sourcemap: true,
-    tsconfig: relative(process.cwd(), "tsconfig.json"),
-    clean: true,
-    outDir: "dist"
-  }) satisfies Options;
-
-export default defineConfig(tsupConfig);
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: ["src/index.ts", "src/utils.ts"],
+      cwd: process.cwd(),
+      target: ["node26"],
+      fixedExtension: false,
+      dts: { tsgo: true },
+      format: ["esm"],
+      sourcemap: true,
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      clean: true,
+      outDir: "dist",
+      unbundle: true
+    }) satisfies Options
+);
 ` as const;
   }
 
@@ -904,7 +885,7 @@ export default defineConfig(tsupConfig);
   }
 
   private pkgPath<const F extends string>(file: F) {
-    return `packages/ui/${file}` as const;
+    return `packages/types/${file}` as const;
   }
 
   private get pkgPaths() {
@@ -912,25 +893,14 @@ export default defineConfig(tsupConfig);
       turbojson: this.pkgPath("turbo.json"),
       packageJson: this.pkgPath("package.json"),
       eslint: this.pkgPath("eslint.config.ts"),
-      postcss: this.pkgPath("postcss.config.mjs"),
       tsup: this.pkgPath("tsup.config.ts"),
+      tsdown: this.pkgPath("tsdown.config.ts"),
       tsconfig: this.pkgPath("tsconfig.json"),
-      nextenvdts: this.pkgPath("next-env.d.ts"),
-      globalCss: this.pkgPath("src/globals.css"),
       rootIndex: this.pkgPath("src/index.ts"),
       uiButton: this.pkgPath("src/ui/button.tsx"),
       postbuildService: this.pkgPath("src/services/postbuild.ts"),
       libUtils: this.pkgPath("src/lib/utils.ts"),
-      iconArrowRight: this.pkgPath("src/icons/arrow-right.tsx"),
-      iconCode: this.pkgPath("src/icons/code.tsx"),
-      iconGithub: this.pkgPath("src/icons/github.tsx"),
-      iconRoot: this.pkgPath("src/icons/index.tsx"),
-      iconLayers: this.pkgPath("src/icons/layers.tsx"),
-      iconMoon: this.pkgPath("src/icons/moon.tsx"),
-      iconsPackage: this.pkgPath("src/icons/package.tsx"),
-      iconsSun: this.pkgPath("src/icons/sun.tsx"),
-      iconsTerminal: this.pkgPath("src/icons/terminal.tsx"),
-      iconsZap: this.pkgPath("src/icons/zap.tsx")
+      utils: this.pkgPath("src/utils.ts")
     };
   }
 
@@ -954,28 +924,15 @@ export default defineConfig(tsupConfig);
       this.workspace
     );
     return Promise.all([
-      this.wt("packages/ui/eslint.config.ts", this.eslintConfigTs),
-      this.wt("packages/ui/next-env.d.ts", this.nextEnvDts),
-      this.wt("packages/ui/package.json", JSON.stringify(pkgJson, null, 2)),
-      this.wt("packages/ui/postcss.config.mjs", this.postcssConfigMjs),
-      this.wt("packages/ui/src/globals.css", this.globalCss),
-      this.wt("packages/ui/src/icons/arrow-right.tsx", this.arrowRightIcon),
-      this.wt("packages/ui/src/icons/code.tsx", this.codeIcon),
-      this.wt("packages/ui/src/icons/github.tsx", this.githubIcon),
-      this.wt("packages/ui/src/icons/index.tsx", this.iconRoot),
-      this.wt("packages/ui/src/icons/layers.tsx", this.layersIcon),
-      this.wt("packages/ui/src/icons/moon.tsx", this.moonIcon),
-      this.wt("packages/ui/src/icons/package.tsx", this.packageIcon),
-      this.wt("packages/ui/src/icons/sun.tsx", this.sunIcon),
-      this.wt("packages/ui/src/icons/terminal.tsx", this.terminalIcon),
-      this.wt("packages/ui/src/icons/zap.tsx", this.zapIcon),
-      this.wt("packages/ui/src/index.ts", this.srcRootIndex),
-      this.wt("packages/ui/src/lib/utils.ts", this.libUtils),
-      this.wt("packages/ui/src/services/postbuild.ts", this.postBuildService),
-      this.wt("packages/ui/src/ui/button.tsx", this.uiButtonComponent),
-      this.wt("packages/ui/tsconfig.json", this.tsConfigTemplate),
-      this.wt("packages/ui/tsup.config.ts", this.tsupConfigTemplate),
-      this.wt("packages/ui/turbo.json", this.turboJson)
+      this.wt("packages/types/eslint.config.ts", this.eslintConfigTs),
+      this.wt("packages/types/package.json", JSON.stringify(pkgJson, null, 2)),
+      this.wt("packages/types/src/index.ts", this.srcRootIndex),
+      this.wt("packages/types/src/lib/utils.ts", this.libUtils),
+      this.wt("packages/types/src/services/postbuild.ts", this.postBuildService),
+      this.wt("packages/types/src/ui/button.tsx", this.uiButtonComponent),
+      this.wt("packages/types/tsconfig.json", this.tsConfigTemplate),
+      this.wt("packages/types/tsdown.config.ts", this.tsdownConfigTemplate),
+      this.wt("packages/types/turbo.json", this.turboJson)
     ]);
   }
 }
