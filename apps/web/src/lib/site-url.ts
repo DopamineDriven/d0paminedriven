@@ -10,3 +10,12 @@ export const getSiteUrl = (env?: "development" | "production" | "preview") => {
   else if (env === "preview") return getPreviewUrl;
   else return getLocalUrl;
 };
+
+export const getSitesUrl = (
+  env: "development" | "production" | "test" | undefined
+) =>
+  !env || env === "development"
+    ? getLocalUrl
+    : env === "production"
+      ? getProductionUrl
+      : getPreviewUrl;

@@ -1,5 +1,5 @@
+import type { ConfigHandler } from "@/config/index.ts";
 import type { PromptPropsBase } from "@/types/index.ts";
-import { ConfigHandler } from "@/config/index.ts";
 
 /* eslint-disable @typescript-eslint/await-thenable */
 
@@ -171,6 +171,9 @@ export const reactConfig = defineConfig(
     return `{
   "extends": "@${this.workspace}/tsconfig/node-pkg.json",
   "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "types": ["*"]
   },
@@ -229,7 +232,20 @@ export default defineConfig(
 );` as const;
   }
 
-  private get eslintConfigTemplate() {
+  private get IndexTemplate() {
+    // prettier-ignore
+    return `export { baseConfig } from "@/base.ts";
+export { nextjsConfig } from "@/next.ts";
+export { reactConfig } from "@/react.ts";
+` as const;
+  }
+
+  private eslintPath<const F extends string>(file: F) {
+    return `tooling/eslint/${file}` as const;
+  }
+
+  private get eslintConfig() {
+    // prettier-ignore
     return `import { defineConfig } from "@eslint/config-helpers";
 import { baseConfig } from "./base.ts";
 
@@ -247,19 +263,7 @@ export default defineConfig(
     ignores: ["dist/**"]
   },
   baseConfig(process.cwd())
-);
-` as const;
-  }
-
-  private get IndexTemplate() {
-    return `export { baseConfig } from "./base.ts";
-export { nextjsConfig } from "./next.ts";
-export { reactConfig } from "./react.ts";
-` as const;
-  }
-
-  private eslintPath<const F extends string>(file: F) {
-    return `tooling/eslint/${file}` as const;
+);` as const
   }
 
   private get getPaths() {
@@ -302,10 +306,9 @@ export { reactConfig } from "./react.ts";
         JSON.stringify(pkgJson, null, 2)
       ),
       this.writeTarget("tooling/eslint/tsdown.config.ts", this.tsdownTemplate),
-
       this.writeTarget("tooling/eslint/react.ts", this.reactScaffold),
       this.writeTarget("tooling/eslint/tsconfig.json", this.tsconfigScaffold),
-      this.writeTarget("tooling/eslint/index.ts", this.eslintConfigTemplate),
+      this.writeTarget("tooling/eslint/eslint.config.ts", this.eslintConfig),
       this.writeTarget("tooling/eslint/turbo.json", this.turboConfigTemplate),
       this.writeTarget("tooling/eslint/index.ts", this.IndexTemplate)
     ]);

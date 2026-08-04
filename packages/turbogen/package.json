@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "8.0.0",
+  "version": "9.0.3",
   "author": "Andrew Ross",
   "description": "convenient turborepo generator",
   "repository": {
@@ -30,11 +30,12 @@
         "services/scaffold": [
           "dist/services/scaffold/tooling/ts-scaffold.d.ts",
           "dist/services/scaffold/tooling/prettier-scaffold.d.ts",
-          "dist/services/scaffold/tooling/jest-scaffold.d.ts",
+          "dist/services/scaffold/tooling/vitest-scaffold.d.ts",
           "dist/services/scaffold/tooling/eslint-scaffold.d.ts",
           "dist/services/scaffold/root/root-scaffolder.d.ts",
           "dist/services/scaffold/apps/generic-scaffold.d.ts",
           "dist/services/scaffold/packages/ui.d.ts",
+          "dist/services/scaffold/packages/types.d.ts",
           "dist/services/scaffold/index.d.ts"
         ],
         "types": [
@@ -67,11 +68,12 @@
       "services/scaffold": [
         "dist/services/scaffold/tooling/ts-scaffold.d.ts",
         "dist/services/scaffold/tooling/prettier-scaffold.d.ts",
-        "dist/services/scaffold/tooling/jest-scaffold.d.ts",
+        "dist/services/scaffold/tooling/vitest-scaffold.d.ts",
         "dist/services/scaffold/tooling/eslint-scaffold.d.ts",
         "dist/services/scaffold/root/root-scaffolder.d.ts",
         "dist/services/scaffold/apps/generic-scaffold.d.ts",
         "dist/services/scaffold/packages/ui.d.ts",
+        "dist/services/scaffold/packages/types.d.ts",
         "dist/services/scaffold/index.d.ts"
       ],
       "types": [
@@ -88,19 +90,19 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./*": "./dist/*.js",
     "./bin": "./dist/bin/init.js",
     "./config": "./dist/config/index.js",
     "./services/cli": "./dist/services/cli/index.js",
     "./services/cli/inquirer": "./dist/services/cli/inquirer.js",
     "./services/scaffold": "./dist/services/scaffold/index.js",
-    "./services/scaffold/apps/generic-scaffold": "./dist/services/scaffold/apps/generic-scaffold.js",
-    "./services/scaffold/packages/ui": "./dist/services/scaffold/packages/ui.ts",
-    "./services/scaffold/root/root-scaffolder": "./dist/services/scaffold/root/root-scaffolder.js",
-    "./services/scaffold/tooling/eslint-saffold": "./dist/services/scaffold/tooling/eslint-scaffold.js",
-    "./services/scaffold/tooling/jest-scaffold": "./dist/services/scaffold/tooling/jest-scaffold.js",
-    "./services/scaffold/tooling/prettier-scaffold": "./dist/services/scaffold/tooling/prettier-scaffold.js",
-    "./services/scaffold/tooling/ts-scaffold": "./dist/services/scaffold/tooling/ts-scaffold.js",
+    "./services/scaffold/generic-app": "./dist/services/scaffold/apps/generic-scaffold.js",
+    "./services/scaffold/ui": "./dist/services/scaffold/packages/ui.js",
+    "./services/scaffold/types": "./dist/services/scaffold/packages/types.ts",
+    "./services/scaffold/root": "./dist/services/scaffold/root/root-scaffolder.js",
+    "./services/scaffold/eslint": "./dist/services/scaffold/tooling/eslint-scaffold.js",
+    "./services/scaffold/vitest": "./dist/services/scaffold/tooling/vitest-scaffold.js",
+    "./services/scaffold/prettier": "./dist/services/scaffold/tooling/prettier-scaffold.js",
+    "./services/scaffold/ts": "./dist/services/scaffold/tooling/ts-scaffold.js",
     "./types": "./dist/types/index.js"
   },
   "scripts": {
@@ -116,7 +118,6 @@
     "@inquirer/prompts": "catalog:inquirer",
     "dotenv": "catalog:dotenv",
     "gradient-string": "catalog:gradient",
-    "js-yaml": "^5.2.3",
     "yaml": "catalog:yaml"
   },
   "devDependencies": {

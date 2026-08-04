@@ -1,5 +1,6 @@
 import type { PromptPropsBase } from "@/types/index.ts";
 import { ConfigHandler } from "@/config/index.ts";
+
 /* eslint-disable @typescript-eslint/await-thenable */
 
 export class UIPackageScaffolder {
@@ -12,7 +13,7 @@ export class UIPackageScaffolder {
     return this.baseProps.workspace;
   }
 
-  private get globalCss() {
+  private get cssTemplate() {
     // prettier-ignore
     return `@import "tailwindcss/theme.css" layer(theme) source("../src");
 
@@ -20,26 +21,7 @@ export class UIPackageScaffolder {
 
 @custom-variant dark (&:where([data-theme=dark], .dark, [data-theme=dark] *));
 
-@font-face {
-  font-family: "CalSans";
-  src: url("https://raw.githubusercontent.com/DopamineDriven/d0paminedriven/refs/heads/master/packages/turbogen/public/CalSans-SemiBold.woff2")
-    format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "CalSans";
-  src: url("https://raw.githubusercontent.com/DopamineDriven/d0paminedriven/refs/heads/master/packages/turbogen/public/CalSans-Regular.woff2")
-    format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme {
-  --font-cal-sans: CalSans, sans-serif;
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.14 0.0044 285.82);
   --color-card: oklch(1 0 0);
@@ -66,7 +48,7 @@ export class UIPackageScaffolder {
   --color-chart-5: oklch(0.8372 0.1644 84.53);
   --color-hue-0: oklch(0.9434 0.199 105.96);
   --color-hue-1: oklch(0.6477 0.263 359.98);
-  --color-hue-2: oklch(0.6404 0.3 324.36);
+  --color-hue-2: oklch(0.6404 0.300 324.36);
   --color-hue-3: oklch(0.5636 0.292 301.63);
   --color-hue-4: oklch(0.5898 0.211 259.36);
   --color-hue-5: oklch(0.8203 0.141 210.49);
@@ -93,12 +75,23 @@ export class UIPackageScaffolder {
   @keyframes shimmer {
     0% {
       opacity: 0.5;
-    }
+    } /* Start with a semi-transparent state */
     50% {
       opacity: 1;
-    }
+    } /* Become fully visible */
     100% {
       opacity: 0.5;
+    } /* Return to semi-transparent */
+  }
+
+  --animate-twinkle: twinkle 5s infinite;
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
     }
   }
 }
@@ -131,17 +124,18 @@ export class UIPackageScaffolder {
     --color-chart-5: oklch(0.8372 0.1644 84.53);
     --color-hue-0: oklch(0.9434 0.199 105.96);
     --color-hue-1: oklch(0.6477 0.263 359.98);
-    --color-hue-2: oklch(0.6404 0.3 324.36);
+    --color-hue-2: oklch(0.6404 0.300 324.36);
     --color-hue-3: oklch(0.5636 0.292 301.63);
     --color-hue-4: oklch(0.5898 0.211 259.36);
     --color-hue-5: oklch(0.8203 0.141 210.49);
     --color-hue-6: oklch(0.8842 0.107 168.47);
   }
 }
+
 ` as const;
   }
 
-  private get srcRootIndex() {
+  private get rootTemplate() {
     // prettier-ignore
     return `import "./globals.css";
 
@@ -163,70 +157,66 @@ export type { ButtonProps } from "@/ui/button";
 ` as const;
   }
 
-  private get uiButtonComponent() {
+  private get buttonTemplate() {
     // prettier-ignore
     return `"use client";
 
 import type { VariantProps } from "class-variance-authority";
 import type { ComponentPropsWithRef } from "react";
+import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  \`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all outline-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 focus-visible:ring-offset-2 shrink-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive [&_svg]:not-[[class*='size-']]:not-[[class^='h-']]:not-[[class^='w-']]:size-4\`,
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost:
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline"
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10"
+        default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        icon: "size-8",
+        "icon-sm": "size-6",
+        "icon-lg": "size-9"
       }
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default"
-    }
+    defaultVariants: { variant: "default", size: "default" }
   }
 );
 
 export interface ButtonProps
-  extends ComponentPropsWithRef<"button">,
-    VariantProps<typeof buttonVariants> {
+  extends ComponentPropsWithRef<"button">, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
-const Button = ({
+function Button({
   className,
   variant,
   size,
   asChild = false,
-  ref,
   ...props
-}: ButtonProps) => {
+}: ButtonProps) {
   const Comp = asChild ? Slot : "button";
   return (
     <Comp
+      data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
       {...props}
     />
   );
-};
-
-Button.displayName = "Button";
+}
 
 export { Button, buttonVariants };
 ` as const;
@@ -344,25 +334,13 @@ export function cn(...inputs: ClassValue[]) {
 
   private get arrowRightIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function ArrowRight({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function ArrowRight({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -374,31 +352,18 @@ export function ArrowRight({
       <path d="m12 5 7 7-7 7" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get codeIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Code({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Code({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -410,22 +375,19 @@ export function Code({
       <path d="m8 6-6 6 6 6" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
-  private get githubIcon() {
+  private get githubIconTemplate() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Github({
-  ...svg
-}: Omit<ComponentPropsWithRef<"svg">, "xmlns" | "viewBox" | "role">) {
+export function Github({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       viewBox="0 0 96 96"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       {...svg}>
       <path
         fillRule="evenodd"
@@ -435,8 +397,7 @@ export function Github({
       />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get iconRoot() {
@@ -444,15 +405,15 @@ export function Github({
     return `"use client";
 
 import type { ComponentPropsWithRef } from "react";
-import { ArrowRight } from "./arrow-right";
-import { Code } from "./code";
-import { Github } from "./github";
-import { Layers } from "./layers";
-import { Moon } from "./moon";
-import { Package } from "./package";
-import { Sun } from "./sun";
-import { Terminal } from "./terminal";
-import { Zap } from "./zap";
+import { ArrowRight } from "@/icons/arrow-right";
+import { Code } from "@/icons/code";
+import { Github } from "@/icons/github";
+import { Layers } from "@/icons/layers";
+import { Moon } from "@/icons/moon";
+import { Package } from "@/icons/package";
+import { Sun } from "@/icons/sun";
+import { Terminal } from "@/icons/terminal";
+import { Zap } from "@/icons/zap";
 
 const IconComponents = {
   ArrowRight,
@@ -494,9 +455,9 @@ function IconWithTarget({ target, ...props }: IconProps<IconName>) {
 }
 
 export const Icon = Object.assign(
-  // allows for target="icon name"
+  // allows for target="icon name" -> <Icon target="Sun" />
   IconWithTarget,
-  // allows for keying into icon name directly
+  // allows for keying into icon name directly -> <Icon.Sun />, etc
   IconComponents
 );
 
@@ -506,25 +467,13 @@ export { ArrowRight, Code, Github, Layers, Moon, Package, Sun, Terminal, Zap };
 
   private get layersIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Layers({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Layers({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -537,34 +486,21 @@ export function Layers({
       <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get moonIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Moon({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Moon({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      role="img"
+      role={role}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -572,33 +508,21 @@ export function Moon({
       <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get packageIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
-export function Package({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+    return `import type { BaseSVGProps } from "@/icons/index";
+
+export function Package({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      role="img"
+      role={role}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -609,31 +533,18 @@ export function Package({
       <path d="m7.5 4.27 9 5.15" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get sunIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Sun({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Sun({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -652,31 +563,18 @@ export function Sun({
       <path d="m19.07 4.93-1.41 1.41" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get terminalIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Terminal({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Terminal({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -688,31 +586,18 @@ export function Terminal({
       <path d="m4 17 6-6-6-6" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get zapIcon() {
     // prettier-ignore
-    return `import type { ComponentPropsWithRef } from "react";
+    return `import type { BaseSVGProps } from "@/icons/index";
 
-export function Zap({
-  ...svg
-}: Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->) {
+export function Zap({ role = "img", ...svg }: BaseSVGProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={role}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -723,8 +608,7 @@ export function Zap({
       <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
     </svg>
   );
-}
-` as const;
+}` as const;
   }
 
   private get turboJson() {
@@ -743,8 +627,8 @@ export function Zap({
         "tsconfig.json",
         "package.json",
         "postcss.config.mjs",
-        "eslint.config.mjs",
-        "tsup.config.ts"
+        "eslint.config.ts",
+        "tsdown.config.ts"
       ]
     }
   }
@@ -753,13 +637,10 @@ export function Zap({
 
   private get eslintConfigTs() {
     // prettier-ignore
-    return `import type { Config } from "typescript-eslint";
-import baseConfig from "@${this.workspace}/eslint-config/base";
-import reactConfig from "@${this.workspace}/eslint-config/react";
+    return `import { defineConfig } from "eslint/config";
+import { baseConfig, reactConfig } from "@${this.workspace}/eslint-config";
 
-export default [
-  ...baseConfig,
-  ...reactConfig,
+export default defineConfig(
   {
     ignores: ["dist/**"],
     rules: {
@@ -770,8 +651,11 @@ export default [
       "prefer-const": "off",
       "@typescript-eslint/no-empty-object-type": "off"
     }
-  }
-] satisfies Config;` as const;
+  },
+  baseConfig(process.cwd()),
+  reactConfig
+);
+` as const;
   }
 
   private get nextEnvDts() {
@@ -806,58 +690,63 @@ export default {
         "name": "next"
       }
     ],
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "ignoreDeprecations":"6.0",
     "types": ["*"],
-    "rootDir": "./src",
+    "rootDir": ".",
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "outDir": "dist"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/globals.d.ts", "next-env.d.ts"],
+
+  "include": ["src/**/*.ts", "src/**/*.tsx", "next-env.d.ts", "**/*.ts", "**/*.mjs"],
   "exclude": ["dist"]
 }
 ` as const;
   }
 
-  private get tsupConfigTemplate() {
+  private get tsdownTemplate() {
     // prettier-ignore
     return `import { relative } from "node:path";
-import type { Options } from "tsup";
-import { defineConfig } from "tsup";
+import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
 
-const tsupConfig = (options: Options) =>
-  ({
-    ...options,
-    entry: [
-      "src/globals.css",
-      "src/index.ts",
-      "src/icons/*.tsx",
-      "src/lib/*.ts",
-      "src/ui/*.tsx",
-      "!src/services/icon-workup.ts",
-      "!src/services/postbuild.ts"
-    ],
-    dts: true,
-    external: ["react", "react-dom"],
-    watch: process.env.NODE_ENV === "development",
-    keepNames: true,
-    target: ["esnext"],
-    format: ["esm"],
-    sourcemap: true,
-    tsconfig: relative(process.cwd(), "tsconfig.json"),
-    clean: true,
-    outDir: "dist"
-  }) satisfies Options;
-
-export default defineConfig(tsupConfig);
-` as const;
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: [
+        "src/globals.css",
+        "src/index.ts",
+        "src/icons/index.tsx",
+        "src/lib/*.ts",
+        "src/ui/*.tsx",
+        "!src/services/postbuild.ts"
+      ],
+      dts: { tsgo: true },
+      external: ["react"],
+      platform: "neutral",
+      fixedExtension: false,
+      target: ["esnext"],
+      format: ["esm"],
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      cwd: process.cwd(),
+      clean: true,
+      outDir: "dist",
+      unbundle: true,
+      css: {
+        fileName: "globals.css",
+        inject: false,
+        minify: false,
+        transformer: "postcss"
+      }
+    }) satisfies UserConfig
+);` as const;
   }
 
   private get deps() {
     return [
       "@radix-ui/react-slot",
-      "@swc/helpers",
       "class-variance-authority",
       "clsx",
+      "csstype",
       "tailwind-merge"
     ] as const;
   }
@@ -865,29 +754,34 @@ export default defineConfig(tsupConfig);
   private get devDeps() {
     return [
       "@d0paminedriven/fs",
-      "@microsoft/api-extractor",
-      "@swc/core",
       "@tailwindcss/postcss",
+      "@tsdown/css",
+      "@types/jsdom",
       "@types/node",
       "@types/react",
       "@types/react-dom",
       "@typescript/native-preview",
       "autoprefixer",
-      "chokidar",
       "eslint",
       "jiti",
+      "jsdom",
       "next",
       "postcss",
+      "postcss-import",
+      "postcss-load-config",
       "prettier",
       "react",
       "react-dom",
+      "rolldown",
+      "rolldown-plugin-dts",
       "tailwindcss",
-      "terser",
-      "tslib",
-      "tsup",
+      "tsdown",
       "tsx",
       "tw-animate-css",
-      "typescript"
+      "typescript",
+      "typescript-eslint",
+      "unplugin-lightningcss",
+      "vitest"
     ] as const;
   }
 
@@ -895,7 +789,8 @@ export default defineConfig(tsupConfig);
     return [
       `@${this.workspace}/eslint-config`,
       `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`
+      `@${this.workspace}/tsconfig`,
+      `@${this.workspace}/vitest-config`
     ] as const;
   }
 
@@ -913,10 +808,10 @@ export default defineConfig(tsupConfig);
       packageJson: this.pkgPath("package.json"),
       eslint: this.pkgPath("eslint.config.ts"),
       postcss: this.pkgPath("postcss.config.mjs"),
-      tsup: this.pkgPath("tsup.config.ts"),
+      tsdown: this.pkgPath("tsdown.config.ts"),
       tsconfig: this.pkgPath("tsconfig.json"),
       nextenvdts: this.pkgPath("next-env.d.ts"),
-      globalCss: this.pkgPath("src/globals.css"),
+      cssTemplate: this.pkgPath("src/globals.css"),
       rootIndex: this.pkgPath("src/index.ts"),
       uiButton: this.pkgPath("src/ui/button.tsx"),
       postbuildService: this.pkgPath("src/services/postbuild.ts"),
@@ -958,10 +853,10 @@ export default defineConfig(tsupConfig);
       this.wt("packages/ui/next-env.d.ts", this.nextEnvDts),
       this.wt("packages/ui/package.json", JSON.stringify(pkgJson, null, 2)),
       this.wt("packages/ui/postcss.config.mjs", this.postcssConfigMjs),
-      this.wt("packages/ui/src/globals.css", this.globalCss),
+      this.wt("packages/ui/src/globals.css", this.cssTemplate),
       this.wt("packages/ui/src/icons/arrow-right.tsx", this.arrowRightIcon),
       this.wt("packages/ui/src/icons/code.tsx", this.codeIcon),
-      this.wt("packages/ui/src/icons/github.tsx", this.githubIcon),
+      this.wt("packages/ui/src/icons/github.tsx", this.githubIconTemplate),
       this.wt("packages/ui/src/icons/index.tsx", this.iconRoot),
       this.wt("packages/ui/src/icons/layers.tsx", this.layersIcon),
       this.wt("packages/ui/src/icons/moon.tsx", this.moonIcon),
@@ -969,12 +864,12 @@ export default defineConfig(tsupConfig);
       this.wt("packages/ui/src/icons/sun.tsx", this.sunIcon),
       this.wt("packages/ui/src/icons/terminal.tsx", this.terminalIcon),
       this.wt("packages/ui/src/icons/zap.tsx", this.zapIcon),
-      this.wt("packages/ui/src/index.ts", this.srcRootIndex),
+      this.wt("packages/ui/src/index.ts", this.rootTemplate),
       this.wt("packages/ui/src/lib/utils.ts", this.libUtils),
       this.wt("packages/ui/src/services/postbuild.ts", this.postBuildService),
-      this.wt("packages/ui/src/ui/button.tsx", this.uiButtonComponent),
+      this.wt("packages/ui/src/ui/button.tsx", this.buttonTemplate),
       this.wt("packages/ui/tsconfig.json", this.tsConfigTemplate),
-      this.wt("packages/ui/tsup.config.ts", this.tsupConfigTemplate),
+      this.wt("packages/ui/tsdown.config.ts", this.tsdownTemplate),
       this.wt("packages/ui/turbo.json", this.turboJson)
     ]);
   }

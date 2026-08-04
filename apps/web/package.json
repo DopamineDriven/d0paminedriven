@@ -36,6 +36,7 @@
     "class-variance-authority": "catalog:cva",
     "clsx": "catalog:clsx",
     "csstype": "catalog:csstype",
+    "geist": "catalog:geist",
     "js-cookie": "catalog:cookies",
     "motion": "catalog:motion",
     "motion-dom": "catalog:motion",

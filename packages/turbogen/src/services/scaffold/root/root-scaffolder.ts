@@ -45,15 +45,13 @@ export class RootScaffolder {
 
   private get localDeps() {
     return [
-      `@${this.workspace}/eslint-config`,
       `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`,
-      `@${this.workspace}/vitest-config`
     ] as const;
   }
 
   private get devDeps() {
     return [
+      "@biomejs/biome",
       "@changesets/cli",
       "@d0paminedriven/turbogen",
       "@types/node",
@@ -302,12 +300,7 @@ trustLockfile: true
 blockExoticSubdeps: false
 ignorePatchFailures: true
 dangerouslyAllowAllBuilds: true
-verifyStoreIntegrity: false
-
-allowBuilds:
-  '@swc/core': true
-  esbuild: true
-  sharp: true` as const;
+verifyStoreIntegrity: false` as const;
   }
 
   private get gitignoreTemplate() {
@@ -378,6 +371,10 @@ pnpm-lock.yaml
         /(build_order=\(([\s\S]*?)\))/g,
         // prettier-ignore
         `build_order=(
+      "@${workspace}/eslint-config"
+      "@${workspace}/prettier-config"
+      "@${workspace}/vitest-config"
+      "@${workspace}/types"
       "@${workspace}/ui"
     )`
       );

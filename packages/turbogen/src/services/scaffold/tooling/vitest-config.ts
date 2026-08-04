@@ -1,5 +1,5 @@
+import type { ConfigHandler } from "@/config/index.ts";
 import type { PromptPropsBase } from "@/types/index.ts";
-import { ConfigHandler } from "@/config/index.ts";
 
 /* eslint-disable @typescript-eslint/await-thenable */
 
@@ -329,9 +329,7 @@ export default defineConfig(
     } as const;
   }
 
-  private vitestTarget<const V extends keyof typeof this.getPaths>(
-    target: V
-  ) {
+  private vitestTarget<const V extends keyof typeof this.getPaths>(target: V) {
     return this.getPaths[target];
   }
 

@@ -1,6 +1,9 @@
 export type PromptPropsBase = {
   readonly workspace: string;
   readonly port: string;
+  readonly withVercel: boolean;
+  readonly domain: string;
+  readonly previewDomain: string;
 };
 export type ToPascalCase<S extends string> = string extends S
   ? string
@@ -13,9 +16,5 @@ export type NpmLatest = {
   version: string;
   keywords: string[];
   [record: string]:
-    | string
-    | number
-    | boolean
-    | string[]
-    | Record<string, string>;
+    string | number | boolean | string[] | Record<string, string>;
 };

@@ -9,6 +9,8 @@ export { scaffoldService } from "@/services/scaffold/index.ts";
 export { TsScaffolder } from "@/services/scaffold/tooling/ts-scaffold.ts";
 export { UIPackageScaffolder } from "@/services/scaffold/packages/ui.ts";
 export { WebAppScaffolder } from "@/services/scaffold/apps/generic-scaffold.ts";
+export { TypesPackageScaffolder } from "@/services/scaffold/packages/types.ts";
+export { VitestScaffolder } from "@/services/scaffold/tooling/vitest-config.ts";
 export type { CliServiceProps } from "@/services/cli/index.ts";
 export type { ScaffoldServiceProps } from "@/services/scaffold/index.ts";
 export type {
@@ -16,6 +18,7 @@ export type {
   NpmLatest,
   ToPascalCase
 } from "@/types/index.ts";
+
 declare global {
   interface JSON {
     parse<T = unknown>(

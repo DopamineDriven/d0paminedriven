@@ -45,7 +45,7 @@ export function detectDeviceWorkup(request: NextRequest) {
     ios,
     latlng,
     tz,
-    ua: encodeURIComponent(ua),
+    ua,
     ip,
     country,
     city,

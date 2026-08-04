@@ -13,7 +13,6 @@
         "tsconfig.json",
         "package.json",
         "index.d.ts",
-        "global.d.ts",
         "audio-session.d.ts",
         "next-env.d.ts",
         "eslint.config.ts",
@@ -21,7 +20,6 @@
         "next.config.ts"
       ]
     },
-
     "dev": {
       "persistent": true
     }

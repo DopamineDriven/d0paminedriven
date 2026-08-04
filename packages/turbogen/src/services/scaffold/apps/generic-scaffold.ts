@@ -1,5 +1,6 @@
 import { ConfigHandler } from "@/config/index.ts";
 import { PromptPropsBase } from "@/types/index.ts";
+
 /* eslint-disable @typescript-eslint/await-thenable */
 
 /* eslint-disable no-useless-escape */
@@ -7,11 +8,22 @@ export class WebAppScaffolder {
   constructor(
     public baseProps: PromptPropsBase,
     protected handler: ConfigHandler
-  ) {
-  }
+  ) {}
 
   private get workspace() {
     return this.baseProps.workspace;
+  }
+
+  private get withVercel() {
+    return this.baseProps.withVercel;
+  }
+
+  private get domain() {
+    return this.handler.normalizeDomain(this.baseProps.domain);
+  }
+
+  private get previewDomain() {
+    return this.handler.normalizeDomain(this.baseProps.previewDomain);
   }
 
   private get port() {
@@ -42,10 +54,10 @@ export function PageLayout({ children }: { children: ReactNode }) {
     // prettier-ignore
     return `"use client";
 
-import { Icon } from "@${this.workspace}/ui";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { Github, Package } from "@${this.workspace}/ui";
 import { useTheme } from "next-themes";
 
 const ThemeToggle = dynamic(
@@ -80,10 +92,10 @@ export function Nav() {
   }, [resolvedTheme]);
   return (
     <header className="bg-background/95 supports-backdrop-filter:bg-background/60 max-w-9xl sticky top-0 z-40 w-full self-center border-b backdrop-blur">
-      <div className="container mx-auto  flex h-14 items-center">
+      <div className="container flex h-14 items-center">
         <div className="mx-2 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Icon.Package className="size-6" />
+            <Package className="size-6" />
             <span className="font-bold">turbogen</span>
           </Link>
         </div>
@@ -94,7 +106,7 @@ export function Nav() {
               target="_blank"
               rel="noreferrer"
               className="flex items-center space-x-2">
-              <Icon.Github className="size-5" />
+              <Github className="size-5" />
               <span className="sr-only">GitHub</span>
             </Link>
             <Link
@@ -120,8 +132,8 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="max-w-9xl jusify-center container mx-auto flex h-14 w-full border-t md:py-0">
-      <div className="mx-auto flex items-center gap-4 align-middle">
+    <footer className="max-w-9xl self-center border-t py-6 md:py-0 w-full">
+      <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
         <p className="text-muted-foreground text-center text-sm leading-loose md:text-left">
           Scaffolded by &nbsp;
           <span className="font-extrabold">@d0paminedriven/turbogen</span>. The
@@ -145,8 +157,8 @@ export function Footer() {
     // prettier-ignore
     return `"use client";
 
-import { Button, Icon } from "@${this.workspace}/ui";
 import { useEffect, useState } from "react";
+import { Button, Moon, Sun } from "@${this.workspace}/ui";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
@@ -154,6 +166,7 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -181,11 +194,7 @@ export function ThemeToggle() {
           height: "2.5rem",
           borderRadius: "0.375rem"
         }}>
-        {prefersDark ? (
-          <Icon.Moon className="size-5" />
-        ) : (
-          <Icon.Sun className="size-5" />
-        )}
+        {prefersDark ? <Moon className="size-5" /> : <Sun className="size-5" />}
         <span
           style={{
             position: "absolute",
@@ -221,9 +230,9 @@ export function ThemeToggle() {
         borderRadius: "0.375rem"
       }}>
       {resolvedTheme === "dark" ? (
-        <Icon.Moon className="size-5" />
+        <Moon className="size-5" />
       ) : (
-        <Icon.Sun className="size-5" />
+        <Sun className="size-5" />
       )}
       <span
         style={{
@@ -241,6 +250,23 @@ export function ThemeToggle() {
       </span>
     </Button>
   );
+}` as const;
+  }
+
+  private get proxyScaffold() {
+    // prettier-ignore
+    return `import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { detectDeviceAndSetCookies } from "@/lib/server-cookies";
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|opengraph-image|twitter-image).*)"
+  ]
+};
+
+export default async function proxy(req: NextRequest) {
+  return detectDeviceAndSetCookies(req, NextResponse.next());
 }
 ` as const;
   }
@@ -253,7 +279,22 @@ export function ThemeToggle() {
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts"]
+      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "src/**/*.css",
+        "tsconfig.json",
+        "package.json",
+        "index.d.ts",
+        "playwright.config.ts",
+        "vitest.config.ts",
+        "next-env.d.ts",
+        "eslint.config.ts",
+        "postcss.config.ts",
+        "next.config.ts"
+      ]
     },
     "dev": {
       "persistent": true
@@ -262,30 +303,11 @@ export function ThemeToggle() {
 }` as const;
   }
 
-  private get globalDts() {
+  private get indexDtsWithVercel() {
     // prettier-ignore
-    return `/// <reference types="node" />
-
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      readonly VERCEL_ENV: "development" | "production" | "preview";
-    }
-  }
-  declare module "http" {
-    interface IncomingHttpHeaders {
-      "x-vercel-ip-country"?: string;
-      "x-vercel-ip-city"?: string;
-      "x-vercel-ip-continent"?: string;
-      "x-vercel-forwarded-for"?: string;
-      "x-real-ip"?: string;
-      "x-vercel-ip-country-region"?: string;
-      "x-vercel-ip-postal-code"?: string;
-      "x-vercel-signature"?: string;
-      "x-vercel-ip-timezone"?: string;
-      "x-vercel-ip-latitude"?: string;
-      "x-vercel-ip-longitude"?: string;
-    }
+    return `declare global {
+  interface Window {
+    dataLayer?: object[];
   }
   interface JSON {
     parse<T = unknown>(
@@ -296,10 +318,60 @@ declare global {
   interface Body {
     json<T = unknown>(): Promise<T>;
   }
-  interface Response {
+  interface ObjectConstructor {
+    // PropertyKey -> string and number allowed, symbol disallowed (symbol can't be enumerable)
+    keys<T = object>(
+      o: T
+    ): (keyof T extends infer K
+      ? K extends string
+        ? K
+        : K extends number
+          ? \`\${K}\`
+          : never
+      : never)[];
+  }
+  namespace NodeJS {
+    interface ProcessEnv {
+      readonly VERCEL_ENV: "development" | "production" | "preview";
+    }
+  }
+}
+declare module "http" {
+  interface IncomingHttpHeaders {
+    "x-vercel-ip-country"?: string;
+    "x-vercel-ip-city"?: string;
+    "x-vercel-ip-continent"?: string;
+    "x-vercel-forwarded-for"?: string;
+    "x-real-ip"?: string;
+    "x-vercel-ip-country-region"?: string;
+    "x-vercel-ip-postal-code"?: string;
+    "x-vercel-signature"?: string;
+    "x-vercel-ip-timezone"?: string;
+    "x-vercel-ip-latitude"?: string;
+    "x-vercel-ip-longitude"?: string;
+  }
+}
+export {};
+` as const;
+  }
+
+  private get IndexDts() {
+    // prettier-ignore
+    return `declare global {
+  interface Window {
+    dataLayer?: object[];
+  }
+  interface JSON {
+    parse<T = unknown>(
+      text: string,
+      reviver?: (this: any, key: string, value: any) => any
+    ): T;
+  }
+  interface Body {
     json<T = unknown>(): Promise<T>;
   }
   interface ObjectConstructor {
+    // PropertyKey -> string and number allowed, symbol disallowed (symbol can't be enumerable)
     keys<T = object>(
       o: T
     ): (keyof T extends infer K
@@ -316,36 +388,51 @@ export {};
 ` as const;
   }
 
-  private get eslintConfigMjs() {
+  private get eslintConfigTs() {
     // prettier-ignore
-    return `import baseConfig from "@${this.workspace}/eslint-config/base";
-import nextjsConfig from "@${this.workspace}/eslint-config/next";
-import reactConfig from "@${this.workspace}/eslint-config/react";
+    return `import {
+  baseConfig,
+  nextjsConfig,
+  reactConfig
+} from "@${this.workspace}/eslint-config";
+import { defineConfig } from "eslint/config";
 
-/** @type {import('typescript-eslint').Config} */
-export default [
-  ...baseConfig,
-  ...reactConfig,
-  ...nextjsConfig,
+export default defineConfig(
   {
-    ignores: [".next/**", "!.next/types/**/*"],
+    ignores: ["dist/**"],
     rules: {
-      "@typescript-eslint/consistent-type-assertions": "off",
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/prefer-includes": "off",
+      "@typescript-eslint/prefer-string-starts-ends-with": "off",
       "@typescript-eslint/require-await": "off",
-      "import/consistent-type-specifier-style": "off"
+      "prefer-const": "off",
+      "@typescript-eslint/no-empty-object-type": "off"
     }
-  }
-];` as const;
+  },
+  baseConfig(process.cwd()),
+  reactConfig,
+  nextjsConfig
+);
+` as const;
   }
 
-  private get postcssConfigMjs() {
+  private get vitestConfig() {
     // prettier-ignore
-    return `/** @type {import('postcss-load-config').Config} */
+    return `import { sharedConfig } from "@${this.workspace}/vitest-config";
+
+export default sharedConfig(process.cwd());
+` as const;
+  }
+
+  private get postcssConfigTs() {
+    // prettier-ignore
+    return `import type { Config } from "postcss-load-config";
+
 export default {
   plugins: {
     "@tailwindcss/postcss": {}
   }
-};` as const;
+} satisfies Config;` as const;
   }
 
   private get nextEnvDts() {
@@ -370,16 +457,16 @@ export default {
         "name": "next"
       }
     ],
-    "ignoreDeprecations":"6.0",
-    "types": ["*"],
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["*"]
   },
   "include": [
     ".",
     "next-env.d.ts",
     "next.config.ts",
-    "global.d.ts",
-    "postcss.config.mjs",
+    "postcss.config.ts",
+    "tailwind.config.ts",
+    "index.d.ts",
     "src/**/*.tsx",
     "src/**/*.ts",
     ".next/types/**/*.ts"
@@ -388,13 +475,69 @@ export default {
 }` as const;
   }
 
+  private get playWrightConfig() {
+    // prettier-ignore
+    return `import { join, relative } from "node:path";
+import { defineConfig, devices } from "@playwright/test";
+
+// This config is loaded as a native ES module (apps/web is \`type: module\`), so
+// \`import.meta.dirname\` — not \`__dirname\` — resolves to apps/web. The Next dev
+// server must be started through the root turbo script (never \`next dev\` from
+// inside apps/web — that corrupts the turbo cache), so the webServer runs
+// \`pnpm run:web\` with its cwd set to the monorepo root.
+const appDir = import.meta.dirname;
+const repoRoot = join(appDir, "..", "..");
+const baseURL = "http://localhost:${this.port}";
+const isCI = !!process.env.CI;
+
+export default defineConfig({
+  testDir: join(appDir, "src/__e2e__"),
+  testMatch: "**/*.e2e.ts",
+  fullyParallel: true,
+  tsconfig: relative(process.cwd(), "tsconfig.json"),
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  workers: isCI ? 1 : undefined,
+  reporter: [["list"], ["html", { open: "never" }]],
+  expect: { timeout: 10000 },
+  use: {
+    baseURL,
+    trace: "on-first-retry",
+    screenshot: "on"
+  },
+  projects: [
+    {
+      name: "chromium",
+      // Drive the full Chromium binary (new headless) instead of the
+      // lightweight chrome-headless-shell, which was the source of the
+      // browser-launch / headless instability we hit.
+      use: { ...devices["Desktop Chrome"], channel: "chromium" }
+    }
+  ],
+  webServer: [
+    {
+      name: "web",
+      command: "pnpm run:web",
+      cwd: repoRoot,
+      url: baseURL,
+      reuseExistingServer: !isCI,
+      timeout: 120000,
+      stdout: "ignore",
+      stderr: "pipe"
+    }
+  ]
+});
+`;
+  }
+
   private get deps() {
     return [
       "@base-ui/react",
       "class-variance-authority",
       "clsx",
       "csstype",
-      "lucide-react",
+      "geist",
+      "js-cookie",
       "motion",
       "next",
       "next-themes",
@@ -409,6 +552,8 @@ export default {
     return [
       "@playwright/test",
       "@tailwindcss/postcss",
+      "@types/js-cookie",
+      "@types/jsdom",
       "@types/node",
       "@types/react",
       "@types/react-dom",
@@ -416,10 +561,14 @@ export default {
       "autoprefixer",
       "babel-plugin-react-compiler",
       "dotenv",
+      "dotenv-expand",
       "eslint",
+      "jiti",
+      "jsdom",
       "motion-dom",
       "motion-utils",
       "postcss",
+      "postcss-load-config",
       "prettier",
       "sharp",
       "tailwindcss",
@@ -427,8 +576,7 @@ export default {
       "tslib",
       "tsx",
       "typescript",
-      "urlpattern-polyfill",
-      "webpack"
+      "vitest"
     ] as const;
   }
 
@@ -436,7 +584,9 @@ export default {
     return [
       `@${this.workspace}/eslint-config`,
       `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`
+      `@${this.workspace}/tsconfig`,
+      `@${this.workspace}/types`,
+      `@${this.workspace}/vitest-config`
     ] as const;
   }
 
@@ -457,7 +607,7 @@ export default {
       { pathname: "/svgs/**" },
       { pathname: "/*" }
     ],
-    qualities: [75, 100],
+    qualities: [75, 80, 85, 90, 95, 100],
     loader: "default",
     formats: ["image/avif", "image/webp"],
     dangerouslyAllowLocalIP: true,
@@ -470,14 +620,178 @@ export default {
         port: "${this.port}",
         protocol: "http"
       },
+      { hostname: "${this.domain}", protocol: "https" },
+      { hostname: "${this.previewDomain}", protocol: "https" },
       { hostname: "raw.githubusercontent.com", protocol: "https" },
       { hostname: "imgen.x.ai", protocol: "https" },
       { hostname: "images.unsplash.com", protocol: "https" },
       { hostname: "tailwindcss.com", protocol: "https" }
     ]
-  },
-  productionBrowserSourceMaps: true
+  }
 } satisfies NextConfig;` as const;
+  }
+
+  private get serverCookiesVercel() {
+    // prettier-ignore
+    return `import type { NextRequest } from "next/server";
+import { NextResponse, userAgent } from "next/server";
+
+export function detectDeviceWorkup(request: NextRequest) {
+  const country = request.headers.get("x-vercel-ip-country") ?? "US";
+  const region =
+    request.headers.get("x-vercel-ip-country-region") ?? "Illinois";
+  const city = request.headers.get("x-vercel-ip-city") ?? "Chicago";
+  const lng = request.headers.get("x-vercel-ip-longitude") ?? "-87.8966849";
+  const lat = request.headers.get("x-vercel-ip-latitude") ?? "41.8338486";
+  const postalCode = request.headers.get("x-vercel-ip-postal-code") ?? "60010";
+  const ip = request.headers.get("x-vercel-forwarded-for") ?? "127.0.0.1";
+
+  const tz = request.headers.get("x-vercel-ip-timezone") ?? "America/Chicago";
+  const { os, device, ua, browser } = userAgent(request);
+  const isMac = /(mac)/gim.test(os?.name ?? "") ?? false;
+  const latlng = \`\${lat},\${lng}\` as const;
+  const browserName = browser.name ?? "Chrome";
+  const browserVersion = browser.version ?? "147.0.7727.49";
+  const { hostname } = request.nextUrl;
+
+  const accept = request.headers.get("accept-language") ?? "";
+  const m = accept.match(
+    /^\s*([A-Za-z]{1,8}(?:-[A-Za-z]{1,8})*)(?:;q=[0-9.]+)?/
+  );
+
+  const isIOS = /(ios|iphone|ipad|iwatch)/i.test(ua);
+
+  const ios = \`\${isIOS}\` as const;
+
+  const viewport = device?.type === "mobile" ? "mobile" : "desktop";
+
+  let locale = m?.[1] ?? "en-US";
+
+  if (!locale.includes("-")) {
+    locale = \`\${locale.toLowerCase()}-\${country}\`;
+  }
+
+  const obj = {
+    hostname,
+    locale,
+    viewport,
+    browserName,
+    browserVersion,
+    ios,
+    latlng,
+    tz,
+    ua,
+    ip,
+    country,
+    city,
+    isMac: \`\${isMac}\`,
+    region,
+    postalCode
+  } as const;
+
+  return obj;
+}
+
+export function detectDeviceAndSetCookies(
+  request: NextRequest,
+  response: NextResponse
+) {
+  const domain =
+    process.env.NODE_ENV !== "development" ? ".${this.domain}" : undefined;
+  const config = {
+    domain,
+    path: "/",
+    secure: typeof domain !== "undefined",
+    sameSite: "lax",
+    httpOnly: false
+  } as const;
+
+  const obj = detectDeviceWorkup(request);
+
+  for (const key of Object.keys(obj)) {
+    if (request.cookies.has(key)) {
+      response.cookies.delete(key);
+    }
+  }
+
+  for (const [k, v] of Object.entries(obj)) {
+    response.cookies.set(k, v, config);
+  }
+
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+}` as const;
+  }
+
+  private get serverCookiesSansVercel() {
+    // prettier-ignore
+    return `import type { NextRequest } from "next/server";
+import { NextResponse, userAgent } from "next/server";
+
+export function detectDeviceWorkup(request: NextRequest) {
+  const { os, device, ua, browser } = userAgent(request);
+  const isMac = /(mac)/gim.test(os?.name ?? "") ?? false;
+  const browserName = browser.name ?? "Chrome";
+  const browserVersion = browser.version ?? "147.0.7727.49";
+  const { hostname } = request.nextUrl;
+
+  const accept = request.headers.get("accept-language") ?? "";
+  const m = accept.match(
+    /^\s*([A-Za-z]{1,8}(?:-[A-Za-z]{1,8})*)(?:;q=[0-9.]+)?/
+  );
+
+  const isIOS = /(ios|iphone|ipad|iwatch)/i.test(ua);
+
+  const ios = \`\${isIOS}\` as const;
+
+  const viewport = device?.type === "mobile" ? "mobile" : "desktop";
+
+  let locale = m?.[1] ?? "en-US";
+
+  const obj = {
+    hostname,
+    locale,
+    viewport,
+    browserName,
+    browserVersion,
+    ios,
+    ua,
+    isMac: \`\${isMac}\`
+  } as const;
+
+  return obj;
+}
+
+export function detectDeviceAndSetCookies(
+  request: NextRequest,
+  response: NextResponse
+) {
+  const domain =
+    process.env.NODE_ENV !== "development" ? ".${this.domain}" : undefined;
+  const config = {
+    domain,
+    path: "/",
+    secure: typeof domain !== "undefined",
+    sameSite: "lax",
+    httpOnly: false
+  } as const;
+
+  const obj = detectDeviceWorkup(request);
+
+  for (const key of Object.keys(obj)) {
+    if (request.cookies.has(key)) {
+      response.cookies.delete(key);
+    }
+  }
+
+  for (const [k, v] of Object.entries(obj)) {
+    response.cookies.set(k, v, config);
+  }
+
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+}
+` as const;
   }
 
   private get globalCss() {
@@ -488,21 +802,7 @@ export default {
 
 @plugin "tailwindcss-motion";
 
-/*
-  https://tailwindcss.com/docs/dark-mode#toggling-dark-mode-manually
-
-  Uncomment the following to use a CSS Selector instead of the \`prefers-color-scheme\` media-query
-
-  @custom-variant dark (&:where(.dark, .dark *));
-*/
-
-/*
-  https://tailwindcss.com/docs/dark-mode#using-a-data-attribute
-
-  Using a data-attribute instead of a dark theme selector
-
-*/
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant dark (&:where([data-theme=dark], .dark, [data-theme=dark] *));
 
 @font-face {
   font-family: "CalSans";
@@ -523,6 +823,9 @@ export default {
 @theme {
   --font-cal-sans: CalSans, sans-serif;
   --font-inter: var(--font-inter);
+  --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
+  --font-pixel-square: var(--font-geist-pixel-square);
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.14 0.0044 285.82);
   --color-card: oklch(1 0 0);
@@ -633,20 +936,6 @@ export default {
   }
 }
 
-
-/*
-  The default border color has changed to \`currentColor\` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-
-:root {
-  --radius: 0.5rem;
-}
-
 @layer base {
   *,
   ::after,
@@ -744,11 +1033,17 @@ export default function GlobalError({
       return `import type { Metadata, Viewport } from "next";
 import React from "react";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/ui/page-layout";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import "@${this.workspace}/ui/globals.css";
+import Script from "next/script";
+import { CookieProvider } from "@/context/cookie-context";
+
+import { GeistMono } from "geist/font/mono";
+import { GeistPixelSquare } from "geist/font/pixel";
+import { GeistSans } from "geist/font/sans";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -757,23 +1052,21 @@ const inter = Inter({
 
 export const viewport = {
   colorScheme: "normal",
-  userScalable: true,
-  themeColor: "#ffffff",
-  viewportFit: "auto",
-  initialScale: 1,
+  themeColor: "#0a0a0a",
+  viewportFit: "cover",
   maximumScale: 1,
+  userScalable: false,
+  initialScale: 1,
   width: "device-width"
 } satisfies Viewport;
 
 export const metadata: Metadata = {
-  /* populate relevant values in src/lib/site-url.ts and uncomment for url injetion */
-  // metadataBase: new URL(getSiteUrl(process.env.NODE_ENV)),
   title: {
     default: "@${this.workspace}/web",
     template: "%s | @${this.workspace}/web"
   },
   description: "@${this.workspace}/web scaffolded by @d0paminedriven/turbogen"
-};
+} satisfies Metadata;
 
 export default function RootLayout({
   children
@@ -781,10 +1074,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html
+      suppressHydrationWarning
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={\`\${inter.variable} \${GeistSans.variable} \${GeistMono.variable} \${GeistPixelSquare.variable}\`}>
       <head>
-        <script
-          async={true}
+        <Script
+          async
+          strategy="beforeInteractive"
           id="prevent-flash-of-wrong-theme"
           dangerouslySetInnerHTML={{
             __html: \`
@@ -802,16 +1100,18 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "bg-background font-cal-sans min-h-screen antialiased",
-          inter.variable
+          "bg-background font-cal-sans m-0 h-dvh w-screen overflow-x-hidden p-0 antialiased"
         )}>
-        <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem>
-          <PageLayout>{children}</PageLayout>
-        </ThemeProvider>
+        <CookieProvider>
+          <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem>
+            <PageLayout>{children}</PageLayout>
+          </ThemeProvider>
+        </CookieProvider>
       </body>
     </html>
   );
 }
+
 ` as const;
     }
   }
@@ -828,38 +1128,337 @@ export function cn(...inputs: ClassValue[]) {
 ` as const;
   }
 
-  private get libSiteUrlTs() {
+  private get cookieTypesWithVercel() {
     // prettier-ignore
-    return `export const getProductionUrl = "https://prod-placeholder.com" as const;
+    return `import type { Rm } from "@${this.workspace}/types";
 
-export const getPreviewUrl = "https://preview-placeholder.vercel.app" as const;
+export const COOKIES = {
+  browserVersion: "browserVersion",
+  browserName: "browserName",
+  hostname: "hostname",
+  viewport: "viewport",
+  ios: "ios",
+  latlng: "latlng",
+  tz: "tz",
+  ip: "ip",
+  ua: "ua",
+  country: "country",
+  city: "city",
+  isMac: "isMac",
+  region: "region",
+  postalCode: "postalCode",
+  locale: "locale"
+} as const;
+
+export function isValidCookieKey(c: string) {
+  return (
+    c === "browserName" ||
+    c === "browserVersion" ||
+    c === "hostname" ||
+    c === "viewport" ||
+    c === "ios" ||
+    c === "latlng" ||
+    c === "tz" ||
+    c === "ip" ||
+    c === "ua" ||
+    c === "country" ||
+    c === "city" ||
+    c === "isMac" ||
+    c === "region" ||
+    c === "postalCode" ||
+    c === "locale"
+  );
+}
+
+export type CookieValue = {
+  hostname: string;
+  browserName: string;
+  browserVersion: string;
+  viewport: "mobile" | "desktop" | (string & {});
+  ip: string;
+  ua: string;
+  ios: "true" | "false" | (string & {});
+  latlng: string;
+  tz: string;
+  region: string;
+  postalCode: string;
+  country: string;
+  city: string;
+  isMac: "true" | "false" | (string & {});
+  locale: string;
+};
+
+export type CookieKey = keyof typeof COOKIES;
+
+export type GetCookie<
+  T extends keyof CookieValue = keyof CookieValue,
+  ToOptional = false
+> = ToOptional extends true
+  ? { [P in T]?: CookieValue[P] }[T]
+  : {
+      [P in T]: CookieValue[P];
+    }[T];
+
+export interface CookieContextType {
+  get: <const K extends CookieKey>(key: K) => GetCookie<K> | undefined;
+  set: <const K extends CookieKey>(
+    key: K,
+    value: CookieValue[K],
+    options?: Cookies.CookieAttributes
+  ) => void;
+  remove: (key: CookieKey) => void;
+  getAll: () => Partial<CookieValue>;
+  getTargeted: <const V extends keyof CookieValue>(
+    k: readonly V[]
+  ) => FilterResults<V>;
+}
+export type FilterBySelect<Q extends keyof CookieValue> = Exclude<
+  Exclude<Q, CookieValue>,
+  CookieValue
+>;
+
+export type FilterResults<S extends keyof CookieValue> = Rm<
+  CookieValue,
+  Exclude<keyof CookieValue, FilterBySelect<S>>
+>;
+
+export interface FullRes<S extends keyof CookieValue = keyof CookieValue> {
+  cookies: FilterResults<S>[];
+}
+
+export type CookieOpts<T extends keyof CookieValue = keyof CookieValue> = {
+  select: readonly T[];
+};
+
+export function handleSelect<
+  const V extends keyof CookieValue = keyof CookieValue
+>(select: CookieOpts<V>["select"]) {
+  const a = Array.of<readonly [string, string | number | boolean]>();
+
+  if (select && select.length > 0) {
+    const k = select.join(",");
+
+    const tuple = ["select", k] as const;
+    a.push(tuple);
+  }
+
+  return select;
+}` as const;
+  }
+
+  private get cookieTypesSansVercel() {
+    // prettier-ignore
+    return `import type { Rm } from "@${this.workspace}/types";
+
+export const COOKIES = {
+  browserVersion: "browserVersion",
+  browserName: "browserName",
+  hostname: "hostname",
+  viewport: "viewport",
+  ios: "ios",
+  ua: "ua",
+  isMac: "isMac",
+  locale: "locale"
+} as const;
+
+export function isValidCookieKey(c: string) {
+  return (
+    c === "browserName" ||
+    c === "browserVersion" ||
+    c === "hostname" ||
+    c === "viewport" ||
+    c === "ios" ||
+    c === "ua" ||
+    c === "isMac" ||
+    c === "locale"
+  );
+}
+
+export type CookieValue = {
+  hostname: string;
+  browserName: string;
+  browserVersion: string;
+  viewport: "mobile" | "desktop" | (string & {});
+  ua: string;
+  ios: "true" | "false" | (string & {});
+  isMac: "true" | "false" | (string & {});
+  locale: string;
+};
+
+export type CookieKey = keyof typeof COOKIES;
+
+export type GetCookie<
+  T extends keyof CookieValue = keyof CookieValue,
+  ToOptional = false
+> = ToOptional extends true
+  ? { [P in T]?: CookieValue[P] }[T]
+  : {
+      [P in T]: CookieValue[P];
+    }[T];
+
+export interface CookieContextType {
+  get: <const K extends CookieKey>(key: K) => GetCookie<K> | undefined;
+  set: <const K extends CookieKey>(
+    key: K,
+    value: CookieValue[K],
+    options?: Cookies.CookieAttributes
+  ) => void;
+  remove: (key: CookieKey) => void;
+  getAll: () => Partial<CookieValue>;
+  getTargeted: <const V extends keyof CookieValue>(
+    k: readonly V[]
+  ) => FilterResults<V>;
+}
+export type FilterBySelect<Q extends keyof CookieValue> = Exclude<
+  Exclude<Q, CookieValue>,
+  CookieValue
+>;
+
+export type FilterResults<S extends keyof CookieValue> = Rm<
+  CookieValue,
+  Exclude<keyof CookieValue, FilterBySelect<S>>
+>;
+
+export interface FullRes<S extends keyof CookieValue = keyof CookieValue> {
+  cookies: FilterResults<S>[];
+}
+
+export type CookieOpts<T extends keyof CookieValue = keyof CookieValue> = {
+  select: readonly T[];
+};
+
+export function handleSelect<
+  const V extends keyof CookieValue = keyof CookieValue
+>(select: CookieOpts<V>["select"]) {
+  const a = Array.of<readonly [string, string | number | boolean]>();
+
+  if (select && select.length > 0) {
+    const k = select.join(",");
+
+    const tuple = ["select", k] as const;
+    a.push(tuple);
+  }
+
+  return select;
+}
+
+` as const;
+  }
+
+  private get cookieContextTemplate() {
+    // prettier-ignore
+    return `"use client";
+
+import type {
+  CookieContextType,
+  CookieKey,
+  CookieValue,
+  FilterResults,
+  GetCookie
+} from "@/types/cookies";
+import type { ReactNode } from "react";
+import { createContext, useCallback, useContext } from "react";
+import { COOKIES } from "@/types/cookies";
+import Cookies from "js-cookie";
+
+const CookieContext = createContext<CookieContextType | undefined>(undefined);
+
+export function CookieProvider({
+  children
+}: Readonly<{ children: ReactNode }>) {
+  const get = useCallback(<const K extends CookieKey>(key: K) => {
+    return Cookies.get(key) as GetCookie<K, true>;
+  }, []);
+
+  const set = useCallback(
+    <const K extends CookieKey>(
+      key: K,
+      value: CookieValue[K],
+      options?: Cookies.CookieAttributes
+    ) => {
+      Cookies.set(COOKIES[key], value, options);
+    },
+    []
+  );
+
+  const getTargeted = useCallback(
+    <const V extends keyof CookieValue>(k: readonly V[]) => {
+      const result = {} as Record<keyof CookieValue, string | undefined>;
+      for (const kk of k) {
+        result[kk] = Cookies.get(kk);
+      }
+      return result as FilterResults<V>;
+    },
+    []
+  );
+
+  const remove = useCallback((key: CookieKey) => {
+    Cookies.remove(COOKIES[key]);
+  }, []);
+
+  const getAll = useCallback(() => {
+    return getTargeted(Object.keys(COOKIES));
+  }, [getTargeted]);
+
+  const contextValue = {
+    get,
+    set,
+    remove,
+    getAll,
+    getTargeted
+  } satisfies CookieContextType;
+
+  return (
+    <CookieContext.Provider value={contextValue}>
+      {children}
+    </CookieContext.Provider>
+  );
+}
+
+export function useCookiesCtx() {
+  const context = useContext(CookieContext);
+  if (!context) {
+    throw new Error("useCookies must be used within a CookieProvider");
+  }
+  return context;
+}
+` as const;
+  }
+
+  private get libSiteUrlSansVercelTs() {
+    // prettier-ignore
+    return `export const getProductionUrl = "https://${this.domain}" as const;
+
+export const getPreviewUrl = "https://${this.previewDomain}" as const;
 
 export const getLocalUrl = "http://localhost:${this.port}" as const;
 
-export const envMediatedBaseUrl = (env: typeof process.env.NODE_ENV) =>
-  process.env.VERCEL_ENV === "development" ||
-  process.env.VERCEL_ENV === "preview"
-    ? getPreviewUrl
-    : env === "development"
-      ? getLocalUrl
-      : env === "production" || process.env.VERCEL_ENV === "production"
-        ? getProductionUrl
-        : env === "test"
-          ? getLocalUrl
-          : getPreviewUrl;
-
+// used with process.env.NODE_ENV
 export const getSiteUrl = (
   env: "development" | "production" | "test" | undefined
 ) =>
-  process.env.VERCEL_ENV === "development"
-    ? getPreviewUrl
-    : !env || env === "development"
-      ? getLocalUrl
-      : process.env.VERCEL_ENV
-        ? process.env.VERCEL_ENV === "preview"
-          ? getPreviewUrl
-          : getProductionUrl
-        : getPreviewUrl;` as const;
+  !env || env === "development"
+    ? getLocalUrl
+    : env === "production"
+      ? getProductionUrl
+      : getPreviewUrl;` as const;
+  }
+
+  private get libSiteUrlTs() {
+    // prettier-ignore
+    return `export const getProductionUrl = "https://${this.domain}" as const;
+
+export const getPreviewUrl = "https://${this.previewDomain}" as const;
+
+export const getLocalUrl = "http://localhost:${this.port}" as const;
+
+// used with process.env.VERCEL_ENV
+export const getSiteUrl = (env?: "development" | "production" | "preview") => {
+  if (!env) return getLocalUrl;
+  else if (env === "production") return getProductionUrl;
+  else if (env === "preview") return getPreviewUrl;
+  else return getLocalUrl;
+};` as const;
   }
 
   private get libBase64Ts() {
@@ -931,131 +1530,6 @@ export function shimmer<
 >([w, h]: [W, H]) {
   return \`data:image/svg+xml;base64,\${toBase64(shimmerScaffold({ w, h }))}\` as const;
 }
-` as const;
-  }
-
-  private get typeNextTs() {
-    // prettier-ignore
-    return `export type InferGSPRTWorkup<T> =
-  T extends Promise<readonly (infer U)[] | (infer U)[]> ? U : T;
-
-/**
- * usage with dynamic page routes in nextjs app directory for a [slug] route
- *
- * \`\`\`tsx
-  export default async function DynamicPage({
-    params
-  }: InferGSPRT<typeof generateStaticParams>) {
-    const { slug } = await params;
-    // your code here
-  }
-  \`\`\`
-*/
-
-export type InferGSPRT<V extends (...args: any) => any> = {
-  params: Promise<InferGSPRTWorkup<ReturnType<V>>>;
-};` as const;
-  }
-
-  private get typeHelpersTs() {
-    // prettier-ignore
-    return `/* General Helper Types BEGIN */
-
-export type Unenumerate<T> = T extends readonly (infer U)[] | (infer U)[]
-  ? U
-  : T;
-
-export type UnwrapPromise<T> = T extends Promise<infer U> | PromiseLike<infer U>
-  ? U
-  : T;
-
-export type RemoveFields<T, P extends keyof T = keyof T> = {
-  [S in keyof T as Exclude<S, P>]: T[S];
-};
-
-export type ConditionalToRequired<
-  T,
-  Z extends keyof T = keyof T
-> = RemoveFields<T, Z> & { [Q in Z]-?: T[Q] };
-
-export type RequiredToConditional<
-  T,
-  X extends keyof T = keyof T
-> = RemoveFields<T, X> & { [Q in X]?: T[Q] };
-
-export type FieldToConditionallyNever<
-  T,
-  X extends keyof T = keyof T
-> = RemoveFields<T, X> & { [Q in X]?: XOR<T[Q], never> };
-
-export type ExcludeFieldEnumerable<T, K extends keyof T> = RemoveFields<T, K>;
-
-export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-
-export type XOR<T, U> = T | U extends object
-  ? (Without<T, U> & U) | (Without<U, T> & T)
-  : T | U;
-
-export type IsOptional<T, K extends keyof T> = undefined extends T[K]
-  ? object extends Pick<T, K>
-    ? true
-    : false
-  : false;
-
-export type OnlyOptional<T> = {
-  [K in keyof T as IsOptional<T, K> extends true ? K : never]: T[K];
-};
-
-export type OnlyRequired<T> = {
-  [K in keyof T as IsOptional<T, K> extends false ? K : never]: T[K];
-};
-
-export type FilterOptionalOrRequired<
-  V,
-  T extends "conditional" | "required"
-> = T extends "conditional" ? OnlyOptional<V> : OnlyRequired<V>;
-
-
-
-/* General Helper Types END */
-
-
-/* Case helper types BEGIN  */
-
-
-/** Convert literal string types like 'foo-bar' to 'FooBar' */
-export type ToPascalCase<S extends string> = string extends S
-  ? string
-  : S extends \`\${infer T}-\${infer U}\`
-    ? \`\${Capitalize<T>}\${ToPascalCase<U>}\`
-    : Capitalize<S>;
-
-/** Convert literal string types like 'foo-bar' to 'fooBar' */
-export type ToCamelCase<S extends string> = string extends S
-  ? string
-  : S extends \`\${infer T}-\${infer U}\`
-    ? \`\${T}\${ToPascalCase<U>}\`
-    : S;
-
-
-/* Case helper types END  */
-
-
-/* Helper functions BEGIN */
-
-export function whAdjust<O extends string, T extends number>(
-  ogVal: O,
-  widthOrHeight?: string | number,
-  relAdjust?: T
-) {
-  return widthOrHeight && relAdjust
-    ? typeof widthOrHeight === "string"
-      ? Number.parseInt(widthOrHeight, 10) * relAdjust
-      : widthOrHeight * relAdjust
-    : ogVal;
-}
-
-/* Helper functions END */
 ` as const;
   }
 
@@ -1134,14 +1608,22 @@ export default function HomePage() {
     // prettier-ignore
     return `"use client";
 
-import { Button, Icon } from "@${this.workspace}/ui";
 import Link from "next/link";
+import {
+  ArrowRight,
+  Button,
+  Code,
+  Layers,
+  Package,
+  Terminal,
+  Zap
+} from "@${this.workspace}/ui";
 import { motion } from "motion/react";
 
 export function LandingPage() {
   return (
-    <>
-      <section className="font-cal-sans mx-auto flex justify-center space-y-6 pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
+    <div className="relative isolate overflow-y-scroll">
+      <section className="font-cal-sans mx-auto flex justify-center space-y-6 overflow-y-scroll pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
         <div className="container flex max-w-5xl flex-col items-center gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1167,16 +1649,17 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-muted-foreground max-w-2xl leading-normal sm:text-xl sm:leading-8">
             A high-performance monorepo with pnpm workspaces, powered by
-            Turborepo. Pre-configured with ESLint, Prettier, and TypeScript tooling.
+            Turborepo. Pre-configured with ESLint, Prettier, TypeScript, and
+            Vitest.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-x-4">
-            <Button asChild>
+            <Button asChild variant="secondary">
               <Link href="#" scroll={false}>
-                Get Started <Icon.ArrowRight className="ml-2 size-4" />
+                Get Started <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
             <Button variant="outline" asChild>
@@ -1202,7 +1685,8 @@ export function LandingPage() {
             Everything you need to build at scale
           </h2>
           <p className="text-muted-foreground max-w-[85%] leading-normal sm:text-lg sm:leading-7">
-            Turbogen gets the boring shit right so you can focus on your bottom line.
+            Turbogen provides a solid foundation for your projects with a focus
+            on developer experience and performance.
           </p>
         </motion.div>
         <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-5xl md:grid-cols-3">
@@ -1213,7 +1697,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Icon.Zap className="size-6 text-purple-600" />
+              <Zap className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">High Performance</h3>
@@ -1231,7 +1715,7 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Icon.Layers className="size-6 text-purple-600" />
+              <Layers className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Monorepo Structure</h3>
@@ -1249,12 +1733,12 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="bg-background relative overflow-hidden rounded-lg border p-6">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
-              <Icon.Code className="size-6 text-purple-600" />
+              <Code className="size-6 text-purple-600" />
             </div>
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Tooling Included</h3>
               <p className="text-muted-foreground text-sm">
-                Pre-configured ESLint, Prettier, and TypeScript for
+                Pre-configured ESLint, Prettier, TypeScript, and Jest for
                 consistent code quality.
               </p>
             </div>
@@ -1284,18 +1768,22 @@ export function LandingPage() {
           viewport={{ once: true }}
           className="bg-muted/50 mx-auto mt-12 max-w-232 rounded-lg border p-6 md:p-8">
           <div className="flex items-center">
-            <Icon.Terminal className="mr-2 size-5" />
+            <Terminal className="mr-2 size-5" />
             <h3 className="font-bold">Start developing</h3>
           </div>
           <div className="mt-4 space-y-4">
             <div className="rounded-md bg-black p-4">
               <pre className="text-sm text-white">
-                <code>{\`# from the root
+                <code>{\`# Install dependencies
+pnpm install
+
+# Start development server
 pnpm run:web\`}</code>
               </pre>
             </div>
             <p className="text-muted-foreground text-sm">
-              Fire up dev and get to it!
+              This will start the development server for your web application.
+              You can now start building your project!
             </p>
           </div>
         </motion.div>
@@ -1310,13 +1798,13 @@ pnpm run:web\`}</code>
             viewport={{ once: true }}
             className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="bg-muted rounded-full p-3">
-              <Icon.Package className="size-6 text-purple-600" />
+              <Package className="size-6 text-purple-600" />
             </div>
             <h3 className="font-heading text-2xl leading-[1.1]">
-              Explore your monorepo
+              Explore your workspace
             </h3>
             <p className="text-muted-foreground">
-              Your workspace skeleton at a glance:
+              Your monorepo is organized with the following structure:
             </p>
             <div className="bg-muted w-full max-w-md rounded-md p-4 text-left">
               <pre className="text-sm">
@@ -1328,22 +1816,24 @@ pnpm run:web\`}</code>
 └── tooling/
     ├── eslint/
     ├── prettier/
-    └── typescript/\`}
+    ├── typescript/
+    └── vitest/\`}
                 </code>
               </pre>
             </div>
-            <Button asChild>
+            <Button variant="secondary" asChild>
               <Link href="#" scroll={false}>
                 Learn more about the structure&nbsp;
-                <Icon.ArrowRight className="ml-2 size-4" />
+                <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
           </motion.div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
+
 ` as const;
   }
 
@@ -1355,12 +1845,12 @@ pnpm run:web\`}</code>
     return {
       index: this.appPath("turbo.json"),
       packageJson: this.appPath("package.json"),
-      eslint: this.appPath("eslint.config.mjs"),
-      postcss: this.appPath("postcss.config.mjs"),
+      eslint: this.appPath("eslint.config.ts"),
+      postcss: this.appPath("postcss.config.ts"),
       nextconfig: this.appPath("next.config.ts"),
       tsconfig: this.appPath("tsconfig.json"),
       nextenvdts: this.appPath("next-env.d.ts"),
-      globaldts: this.appPath("global.d.ts"),
+      indexDts: this.appPath("index.d.ts"),
       globalCss: this.appPath("src/app/globals.css"),
       rootlayout: this.appPath("src/app/layout.tsx"),
       rootpage: this.appPath("src/app/page.tsx"),
@@ -1370,8 +1860,6 @@ pnpm run:web\`}</code>
       libBase64: this.appPath("src/lib/base64.ts"),
       libSafeNumber: this.appPath("src/lib/safe-number.ts"),
       libShimmer: this.appPath("src/lib/shimmer.ts"),
-      typeHelpers: this.appPath("src/types/helpers.ts"),
-      typeNext: this.appPath("src/types/next.ts"),
       svgFile: this.appPath("public/file.svg"),
       svgGlobe: this.appPath("public/globe.svg"),
       svgNext: this.appPath("public/next.svg"),
@@ -1381,7 +1869,13 @@ pnpm run:web\`}</code>
       uiTheme: this.appPath("src/ui/theme/index.tsx"),
       uiNav: this.appPath("src/ui/nav/index.tsx"),
       uiFooter: this.appPath("src/ui/footer/index.tsx"),
-      uiPageLayout: this.appPath("src/ui/page-layout/index.tsx")
+      uiPageLayout: this.appPath("src/ui/page-layout/index.tsx"),
+      serverCookies: this.appPath("src/lib/server-cookies.ts"),
+      proxy: this.appPath("src/proxy.ts"),
+      playwright: this.appPath("playwright.config.ts"),
+      cookies: this.appPath("src/types/cookies.ts"),
+      cookieCtx: this.appPath("src/context/cookie-context.tsx"),
+      vitestConfig: this.appPath("vitest.config.ts")
     } as const;
   }
 
@@ -1418,6 +1912,19 @@ pnpm run:web\`}</code>
      * const rec: ["index", "apps/web/turbo.json"] | ["packageJson", "apps/web/package.json"] | ["eslint", "apps/web/eslint.config.mjs"] | ["postcss", "apps/web/postcss.config.mjs"] | ["nextconfig", "apps/web/next.config.ts"] | ["tsconfig", "apps/web/tsconfig.json"] | ["nextenvdts", "apps/web/next-env.d.ts"] | ["globaldts", "apps/web/global.d.ts"] | ["globalCss", "apps/web/src/app/globals.css"] | ["rootlayout", "apps/web/src/app/layout.tsx"] | ["rootpage", "apps/web/src/app/page.tsx"] | ["globalerror", "apps/web/src/app/global-error.tsx"] | ... 16 more ... | [...]
      * ```
      */
+    const serverCookies = this.withVercel
+      ? this.serverCookiesVercel
+      : this.serverCookiesSansVercel;
+
+    const siteUrl = this.withVercel
+      ? this.libSiteUrlTs
+      : this.libSiteUrlSansVercelTs;
+
+    const cookieTypes = this.withVercel
+      ? this.cookieTypesWithVercel
+      : this.cookieTypesSansVercel;
+
+    const indexDts = this.withVercel ? this.indexDtsWithVercel : this.IndexDts;
 
     return Promise.all([
       this.writeTarget("apps/web/turbo.json", this.turboJson),
@@ -1427,10 +1934,10 @@ pnpm run:web\`}</code>
         JSON.stringify(pkgJson, null, 2)
       ),
       this.writeTarget("apps/web/tsconfig.json", this.tsconfigJson),
-      this.writeTarget("apps/web/global.d.ts", this.globalDts),
+      this.writeTarget("apps/web/index.d.ts", indexDts),
       this.writeTarget("apps/web/next-env.d.ts", this.nextEnvDts),
-      this.writeTarget("apps/web/eslint.config.mjs", this.eslintConfigMjs),
-      this.writeTarget("apps/web/postcss.config.mjs", this.postcssConfigMjs),
+      this.writeTarget("apps/web/eslint.config.ts", this.eslintConfigTs),
+      this.writeTarget("apps/web/postcss.config.ts", this.postcssConfigTs),
       this.writeTarget(
         "apps/web/src/app/global-error.tsx",
         this.globalErrorTsx
@@ -1438,12 +1945,10 @@ pnpm run:web\`}</code>
       this.writeTarget("apps/web/src/app/globals.css", this.globalCss),
       this.writeTarget("apps/web/src/app/layout.tsx", this.rootLayoutTsx),
       this.writeTarget("apps/web/src/lib/utils.ts", this.libCnTs),
-      this.writeTarget("apps/web/src/lib/site-url.ts", this.libSiteUrlTs),
+      this.writeTarget("apps/web/src/lib/site-url.ts", siteUrl),
       this.writeTarget("apps/web/src/lib/base64.ts", this.libBase64Ts),
       this.writeTarget("apps/web/src/lib/safe-number.ts", this.libSafeNumberTs),
       this.writeTarget("apps/web/src/lib/shimmer.ts", this.libShimmerTs),
-      this.writeTarget("apps/web/src/types/next.ts", this.typeNextTs),
-      this.writeTarget("apps/web/src/types/helpers.ts", this.typeHelpersTs),
       this.writeTarget("apps/web/public/file.svg", this.svgFile),
       this.writeTarget("apps/web/public/next.svg", this.svgNext),
       this.writeTarget("apps/web/public/globe.svg", this.svgGlobe),
@@ -1457,7 +1962,16 @@ pnpm run:web\`}</code>
       this.writeTarget(
         "apps/web/src/ui/page-layout/index.tsx",
         this.uiPageLayout
-      )
+      ),
+      this.writeTarget("apps/web/src/lib/server-cookies.ts", serverCookies),
+      this.writeTarget("apps/web/src/proxy.ts", this.proxyScaffold),
+      this.writeTarget("apps/web/playwright.config.ts", this.playWrightConfig),
+      this.writeTarget("apps/web/src/types/cookies.ts", cookieTypes),
+      this.writeTarget(
+        "apps/web/src/context/cookie-context.tsx",
+        this.cookieContextTemplate
+      ),
+      this.writeTarget("apps/web/vitest.config.ts", this.vitestConfig)
     ]);
   }
 }
