@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "9.0.3",
+  "version": "10.0.1",
   "author": "Andrew Ross",
   "description": "convenient turborepo generator",
   "repository": {
@@ -21,7 +21,8 @@
           "dist/bin/init.d.ts"
         ],
         "config": [
-          "dist/config/index.d.ts"
+          "dist/config/index.d.ts",
+          "dist/config/types.d.ts"
         ],
         "services/cli": [
           "dist/services/cli/inquirer.d.ts",
@@ -59,7 +60,8 @@
         "dist/bin/init.d.ts"
       ],
       "config": [
-        "dist/config/index.d.ts"
+        "dist/config/index.d.ts",
+        "dist/config/types.d.ts"
       ],
       "services/cli": [
         "dist/services/cli/inquirer.d.ts",
@@ -92,6 +94,7 @@
     ".": "./dist/index.js",
     "./bin": "./dist/bin/init.js",
     "./config": "./dist/config/index.js",
+    "./config/types": "./dist/config/types.js",
     "./services/cli": "./dist/services/cli/index.js",
     "./services/cli/inquirer": "./dist/services/cli/inquirer.js",
     "./services/scaffold": "./dist/services/scaffold/index.js",

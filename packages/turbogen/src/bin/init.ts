@@ -45,6 +45,7 @@ if (process.argv[2] === "test") {
 
 if (process.argv[2] === "init") {
   const handler = new ConfigHandler(process.cwd());
+  void handler.resolveCentralCatalog();
   Promise.all([
     exeInquirer().then(async v => {
       const { eslint, prettier, root, typescript, ui, web, vitest, types } =
@@ -72,7 +73,6 @@ if (process.argv[2] === "init") {
         console.log(
           "\nInstalling dependencies... (this may take a few seconds)\n"
         );
-
         installDeps()
           .then(() => {
             console.log(

@@ -1,10 +1,12 @@
 import type { UTR } from "@d0paminedriven/type-utils";
+
 export type BabelPkgs = {
   type: "babel";
   "babel-plugin-react-compiler": string;
 };
 
 export type BiomePkgs = { type: "biome"; "@biomejs/biome": string };
+
 export type BuiPkgs = { type: "bui"; "@base-ui/react": string };
 
 export type ClsxPkgs = { type: "clsx"; clsx: string };
@@ -18,6 +20,7 @@ export type CookiesPkgs = {
 export type CssTypePkgs = { type: "csstype"; csstype: string };
 
 export type CvaPkgs = { type: "cva"; "class-variance-authority": string };
+
 export type DotenvPkgs = {
   type: "dotenv";
   dotenv: string;
@@ -208,5 +211,4 @@ export type UnionOfPkgs =
   | VitePkgs
   | VitestPkgs;
 
-
-  export type PkgsRecord = UTR<UnionOfPkgs, "type">;
+export type PkgsRecord = UTR<UnionOfPkgs, "type">;

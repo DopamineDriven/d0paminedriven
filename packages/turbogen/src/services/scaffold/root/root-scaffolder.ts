@@ -57,7 +57,6 @@ export class RootScaffolder {
       "@types/node",
       "@typescript/native-preview",
       "dotenv",
-      "eslint",
       "husky",
       "prettier",
       "tsx",
@@ -79,6 +78,7 @@ export class RootScaffolder {
     "ghmcadams.lintlens",
     "hilleer.yaml-plus-json",
     "ipatalas.vscode-postfix-ts",
+    "yzane.markdown-pdf",
     "meganrogge.template-string-converter",
     "meouwu.css-var-color-decorator",
     "ms-vscode.vscode-typescript-next",
@@ -284,24 +284,7 @@ max_line_length = 40
 ` as const;
   }
 
-  private get pnpmWorkspaceYamlTemplate() {
-    // prettier-ignore
-    return `packages:
-  - apps/*
-  - packages/*
-  - tooling/*
 
-enablePrePostScripts: true
-nodeLinker: hoisted
-autoInstallPeers: true
-minimumReleaseAge: 0
-trustPolicy: "off"
-trustLockfile: true
-blockExoticSubdeps: false
-ignorePatchFailures: true
-dangerouslyAllowAllBuilds: true
-verifyStoreIntegrity: false` as const;
-  }
 
   private get gitignoreTemplate() {
     // prettier-ignore
@@ -420,7 +403,6 @@ pnpm-lock.yaml
       ),
       this.fetchShellScript(this.workspace)
     ]);
-
     return Promise.all([
       this.configHandler.handleNpmrc(),
       this.writeTarget(".prettierignore", this.prettierignoreTemplate),
@@ -433,7 +415,6 @@ pnpm-lock.yaml
       this.writeTarget(".editorconfig", this.editorConfigTemplate),
       this.writeTarget(".gitignore", this.gitignoreTemplate),
       this.writeTarget("package.json", JSON.stringify(pkgJson, null, 2)),
-      this.writeTarget("pnpm-workspace.yaml", this.pnpmWorkspaceYamlTemplate),
       this.writeTarget("turbo.json", this.turboJsonTemplate),
       this.writeTarget("README.md", this.readmeMinimal)
     ]);

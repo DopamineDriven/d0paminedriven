@@ -90,6 +90,14 @@ export type IsExact<T, U> = [T] extends [U]
     : false
   : false;
 
+/**
+ * UTR (Union to Record)
+ *
+ * takes in a union of discriminated objects sharing at least one differentiating field (eg, \`type\`)
+ * creates a record from the union as follows
+ *
+ * \`type ComprehensiveRecord = UTR<MyDiscriminatedUnion, "type">;\`
+ */
 export type UTR<
   TUnion extends Record<TKey, string>,
   TKey extends string = "kind",
@@ -425,7 +433,6 @@ export default defineConfig(
       "tsdown",
       "tslib",
       "tsx",
-      "tw-animate-css",
       "typescript",
       "typescript-eslint"
     ] as const;

@@ -1,10 +1,10 @@
-import {parse, } from "yaml";
-import {Fs} from "@d0paminedriven/fs";
+import {ConfigHandler} from "@/config/index.ts";
 
-const fs = new Fs(process.cwd());
 
-const getFile = fs.fileToBuffer("src/test/__out__/catalog-example.yaml").toString('utf-8');
+const c = new ConfigHandler(process.cwd());
+async function sss () {
+  const file = await c.resolveCentralCatalog()
+  c.withWs("src/test/__out__/populated-file.yaml", file)
+}
 
-const x = parse(getFile) as unknown
-
-console.log(x);
+sss();
