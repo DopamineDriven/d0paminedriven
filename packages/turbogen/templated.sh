@@ -130,6 +130,10 @@ clean_house() {
 # Function to build specific packages
 build_targeted() {
     local build_order=(
+        "@demo/eslint-config"
+        "@demo/prettier-config"
+        "@demo/vitest-config"
+        "@demo/types"
         "@demo/ui"
     )
 

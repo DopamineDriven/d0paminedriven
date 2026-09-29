@@ -86,6 +86,10 @@ catalogs:
     fflate:
       specifier: ^0.8.3
       version: 0.8.3
+  geist:
+    geist:
+      specifier: ^1.7.2
+      version: 1.7.2
   glob:
     glob:
       specifier: ^13.0.6
@@ -559,6 +563,9 @@ importers:
       csstype:
         specifier: catalog:csstype
         version: 3.2.3
+      geist:
+        specifier: catalog:geist
+        version: 1.7.2(next@16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
       js-cookie:
         specifier: catalog:cookies
         version: 3.0.8
@@ -1206,9 +1213,6 @@ importers:
       gradient-string:
         specifier: catalog:gradient
         version: 3.0.0
-      js-yaml:
-        specifier: ^5.2.3
-        version: 5.2.3
       yaml:
         specifier: catalog:yaml
         version: 2.9.0
@@ -5488,6 +5492,11 @@ packages:
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
+  geist@1.7.2:
+    resolution: {integrity: sha512-Gu5lDFa3pLRyoBlBPf0QIFHVdWAnpco7fS1bJm41jyLPFoguBgiubseUN2oLXMgqZ7uxAxDoXcHMhCY/fOTTgg==}
+    peerDependencies:
+      next: '>=13.2.0'
+
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -5887,10 +5896,6 @@ packages:
 
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
-    hasBin: true
-
-  js-yaml@5.2.3:
-    resolution: {integrity: sha512-n+mUVyUX5bVv7G/G2zyIHOhdxfuU1dY2NOFzTQUWiMUbFss8b57NFlgCCaggU78wSw5KVS9cllzeLyzyR+n5nw==}
     hasBin: true
 
   jsdom@30.0.1:
@@ -11285,6 +11290,10 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
+  geist@1.7.2(next@16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)):
+    dependencies:
+      next: 16.2.12(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+
   gensync@1.0.0-beta.2: {}
 
   get-caller-file@2.0.5: {}
@@ -11743,10 +11752,6 @@ snapshots:
       esprima: 4.0.1
 
   js-yaml@4.1.1:
-    dependencies:
-      argparse: 2.0.1
-
-  js-yaml@5.2.3:
     dependencies:
       argparse: 2.0.1
 

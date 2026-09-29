@@ -1,6 +1,7 @@
+import type { ConfigHandler } from "@/config/index.ts";
 import type { PromptPropsBase } from "@/types/index.ts";
-import { ConfigHandler } from "@/config/index.ts";
 import { WebAppScaffolder } from "@/services/scaffold/apps/generic-scaffold.ts";
+import { TypesPackageScaffolder } from "@/services/scaffold/packages/types.ts";
 import { UIPackageScaffolder } from "@/services/scaffold/packages/ui.ts";
 import { RootScaffolder } from "@/services/scaffold/root/root-scaffolder.ts";
 import { EslintScaffolder } from "@/services/scaffold/tooling/eslint-scaffold.ts";
@@ -15,6 +16,7 @@ export interface ScaffoldServiceProps {
   typescript: TsScaffolder;
   ui: UIPackageScaffolder;
   vitest: VitestScaffolder;
+  types: TypesPackageScaffolder;
   web: WebAppScaffolder;
 }
 
@@ -29,6 +31,7 @@ export function scaffoldService(
     typescript: new TsScaffolder(promptBase, configHandler),
     ui: new UIPackageScaffolder(promptBase, configHandler),
     vitest: new VitestScaffolder(promptBase, configHandler),
-    web: new WebAppScaffolder(promptBase, configHandler)
+    web: new WebAppScaffolder(promptBase, configHandler),
+    types: new TypesPackageScaffolder(promptBase, configHandler)
   };
 }

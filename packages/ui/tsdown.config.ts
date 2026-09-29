@@ -1,5 +1,5 @@
 import { relative } from "node:path";
-import type { UserConfig as Options } from "tsdown";
+import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
 export default defineConfig(
@@ -32,6 +32,7 @@ export default defineConfig(
         fileName: "globals.css",
         inject: false,
         minify: false,
-        transformer: "postcss"      }
-    }) satisfies Options
+        transformer: "postcss"
+      }
+    }) satisfies UserConfig
 );

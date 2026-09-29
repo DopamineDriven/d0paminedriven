@@ -18,6 +18,7 @@
     "next.config.ts",
     "postcss.config.ts",
     "tailwind.config.ts",
+    "index.d.ts",
     "src/**/*.tsx",
     "src/**/*.ts",
     ".next/types/**/*.ts"

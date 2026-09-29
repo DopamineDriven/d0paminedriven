@@ -9,6 +9,9 @@ import "@d0paminedriven/ui/globals.css";
 import Script from "next/script";
 import { CookieProvider } from "@/context/cookie-context";
 import { getSiteUrl } from "@/lib/site-url";
+import { GeistMono } from "geist/font/mono";
+import { GeistPixelSquare } from "geist/font/pixel";
+import { GeistSans } from "geist/font/sans";
 
 /* populate relevant values in src/lib/site-url.ts and uncomment for url injetion */
 // import { getSiteUrl } from "@/lib/site-url";
@@ -48,13 +51,14 @@ export default function RootLayout({
       suppressHydrationWarning
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${inter.variable}`}>
-      <Script
-        async={true}
-        strategy="beforeInteractive"
-        id="prevent-flash-of-wrong-theme"
-        dangerouslySetInnerHTML={{
-          __html: `
+      className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable}`}>
+      <head>
+        <Script
+          async
+          strategy="beforeInteractive"
+          id="prevent-flash-of-wrong-theme"
+          dangerouslySetInnerHTML={{
+            __html: `
               (function() {
                 try {
                   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -64,8 +68,9 @@ export default function RootLayout({
                 } catch (e) {}
               })();
             `
-        }}
-      />
+          }}
+        />
+      </head>
       <body
         className={cn(
           "bg-background font-cal-sans m-0 h-dvh w-screen overflow-x-hidden p-0 antialiased"

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import type { IOType } from "node:child_process";
-import * as inquirer from "@inquirer/prompts";
 import { ConfigHandler } from "@/config/index.ts";
 import { cliService } from "@/services/cli/index.ts";
 import { scaffoldService } from "@/services/scaffold/index.ts";
+import * as inquirer from "@inquirer/prompts";
 
 export async function exeInquirer() {
-  const { i } = cliService(inquirer.input);
+  const { i } = cliService(inquirer.input, inquirer.select);
   return i.executeInquirer();
 }
 
@@ -45,18 +45,18 @@ if (process.argv[2] === "test") {
 
 if (process.argv[2] === "init") {
   const handler = new ConfigHandler(process.cwd());
+  void handler.resolveCentralCatalog();
   Promise.all([
     exeInquirer().then(async v => {
-      const { eslint, prettier, root, typescript, ui, web, vitest } = scaffoldService(
-        v,
-        handler
-      );
+      const { eslint, prettier, root, typescript, ui, web, vitest, types } =
+        scaffoldService(v, handler);
       eslint.exeEslint();
       prettier.exePrettier();
       typescript.exeTs();
       vitest.exeVitest();
       root.exeRoot();
       ui.exeUIPkg();
+      types.exeTypesPkg();
       web.exeWebApp();
       return v;
     })
@@ -73,7 +73,6 @@ if (process.argv[2] === "init") {
         console.log(
           "\nInstalling dependencies... (this may take a few seconds)\n"
         );
-
         installDeps()
           .then(() => {
             console.log(

@@ -5,9 +5,10 @@ export interface CliServiceProps {
 }
 
 export function cliService(
-  input: typeof import("@inquirer/prompts").input
+  input: typeof import("@inquirer/prompts").input,
+  select: typeof import("@inquirer/prompts").select
 ) {
   return {
-    i: new InquirerService(input)
+    i: new InquirerService(input, select)
   };
 }

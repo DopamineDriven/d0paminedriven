@@ -17,7 +17,7 @@ export default {
       { pathname: "/svgs/**" },
       { pathname: "/*" }
     ],
-    qualities: [75, 100],
+    qualities: [75, 80, 85, 90, 95, 100],
     dangerouslyAllowLocalIP: true,
     maximumRedirects: 5,
     contentDispositionType: "attachment",

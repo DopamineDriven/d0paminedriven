@@ -42,6 +42,7 @@
     "build": "tsdown",
     "dev": "pnpm build",
     "lint": "eslint",
+    "typecheck": "tsgo --noEmit",
     "format": "prettier --write \"src/**/*.{ts,cts,mts,js,mjs,cjs,json,yaml,yml}\" --ignore-unknown --cache",
     "clean": "git clean -xdf .turbo dist node_modules"
   },

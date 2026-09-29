@@ -45,21 +45,18 @@ export class RootScaffolder {
 
   private get localDeps() {
     return [
-      `@${this.workspace}/eslint-config`,
       `@${this.workspace}/prettier-config`,
-      `@${this.workspace}/tsconfig`,
-      `@${this.workspace}/vitest-config`
     ] as const;
   }
 
   private get devDeps() {
     return [
+      "@biomejs/biome",
       "@changesets/cli",
       "@d0paminedriven/turbogen",
       "@types/node",
       "@typescript/native-preview",
       "dotenv",
-      "eslint",
       "husky",
       "prettier",
       "tsx",
@@ -81,6 +78,7 @@ export class RootScaffolder {
     "ghmcadams.lintlens",
     "hilleer.yaml-plus-json",
     "ipatalas.vscode-postfix-ts",
+    "yzane.markdown-pdf",
     "meganrogge.template-string-converter",
     "meouwu.css-var-color-decorator",
     "ms-vscode.vscode-typescript-next",
@@ -286,29 +284,7 @@ max_line_length = 40
 ` as const;
   }
 
-  private get pnpmWorkspaceYamlTemplate() {
-    // prettier-ignore
-    return `packages:
-  - apps/*
-  - packages/*
-  - tooling/*
 
-enablePrePostScripts: true
-nodeLinker: hoisted
-autoInstallPeers: true
-minimumReleaseAge: 0
-trustPolicy: "off"
-trustLockfile: true
-blockExoticSubdeps: false
-ignorePatchFailures: true
-dangerouslyAllowAllBuilds: true
-verifyStoreIntegrity: false
-
-allowBuilds:
-  '@swc/core': true
-  esbuild: true
-  sharp: true` as const;
-  }
 
   private get gitignoreTemplate() {
     // prettier-ignore
@@ -378,6 +354,10 @@ pnpm-lock.yaml
         /(build_order=\(([\s\S]*?)\))/g,
         // prettier-ignore
         `build_order=(
+      "@${workspace}/eslint-config"
+      "@${workspace}/prettier-config"
+      "@${workspace}/vitest-config"
+      "@${workspace}/types"
       "@${workspace}/ui"
     )`
       );
@@ -423,7 +403,6 @@ pnpm-lock.yaml
       ),
       this.fetchShellScript(this.workspace)
     ]);
-
     return Promise.all([
       this.configHandler.handleNpmrc(),
       this.writeTarget(".prettierignore", this.prettierignoreTemplate),
@@ -436,7 +415,6 @@ pnpm-lock.yaml
       this.writeTarget(".editorconfig", this.editorConfigTemplate),
       this.writeTarget(".gitignore", this.gitignoreTemplate),
       this.writeTarget("package.json", JSON.stringify(pkgJson, null, 2)),
-      this.writeTarget("pnpm-workspace.yaml", this.pnpmWorkspaceYamlTemplate),
       this.writeTarget("turbo.json", this.turboJsonTemplate),
       this.writeTarget("README.md", this.readmeMinimal)
     ]);

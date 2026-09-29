@@ -122,6 +122,9 @@
 @theme {
   --font-cal-sans: CalSans, sans-serif;
   --font-basis: BasisGrotesquePro, sans-serif;
+  --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
+  --font-pixel-square: var(--font-geist-pixel-square);
   --font-inter: var(--font-inter);
   --color-background: oklch(100% 0 0);
   --color-foreground: oklch(14.479% 0.00002 271.152);
