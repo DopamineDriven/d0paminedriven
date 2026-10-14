@@ -124,7 +124,6 @@
   "[sql]": {
     "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
   },
-  "typescript.native-preview.tsdk": "/home/dopaminedriven/personal/d0pamindriven/node_modules/@typescript/native-preview",
   "js/ts.implicitProjectConfig.target": "ESNext",
   "js/ts.referencesCodeLens.enabled": true,
   "terminal.integrated.defaultLocation": "view",

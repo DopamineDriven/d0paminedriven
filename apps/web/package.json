@@ -40,7 +40,7 @@
     "js-cookie": "catalog:cookies",
     "motion": "catalog:motion",
     "motion-dom": "catalog:motion",
-    "motion-plus": "https://api.motion.dev/registry.tgz?package=motion-plus&version=2.12.0",
+    "motion-plus": "npm:@motionplus/core@^3.0.0",
     "motion-plus-dom": "catalog:motion",
     "motion-utils": "catalog:motion",
     "next": "catalog:next",

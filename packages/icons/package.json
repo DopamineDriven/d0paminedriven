@@ -1,0 +1,84 @@
+{
+  "name": "@d0paminedriven/icons",
+  "version": "1.0.0",
+  "description": "convenient icons",
+  "files": [
+    "dist/**/*.{js,mjs,cjs,d.mts,d.ts,d.cts,css}"
+  ],
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ],
+      "icons": [
+        "dist/icons/*.d.ts"
+      ],
+      "types": [
+        "dist/types/index.d.ts"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "typesVersions": {
+      "*": {
+        "*": [
+          "dist/index.d.ts"
+        ],
+        "icons": [
+          "dist/icons/*.d.ts"
+        ],
+        "types": [
+          "dist/types/index.d.ts"
+        ]
+      }
+    }
+  },
+  "source": "src/index.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./icons/*": "./dist/icons/*.js",
+    "./types": "./dist/types/index.js"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "dev": "pnpm build",
+    "typecheck": "tsgo --noEmit",
+    "prebuild": "rm -rf dist",
+    "build": "tsdown",
+    "clean": "git clean -xdf dist node_modules",
+    "types": "tsc --emitDeclarationOnly"
+  },
+  "peerDependencies": {
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
+  },
+  "devDependencies": {
+    "@d0paminedriven/fs": "catalog:dd",
+    "@d0paminedriven/eslint-config": "workspace:*",
+    "@d0paminedriven/prettier-config": "workspace:*",
+    "@d0paminedriven/tsconfig": "workspace:*",
+    "@types/node": "catalog:node",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@typescript/native-preview": "catalog:tsgo",
+    "eslint": "catalog:eslint",
+    "jiti": "catalog:jiti",
+    "prettier": "catalog:prettier",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "rolldown": "catalog:rolldown",
+    "rolldown-plugin-dts": "catalog:rolldown",
+    "tsdown": "catalog:tsdown",
+    "tslib": "catalog:tslib",
+    "tsx": "catalog:tsx",
+    "typescript": "catalog:ts",
+    "typescript-eslint": "catalog:tseslint"
+  },
+  "prettier": "@d0paminedriven/prettier-config"
+}
