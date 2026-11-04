@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "10.1.0",
+  "version": "10.2.0",
   "author": "Andrew Ross",
   "description": "convenient turborepo generator",
   "repository": {

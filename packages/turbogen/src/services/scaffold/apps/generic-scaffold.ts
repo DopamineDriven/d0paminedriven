@@ -57,7 +57,7 @@ export function PageLayout({ children }: { children: ReactNode }) {
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Github, Package } from "@${this.workspace}/ui";
+import { Github, Package } from "@d0paminedriven/icons";
 import { useTheme } from "next-themes";
 
 const ThemeToggle = dynamic(
@@ -158,7 +158,8 @@ export function Footer() {
     return `"use client";
 
 import { useEffect, useState } from "react";
-import { Button, Moon, Sun } from "@${this.workspace}/ui";
+import { Button } from "@${this.workspace}/ui";
+import { Moon, Sun } from "@d0paminedriven/icons";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
@@ -533,6 +534,7 @@ export default defineConfig({
   private get deps() {
     return [
       "@base-ui/react",
+      "@d0paminedriven/icons",
       "class-variance-authority",
       "clsx",
       "csstype",
@@ -626,6 +628,19 @@ export default {
       { hostname: "imgen.x.ai", protocol: "https" },
       { hostname: "images.unsplash.com", protocol: "https" },
       { hostname: "tailwindcss.com", protocol: "https" }
+    ]
+  },
+  async headers() {
+    return [
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable"
+          }
+        ]
+      }
     ]
   }
 } satisfies NextConfig;` as const;
@@ -1609,21 +1624,20 @@ export default function HomePage() {
     return `"use client";
 
 import Link from "next/link";
+import { Button } from "@${this.workspace}/ui";
 import {
   ArrowRight,
-  Button,
   Code,
   Layers,
   Package,
   Terminal,
   Zap
-} from "@${this.workspace}/ui";
+} from "@d0paminedriven/icons";
 import { motion } from "motion/react";
-
 export function LandingPage() {
   return (
-    <div className="relative isolate overflow-y-scroll">
-      <section className="font-cal-sans mx-auto flex justify-center space-y-6 overflow-y-scroll pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
+    <div className="relative isolate overflow-y-auto">
+      <section className="font-cal-sans mx-auto flex justify-center space-y-6 overflow-y-auto pt-6 pb-8 md:pt-10 md:pb-12 lg:py-32">
         <div className="container flex max-w-5xl flex-col items-center gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1662,7 +1676,7 @@ export function LandingPage() {
                 Get Started <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="secondary" asChild>
               <Link
                 href="https://github.com/DopamineDriven/d0paminedriven"
                 target="_blank"
@@ -1738,7 +1752,7 @@ export function LandingPage() {
             <div className="mt-4 space-y-2">
               <h3 className="font-bold">Tooling Included</h3>
               <p className="text-muted-foreground text-sm">
-                Pre-configured ESLint, Prettier, TypeScript, and Jest for
+                Pre-configured ESLint, Prettier, TypeScript, and Vitest for
                 consistent code quality.
               </p>
             </div>
@@ -1812,7 +1826,8 @@ pnpm run:web\`}</code>
                   {\`├── apps/
 │   └── web/
 ├── packages/
-│   └── ui/
+│   ├── types/
+    └── ui/
 └── tooling/
     ├── eslint/
     ├── prettier/

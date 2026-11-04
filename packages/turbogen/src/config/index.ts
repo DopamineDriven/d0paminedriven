@@ -174,6 +174,7 @@ catalogs:
     class-variance-authority: ${this.m.get("class-variance-authority")}
   dd:
     "@d0paminedriven/fs": ${this.m.get("@d0paminedriven/fs")}
+    "@d0paminedriven/icons": ${this.m.get("@d0paminedriven/icons")}
     "@d0paminedriven/turbogen": ${this.m.get("@d0paminedriven/turbogen")}
   dotenv:
     dotenv: ${this.m.get("dotenv")}
@@ -532,6 +533,7 @@ catalogs:
     "@biomejs/biome": "catalog:biome",
     "@changesets/cli": "catalog:utils",
     "@d0paminedriven/fs": "catalog:dd",
+    "@d0paminedriven/icons": "catalog:dd",
     "@d0paminedriven/turbogen": "catalog:dd",
     "@eslint/compat": "catalog:eslint",
     "@eslint/config-helpers": "catalog:eslint",
@@ -727,7 +729,6 @@ catalogs:
         "*": {
           "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
           "globals.css": ["dist/globals.d.ts"],
-          icons: ["dist/icons/index.d.ts", "dist/icons/*.d.ts"],
           lib: ["dist/lib/*.d.ts"],
           ui: ["dist/ui/*.d.ts"]
         }
@@ -738,7 +739,6 @@ catalogs:
           "*": {
             "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
             "globals.css": ["dist/globals.d.ts"],
-            icons: ["dist/icons/index.d.ts", "dist/icons/*.d.ts"],
             lib: ["dist/lib/*.d.ts"],
             ui: ["dist/ui/*.d.ts"]
           }
@@ -750,8 +750,6 @@ catalogs:
       exports: {
         ".": "./dist/index.js",
         "./globals.css": "./dist/globals.css",
-        "./icons": "./dist/icons/index.js",
-        "./icons/*": "./dist/icons/*.js",
         "./lib/*": "./dist/lib/*.js",
         "./ui/*": "./dist/ui/*.js"
       },
@@ -806,7 +804,6 @@ catalogs:
       x.push(
         "src/globals.css",
         "src/index.ts",
-        "src/icons/index.tsx",
         "src/base/*.tsx",
         "src/hooks/*.ts",
         "src/lib/*.ts",
@@ -820,7 +817,6 @@ catalogs:
       x.push(
         "src/globals.css",
         "src/index.ts",
-        "src/icons/index.tsx",
         "src/base/*.tsx",
         "src/hooks/*.ts",
         "src/lib/*.ts",
