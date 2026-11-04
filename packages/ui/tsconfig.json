@@ -9,12 +9,20 @@
         "name": "next"
       }
     ],
+    "sourceMap": false,
+    "declarationMap": false,
     "types": ["*"],
     "rootDir": ".",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "outDir": "dist"
   },
 
-  "include": ["src/**/*.ts", "src/**/*.tsx", "next-env.d.ts", "**/*.ts", "**/*.mjs"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.mjs"
+  ],
   "exclude": ["dist"]
 }

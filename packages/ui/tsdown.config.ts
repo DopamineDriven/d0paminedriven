@@ -1,6 +1,6 @@
 import { arch, platform } from "node:os";
 import { join, relative, resolve } from "node:path";
-import type { UserConfig } from "tsdown";
+import type { UserConfig, UserConfigFn } from "tsdown";
 import { defineConfig } from "tsdown";
 
 const p = platform();

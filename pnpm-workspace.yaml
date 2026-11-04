@@ -18,7 +18,7 @@ catalogs:
   babel:
     babel-plugin-react-compiler: ^1.0.0
   biome:
-    "@biomejs/biome": ^2.5.15
+    "@biomejs/biome": ^2.6.4
   bui:
     "@base-ui/react": ^1.9.0
   clsx:
@@ -36,14 +36,14 @@ catalogs:
     "@d0paminedriven/fs": ^11.0.0
     "@d0paminedriven/pdfdown": ^0.9.9
   dotenv:
-    dotenv: ^18.0.7
-    dotenv-cli: ^11.0.0
+    dotenv: ^18.0.9
+    dotenv-cli: ^11.1.0
     dotenv-expand: ^1000.0.0
   eslint:
     "@eslint/compat": ^2.1.1
     "@eslint/config-helpers": ^0.7.0
     "@eslint/js": ^10.0.1
-    eslint: ^10.12.0
+    eslint: ^10.13.0
     eslint-plugin-import: ^2.32.0
     eslint-plugin-import-x: ^4.17.1
     eslint-plugin-jsx-a11y: ^6.10.2
@@ -52,28 +52,28 @@ catalogs:
   fflate:
     fflate: ^0.8.3
   geist:
-    geist: ^1.7.2
+    geist: ^1.8.2
   glob:
-    glob: ^13.0.6
+    glob: ^14.0.3
   gradient:
     gradient-string: ^3.0.0
     "@types/gradient-string": ^1.1.6
   gtag:
     "@types/gtag.js": ^0.0.20
   inquirer:
-    "@inquirer/core": ^12.0.4
-    "@inquirer/prompts": ^8.7.3
-    "@inquirer/type": ^4.2.0
+    "@inquirer/core": ^12.0.6
+    "@inquirer/prompts": ^8.7.5
+    "@inquirer/type": ^4.2.1
   jiti:
     jiti: ^2.7.0
   jose:
-    jose: ^6.2.12
+    jose: ^6.2.13
   jsdom:
     "@types/jsdom": ^30.0.0
-    jsdom: ^30.1.2
+    jsdom: ^30.1.3
   katex:
     "@types/katex": ^0.16.8
-    katex: ^0.19.0
+    katex: ^0.19.1
   lightningcss:
     unplugin-lightningcss: ^0.5.0
   lodash:
@@ -85,20 +85,20 @@ catalogs:
     "@mdx-js/react": ^3.1.1
     "@types/mdx": ^2.0.14
   motion:
-    motion: ^14.2.0
-    motion-dom: ^14.2.0
+    motion: ^14.7.1
+    motion-dom: ^14.7.1
     motion-plus-dom: ^3.0.0
-    motion-utils: ^14.1.1
+    motion-utils: ^14.7.0
   nanoid:
     nanoid: ^6.0.2
   next:
-    next: ^16.4.0
-    eslint-config-next: ^16.4.0
+    next: ^16.4.3
+    eslint-config-next: ^16.4.3
     next-themes: ^0.4.6
-    "@next/eslint-plugin-next": ^16.4.0
+    "@next/eslint-plugin-next": ^16.4.3
   node:
-    "@types/node": ^26.6.5
-    node-html-parser: ^9.0.4
+    "@types/node": ^26.6.6
+    node-html-parser: ^9.0.5
     nodemon: ^3.1.14
   nyc:
     nyc: ^18.0.0
@@ -134,9 +134,9 @@ catalogs:
     "@testing-library/react": ^16.3.3
     "@types/react": ^19.3.0
     "@types/react-dom": ^19.3.0
-    react: ^19.3.0
-    react-dom: ^19.3.0
-    react-resizable-panels: ^4.14.5
+    react: ^19.3.1
+    react-dom: ^19.3.1
+    react-resizable-panels: ^4.15.1
     vaul: ^1.1.2
   redis:
     redis: ^6.3.0
@@ -153,7 +153,7 @@ catalogs:
     remark-parse: ^11.0.0
     remark-rehype: ^11.1.2
   rolldown:
-    rolldown: ^1.2.13
+    rolldown: ^1.2.15
     rolldown-plugin-dts: ^0.28.8
     rolldown-plugin-wasm: ^0.3.2
   sharp:
@@ -162,23 +162,23 @@ catalogs:
     "@shikijs/transformers": ^4.5.0
     shiki: ^4.5.0
   styles:
-    autoprefixer: ^10.6.1
-    postcss: ^8.5.30
+    autoprefixer: ^10.6.2
+    postcss: ^8.5.32
     postcss-import: ^17.0.1
     postcss-load-config: ^6.0.1
   swr:
     swr: ^2.5.1
   tanstack:
-    "@tanstack/react-virtual": ^3.14.19
+    "@tanstack/react-virtual": ^3.14.23
   test:
-    "@playwright/test": ^1.64.0
+    "@playwright/test": ^1.64.1
   ts:
     typescript: ^6.0.3
   tsdown:
-    tsdown: ^0.23.1
-    "@tsdown/css": ^0.23.1
+    tsdown: ^0.23.3
+    "@tsdown/css": ^0.23.3
   tseslint:
-    typescript-eslint: ^8.71.2
+    typescript-eslint: ^8.72.1
   tsgo:
     "@typescript/native-preview": ^7.0.0-dev.20260707.2
   tslib:
@@ -186,9 +186,9 @@ catalogs:
   tsx:
     tsx: ^4.23.15
   turbo:
-    turbo: ^2.11.8
-    eslint-config-turbo: ^2.11.8
-    eslint-plugin-turbo: ^2.11.8
+    turbo: ^2.11.10
+    eslint-config-turbo: ^2.11.10
+    eslint-plugin-turbo: ^2.11.10
   tw:
     "@tailwindcss/forms": ^0.5.11
     "@tailwindcss/postcss": ^4.3.3
@@ -202,22 +202,22 @@ catalogs:
   unist:
     "@types/unist": ^3.0.3
     unist-util-remove: ^4.0.0
-    unist-util-visit: ^5.1.0
+    unist-util-visit: ^5.2.0
   utils:
     "@changesets/cli": ^3.0.3
     husky: ^9.1.7
     wait-on: ^9.5.1
   vercel:
     "@vercel/analytics": ^2.0.1
-    "@vercel/functions": ^3.10.1
+    "@vercel/functions": ^3.10.4
   vfile:
     vfile: ^6.0.3
   vite:
     "@vitejs/plugin-react": ^6.1.2
-    vite: ^8.3.4
+    vite: ^8.3.5
   vitest:
-    "@vitest/coverage-istanbul": ^5.0.4
-    "@vitest/ui": ^5.0.4
-    vitest: ^5.0.4
+    "@vitest/coverage-istanbul": ^5.0.5
+    "@vitest/ui": ^5.0.5
+    vitest: ^5.0.5
   yaml:
     yaml: ^2.9.1
