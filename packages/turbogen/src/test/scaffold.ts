@@ -83,12 +83,6 @@ h.withWs(
   "yaml.validate": true,
   "workbench.editor.autoLockGroups": {
     "default": false
-  },
-  "github.copilot.enable": {
-    "*": false,
-    "plaintext": false,
-    "markdown": false,
-    "scminput": false
   }
 }`
 );

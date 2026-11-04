@@ -15,10 +15,10 @@ export class UIPackageScaffolder {
 
   private get cssTemplate() {
     // prettier-ignore
-    return `@import "tailwindcss/theme.css" layer(theme) source("../src");
-
-@import "tailwindcss/utilities.css" layer(utilities);
-
+    return `@import "tailwindcss/theme.css" layer(theme) prefix(ui);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(ui) source("../src");
+@custom-variant svg (& svg);
+@custom-variant has-svg (&:has(> svg));
 @custom-variant dark (&:where([data-theme=dark], .dark, [data-theme=dark] *));
 
 @theme {
@@ -168,28 +168,28 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 
 const buttonVariants = cva(
-  \`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all outline-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 focus-visible:ring-offset-2 shrink-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive [&_svg]:not-[[class*='size-']]:not-[[class^='h-']]:not-[[class^='w-']]:size-4\`,
+  \`ui:inline-flex ui:items-center ui:justify-center ui:gap-2 ui:whitespace-nowrap ui:rounded-md ui:text-sm ui:font-medium ui:ring-offset-background ui:transition-all ui:outline-none ui:focus-visible:outline-none ui:focus-visible:ring-[3px] ui:focus-visible:ring-primary/40 ui:focus-visible:ring-offset-2 ui:shrink-0 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:svg:pointer-events-none ui:svg:shrink-0 ui:aria-invalid:ring-destructive/20 ui:dark:aria-invalid:ring-destructive/40 ui:aria-invalid:border-destructive ui:svg:not-[[class*='size-']]:not-[[class^='h-']]:not-[[class^='w-']]:size-4\`,
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "ui:bg-primary ui:text-primary-foreground ui:hover:bg-primary/90",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "ui:bg-destructive ui:text-white ui:hover:bg-destructive/90 ui:focus-visible:ring-destructive/20 ui:dark:focus-visible:ring-destructive/40 ui:dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "ui:border ui:bg-background ui:shadow-xs ui:hover:bg-accent ui:hover:text-accent-foreground ui:dark:bg-input/30 ui:dark:border-input ui:dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "ui:bg-secondary ui:text-secondary-foreground ui:hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline"
+          "ui:hover:bg-accent ui:hover:text-accent-foreground ui:dark:hover:bg-accent/50",
+        link: "ui:text-primary ui:underline-offset-4 ui:hover:underline"
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-8",
-        "icon-sm": "size-6",
-        "icon-lg": "size-9"
+        default: "ui:h-9 ui:px-4 ui:py-2 ui:has-svg:px-3",
+        sm: "ui:h-8 ui:rounded-md ui:gap-1.5 ui:px-3 ui:has-svg:px-2.5",
+        lg: "ui:h-10 ui:rounded-md ui:px-6 ui:has-svg:px-4",
+        icon: "ui:size-8",
+        "icon-sm": "ui:size-6",
+        "icon-lg": "ui:size-9"
       }
     },
     defaultVariants: { variant: "default", size: "default" }
@@ -691,6 +691,8 @@ export default {
       }
     ],
     "types": ["*"],
+    "sourceMap": false,
+    "declarationMap": false,
     "rootDir": ".",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "outDir": "dist"
@@ -703,43 +705,8 @@ export default {
   }
 
   private get tsdownTemplate() {
-    // prettier-ignore
-    return `import { relative } from "node:path";
-import type { UserConfig } from "tsdown";
-import { defineConfig } from "tsdown";
-
-export default defineConfig(
-  options =>
-    ({
-      ...options,
-      entry: [
-        "src/globals.css",
-        "src/index.ts",
-        "src/icons/index.tsx",
-        "src/lib/*.ts",
-        "src/ui/*.tsx",
-        "!src/services/postbuild.ts"
-      ],
-      dts: { tsgo: true },
-      external: ["react"],
-      platform: "neutral",
-      fixedExtension: false,
-      target: ["esnext"],
-      format: ["esm"],
-      tsconfig: relative(process.cwd(), "tsconfig.json"),
-      cwd: process.cwd(),
-      clean: true,
-      outDir: "dist",
-      unbundle: true,
-      css: {
-        fileName: "globals.css",
-        inject: false,
-        minify: false,
-        transformer: "postcss"
-      }
-    }) satisfies UserConfig
-);` as const;
-  }
+  return this.handler.tsdownWorkup("ui");
+}
 
   private get deps() {
     return [

@@ -1,12 +1,12 @@
 import type { NpmLatest, ToPascalCase } from "@/types/index.ts";
 import { Fs } from "@d0paminedriven/fs";
+import type { TSDownPlatform, TsdownTarget } from "./types.ts";
 
 export class ConfigHandler extends Fs {
   protected m = new Map<keyof typeof this.CATALOG_REGISTRY, string>();
   constructor(public override cwd: string) {
     super((cwd ??= process.cwd()));
   }
-
   protected safeErrMsg(err: unknown) {
     if (err instanceof Error) {
       return err.message;
@@ -153,7 +153,6 @@ minimumReleaseAge: 0
 trustPolicy: "off"
 trustLockfile: true
 blockExoticSubdeps: false
-ignorePatchFailures: true
 dangerouslyAllowAllBuilds: true
 verifyStoreIntegrity: false
 
@@ -771,5 +770,149 @@ catalogs:
       devDependencies: Object.fromEntries([...localEntries, ...devDepCatalogs]),
       prettier: `@${workspace}/prettier-config`
     };
+  }
+
+  public tsdownWorkup(
+    target:
+      "eslint" | "typescript" | "prettier" | "vitest" | "ui" | "types" | "web"
+  ) {
+    let x = Array.of<string>();
+    let t = Array.of<TsdownTarget>();
+    let p: TSDownPlatform;
+    if (target === "eslint") {
+      t = ["node26"];
+      p = "node";
+      x = ["index.ts", "react.ts", "next.ts", "base.ts"] as const;
+    } else if (target === "prettier") {
+      t = ["node26"];
+      p = "node";
+      x = ["index.ts"] as const;
+    } else if (target === "vitest") {
+      t = ["node26"];
+      p = "node";
+      x = ["index.ts"] as const;
+    } else if (target === "typescript") {
+      t = ["node26"];
+      p = "node";
+      x = [];
+    } else if (target === "types") {
+      t = ["node26"];
+      p = "node";
+      x = ["src/index.ts", "src/utils.ts"] as const;
+    } else if (target === "ui") {
+      p = "neutral";
+      t.push("esnext");
+
+      x.push(
+        "src/globals.css",
+        "src/index.ts",
+        "src/icons/index.tsx",
+        "src/base/*.tsx",
+        "src/hooks/*.ts",
+        "src/lib/*.ts",
+        "src/ui/*.tsx",
+        "!src/services/icon-workup.ts",
+        "!src/services/postbuild.ts"
+      );
+    } else {
+      t.push("node26");
+      p = "node";
+      x.push(
+        "src/globals.css",
+        "src/index.ts",
+        "src/icons/index.tsx",
+        "src/base/*.tsx",
+        "src/hooks/*.ts",
+        "src/lib/*.ts",
+        "src/ui/*.tsx",
+        "!src/services/icon-workup.ts",
+        "!src/services/postbuild.ts"
+       )
+    }
+    const entry = JSON.stringify(x, null, 2);
+    const tar = JSON.stringify(t, null, 2);
+    if (target === "ui") {
+      return `import { arch, platform } from "node:os";
+import { join, relative, resolve } from "node:path";
+import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
+
+const p = platform();
+const a = arch();
+const executable = p === "win32" ? "tsgo.exe" : "tsgo";
+const dirname = \`native-preview-\${p}-\${a}\`;
+
+const path = resolve(
+  join(
+    process.cwd(),
+    \`../../node_modules/@typescript/\${dirname}/lib/\${executable}\`
+  )
+);
+
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: ${entry},
+      cwd: process.cwd(),
+      fixedExtension: false,
+      target: ${tar},
+      external: ["react"],
+      platform: "${p}",
+      dts: { tsgo: { path } },
+      format: ["esm"],
+      sourcemap: false,
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      clean: true,
+      outDir: "dist",
+      unbundle: true,
+      css: {
+        fileName: "globals.css",
+        inject: false,
+        minify: false,
+        transformer: "postcss"
+      }
+    }) satisfies UserConfig,
+);
+`;
+    } else {
+      // prettier-ignore
+      return `import { arch, platform } from "node:os";
+import { join, relative, resolve } from "node:path";
+import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
+
+const p = platform();
+const a = arch();
+const executable = p === "win32" ? "tsgo.exe" : "tsgo";
+const dirname = \`native-preview-\${p}-\${a}\`;
+
+const path = resolve(
+  join(
+    process.cwd(),
+    \`../../node_modules/@typescript/\${dirname}/lib/\${executable}\`
+  )
+);
+
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: ${entry},
+      cwd: process.cwd(),
+      fixedExtension: false,
+      target: ${tar},
+      platform: "${p}",
+      dts: { tsgo: { path } },
+      format: ["esm"],
+      sourcemap: false,
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      clean: true,
+      outDir: "dist",
+      unbundle: true
+    }) satisfies UserConfig
+);
+` as const;
+    }
   }
 }

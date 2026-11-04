@@ -389,7 +389,9 @@ export default defineConfig(
       "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "types": ["*"]
+    "types": ["*"],
+    "sourceMap": false,
+    "declarationMap": false
   },
   "include": ["**/*.ts", "src/**/*.ts", "**/*.preset.ts"],
   "exclude": ["dist"]
@@ -399,28 +401,7 @@ export default defineConfig(
 
   private get tsdownConfigTemplate() {
     // prettier-ignore
-    return `import { relative } from "node:path";
-import type { UserConfig as Options } from "tsdown";
-import { defineConfig } from "tsdown";
-
-export default defineConfig(
-  options =>
-    ({
-      ...options,
-      entry: ["src/index.ts", "src/utils.ts"],
-      cwd: process.cwd(),
-      target: ["node26"],
-      fixedExtension: false,
-      dts: { tsgo: true },
-      format: ["esm"],
-      sourcemap: true,
-      tsconfig: relative(process.cwd(), "tsconfig.json"),
-      clean: true,
-      outDir: "dist",
-      unbundle: true
-    }) satisfies Options
-);
-` as const;
+    return this.handler.tsdownWorkup("types");
   }
 
   private get devDeps() {
