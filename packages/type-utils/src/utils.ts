@@ -1,3 +1,8 @@
+import type { ValidAsciiUnion } from "@/codes.ts";
+import type { ValidSymbolUnion } from "@/symbols.ts";
+import { asciiToSymbol, isValidAscii, validAscii } from "@/codes.ts";
+import { isValidSymbol, symbolToAscii, validSymbol } from "@/symbols.ts";
+
 export type Unenumerate<T> = T extends (infer U)[] | readonly (infer U)[]
   ? U
   : T;
@@ -39,8 +44,16 @@ export type Include<T, U extends T> = Exclude<T, Exclude<T, U>>;
 // prettier-ignore
 export type XOR<T, U> =
   [T, U] extends [object, object]
-    ? (Without<T, U> & U) | (Without<U, T> & T)
+    ? ((Without<T, U> & U) | (Without<U, T> & T))
     : T | U
+
+// xor from prisma
+// type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never; };
+// /**
+//  * XOR is needed to have a real mutually exclusive union type
+//  * https://stackoverflow.com/questions/42123407/does-typescript-support-mutually-exclusive-types
+//  */
+// export type XOR<T, U> = T extends object ? U extends object ? ((Without<T, U> & U) | (Without<U, T> & T)) & object : U : T;
 
 /**
  * CTR (Conditional to Required)
@@ -67,6 +80,20 @@ export type RTC<
 > = Rm<T, K> & {
   [Q in K]?: T[Q];
 };
+
+/**
+ * AtLeastOne
+ *
+ * - every property optional, but at least one of K must be present
+ * - By default: K is every key of T
+ */
+export type AtLeastOne<
+  T,
+  K extends keyof OnlyOptional<RTC<T>> = keyof OnlyOptional<RTC<T>>
+> = {
+  [P in K]: CTR<RTC<T>, P>;
+}[K];
+
 export type IsExact<T, U> = [T] extends [U]
   ? [U] extends [T]
     ? true
@@ -76,9 +103,11 @@ export type IsExact<T, U> = [T] extends [U]
 export type UTR<
   TUnion extends Record<TKey, string>,
   TKey extends string = "kind",
-  TDiscriminant extends string = TUnion[TKey]
+  TExclude extends `strip-${TKey}` | boolean = false
 > = {
-  [K in TDiscriminant]: Extract<TUnion, Record<TKey, K>>;
+  [K in TUnion[TKey]]: TExclude extends false
+    ? Extract<TUnion, Record<TKey, K>>
+    : Rm<Extract<TUnion, Record<TKey, K>>, TKey>;
 };
 
 /**
@@ -119,18 +148,6 @@ export type OnlyRequired<T> = {
   [K in keyof T as IsOptional<T, K> extends false ? K : never]: T[K];
 };
 
-/**
- * workup for next.js dynamic route generate static params handling
- */
-export type InferGSPRTWorkup<T> =
-  T extends Promise<readonly (infer U)[] | (infer U)[]> ? U : T;
-
-/**
- * infer generate static params return type in next.js dynamic routes
- */
-export type InferGSPRT<V extends (...args: any) => any> = {
-  params: Promise<InferGSPRTWorkup<ReturnType<V>>>;
-};
 
 /**
  * Expect that the thing passed to Expect<T> is true.
@@ -200,8 +217,6 @@ export type RequireNested<
     ? Rm<T, Path> & Record<Path, Required<T>[Path]>
     : T;
 
-export type FlexiCase<T extends string> = Lowercase<T> | Uppercase<T>;
-
 export type Signals =
   | "SIGABRT"
   | "SIGALRM"
@@ -247,4 +262,88 @@ export type Signals =
 export type BigIntOrNumber<T extends boolean = false> = T extends true
   ? number
   : bigint;
+
+// export type FilterBySelect<Q extends keyof ModelIdToModelDisplayName> = Exclude<
+//   Exclude<Q, ProductDataFull>,
+//   ProductDataFull
+// >;
+
+// export type FilterResults<S extends keyof ProductDataFull> = Rm<
+//   ProductDataFull,
+//   Exclude<keyof ProductDataFull, FilterBySelect<S>>
+// >;
+/**
+ *
+ */
+
+export type NumRange<
+  N extends number = number,
+  Result extends unknown[] = []
+> = Result["length"] extends N
+  ? Result
+  : NumRange<N, [...Result, Result["length"]]>;
+
+export type NumUnion<A extends number> = Unenumerate<NumRange<A>>;
+
+export type RepeatRO<
+  T,
+  N extends number,
+  Result extends readonly T[] = readonly []
+> = N extends N
+  ? Result["length"] extends N
+    ? Result
+    : RepeatRO<T, N, readonly [...Result, T]>
+  : never;
+
+export type Repeat<T, N extends number, Result extends T[] = []> = N extends N
+  ? Result["length"] extends N
+    ? Result
+    : Repeat<T, N, [...Result, T]>
+  : never;
+/**
+ * generic args
+ *
+ * (1) the type &rarr; `T`
+ *
+ * (2) is readonly (boolean; defaults to false) &rarr; `RO`
+ *
+ * (3) min (number; defaults to 1) &rarr; `Min`
+ *
+ * (4) max (number; defaults to 5) &rarr; `Max`
+ *
+ * `FlexiRepeater<T, RO, Min, Max>`
+ */
+export type Repeater<
+  T,
+  RO extends boolean = false,
+  Min extends number = 1,
+  Max extends number = 5
+> = RO extends true
+  ? RepeatRO<T, Exclude<NumUnion<Max> | Max, NumUnion<Min>>>
+  : Repeat<T, Exclude<NumUnion<Max> | Max, NumUnion<Min>>>;
+
+export type ValidSymbolMap<Q extends string = string> =
+  Q extends ValidSymbolUnion
+    ? {
+        [P in Q]: (typeof symbolToAscii)[P];
+      }[Q]
+    : never;
+
+export type ValidAsciiMap<Q extends number = number> = Q extends ValidAsciiUnion
+  ? {
+      [P in Q]: (typeof asciiToSymbol)[P];
+    }[Q]
+  : never;
+
+export function asciiEpimer<const P extends string = string>(
+  s: P
+): P extends ValidSymbolUnion ? ValidSymbolMap<P> : never;
+export function asciiEpimer<const P extends number = number>(
+  s: P
+): P extends ValidAsciiUnion ? ValidAsciiMap<P> : never;
+export function asciiEpimer(s: string | number) {
+  if (typeof s === "string" && isValidSymbol(s)) return symbolToAscii[s];
+  else if (typeof s === "number" && isValidAscii(s)) return asciiToSymbol[s];
+  else throw new Error(`invalid symbol or code input ${s}`);
+}
 

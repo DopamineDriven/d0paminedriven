@@ -19,13 +19,13 @@ export default defineConfig(
   options =>
     ({
       ...options,
-      entry: ["src/index.ts", "src/utils.ts"],
+      entry: ["src/codes.ts", "src/index.ts", "src/symbols.ts", "src/utils.ts"],
       cwd: process.cwd(),
       target: ["node26"],
       fixedExtension: false,
       dts: { tsgo: { path } },
       format: ["esm"],
-      sourcemap: true,
+      sourcemap: false,
       tsconfig: relative(process.cwd(), "tsconfig.json"),
       clean: true,
       outDir: "dist",
