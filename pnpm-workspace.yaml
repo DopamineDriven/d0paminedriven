@@ -32,9 +32,9 @@ catalogs:
   cva:
     class-variance-authority: ^0.7.1
   dd:
-    "@d0paminedriven/fs": ^11.0.0
-    "@d0paminedriven/mimedown": ^0.1.0
-    "@d0paminedriven/pdfdown": ^0.17.0
+    "@d0paminedriven/fs": ^12.2.0
+    "@d0paminedriven/mimedown": ^0.4.0
+    "@d0paminedriven/pdfdown": ^0.20.0
   dotenv:
     dotenv: ^18.0.10
     dotenv-cli: ^11.1.0
@@ -61,9 +61,9 @@ catalogs:
   gtag:
     "@types/gtag.js": ^0.0.20
   inquirer:
-    "@inquirer/core": ^12.1.0
-    "@inquirer/prompts": ^8.8.0
-    "@inquirer/type": ^4.3.0
+    "@inquirer/core": ^12.1.1
+    "@inquirer/prompts": ^8.8.1
+    "@inquirer/type": ^4.3.1
   jiti:
     jiti: ^2.7.0
   jose:
@@ -162,7 +162,7 @@ catalogs:
     "@shikijs/transformers": ^4.6.0
     shiki: ^4.6.0
   styles:
-    autoprefixer: ^10.6.2
+    autoprefixer: ^10.7.0
     postcss: ^8.5.33
     postcss-import: ^17.0.1
     postcss-load-config: ^6.0.1
@@ -193,7 +193,7 @@ catalogs:
     "@tailwindcss/forms": ^0.5.11
     "@tailwindcss/postcss": ^4.3.5
     "@tailwindcss/typography": ^0.5.20
-    tailwind-merge: ^3.7.0
+    tailwind-merge: ^3.7.1
     tailwindcss: ^4.3.5
     tailwindcss-motion: ^1.1.1
     tw-animate-css: ^1.4.0
@@ -221,3 +221,10 @@ catalogs:
     vitest: ^5.1.1
   yaml:
     yaml: ^2.9.1
+permissions:
+  tsdown:
+    skills: true
+skills:
+  dirs:
+    - .agent/skills
+    - .claude/skills
