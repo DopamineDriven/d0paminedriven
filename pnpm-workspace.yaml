@@ -32,8 +32,8 @@ catalogs:
   cva:
     class-variance-authority: ^0.7.1
   dd:
-    "@d0paminedriven/fs": ^12.2.0
-    "@d0paminedriven/mimedown": ^0.4.0
+    "@d0paminedriven/fs": ^12.4.0
+    "@d0paminedriven/mimedown": ^0.6.0
     "@d0paminedriven/pdfdown": ^0.20.0
   dotenv:
     dotenv: ^18.0.10
@@ -139,7 +139,7 @@ catalogs:
     react-resizable-panels: ^4.24.1
     vaul: ^1.1.2
   redis:
-    redis: ^6.3.1
+    redis: ^6.4.0
   rehype:
     rehype-katex: ^7.0.1
     rehype-pretty-code: ^0.14.6
@@ -169,7 +169,7 @@ catalogs:
   swr:
     swr: ^2.5.1
   tanstack:
-    "@tanstack/react-virtual": ^3.14.26
+    "@tanstack/react-virtual": ^3.14.28
   test:
     "@playwright/test": ^1.65.1
   ts:
@@ -178,7 +178,7 @@ catalogs:
     tsdown: ^0.23.7
     "@tsdown/css": ^0.23.7
   tseslint:
-    typescript-eslint: ^8.73.0
+    typescript-eslint: ^8.74.0
   tsgo:
     "@typescript/native-preview": ^7.0.0-dev.20260707.2
   tslib:

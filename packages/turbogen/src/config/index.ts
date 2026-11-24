@@ -175,7 +175,9 @@ catalogs:
   dd:
     "@d0paminedriven/fs": ${this.m.get("@d0paminedriven/fs")}
     "@d0paminedriven/icons": ${this.m.get("@d0paminedriven/icons")}
+    "@d0paminedriven/mimedown": ${this.m.get("@d0paminedriven/mimedown")}
     "@d0paminedriven/turbogen": ${this.m.get("@d0paminedriven/turbogen")}
+    "@d0paminedriven/type-utils": ${this.m.get("@d0paminedriven/type-utils")}
   dotenv:
     dotenv: ${this.m.get("dotenv")}
     dotenv-cli: ${this.m.get("dotenv-cli")}
@@ -534,7 +536,9 @@ catalogs:
     "@changesets/cli": "catalog:utils",
     "@d0paminedriven/fs": "catalog:dd",
     "@d0paminedriven/icons": "catalog:dd",
+    "@d0paminedriven/mimedown": "catalog:dd",
     "@d0paminedriven/turbogen": "catalog:dd",
+    "@d0paminedriven/type-utils": "catalog:dd",
     "@eslint/compat": "catalog:eslint",
     "@eslint/config-helpers": "catalog:eslint",
     "@eslint/js": "catalog:eslint",

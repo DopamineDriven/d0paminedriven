@@ -535,6 +535,7 @@ export default defineConfig({
     return [
       "@base-ui/react",
       "@d0paminedriven/icons",
+            "@d0paminedriven/mimedown",
       "class-variance-authority",
       "clsx",
       "csstype",
@@ -552,6 +553,7 @@ export default defineConfig({
 
   private get devDeps() {
     return [
+      "@d0paminedriven/type-utils",
       "@playwright/test",
       "@tailwindcss/postcss",
       "@types/js-cookie",
@@ -1145,7 +1147,7 @@ export function cn(...inputs: ClassValue[]) {
 
   private get cookieTypesWithVercel() {
     // prettier-ignore
-    return `import type { Rm } from "@${this.workspace}/types";
+    return `import type { Rm } from "@d0paminedriven/type-utils";
 
 export const COOKIES = {
   browserVersion: "browserVersion",
@@ -1263,7 +1265,7 @@ export function handleSelect<
 
   private get cookieTypesSansVercel() {
     // prettier-ignore
-    return `import type { Rm } from "@${this.workspace}/types";
+    return `import type { Rm } from "@d0paminedriven/type-utils";
 
 export const COOKIES = {
   browserVersion: "browserVersion",
