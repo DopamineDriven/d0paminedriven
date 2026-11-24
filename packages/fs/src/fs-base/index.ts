@@ -43,8 +43,8 @@ export class FsBase extends MimeService {
     return relative(this.cwd, path);
   }
 
-  public absPath<const T extends string>(path: T) {
-    return resolve(this.relPath(path));
+  public absPath<const T extends readonly string[] = readonly string[]>(path: T) {
+    return resolve(...path);
   }
 
   public parseDotEnv() {

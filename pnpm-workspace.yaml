@@ -17,7 +17,7 @@ catalogs:
   babel:
     babel-plugin-react-compiler: ^1.0.0
   biome:
-    "@biomejs/biome": ^2.6.8
+    "@biomejs/biome": ^2.6.9
   bui:
     "@base-ui/react": ^1.9.0
   clsx:
@@ -32,8 +32,8 @@ catalogs:
   cva:
     class-variance-authority: ^0.7.1
   dd:
-    "@d0paminedriven/fs": ^12.4.0
-    "@d0paminedriven/mimedown": ^0.6.0
+    "@d0paminedriven/fs": ^12.5.0
+    "@d0paminedriven/mimedown": ^0.7.0
     "@d0paminedriven/pdfdown": ^0.20.0
   dotenv:
     dotenv: ^18.0.10
