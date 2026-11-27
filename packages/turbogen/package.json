@@ -1,6 +1,6 @@
 {
   "name": "@d0paminedriven/turbogen",
-  "version": "10.0.1",
+  "version": "10.3.0",
   "author": "Andrew Ross",
   "description": "convenient turborepo generator",
   "repository": {
@@ -131,7 +131,6 @@
     "@inquirer/type": "catalog:inquirer",
     "@types/gradient-string": "catalog:gradient",
     "@types/node": "catalog:node",
-    "@typescript/native-preview": "catalog:tsgo",
     "dotenv-cli": "catalog:dotenv",
     "dotenv-expand": "catalog:dotenv",
     "eslint": "catalog:eslint",

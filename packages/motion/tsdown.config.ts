@@ -1,5 +1,5 @@
 import { relative } from "node:path";
-import type { UserConfig as Options } from "tsdown";
+import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
 export default defineConfig(
@@ -22,10 +22,11 @@ export default defineConfig(
         "!src/services/output-md.ts",
         "!src/services/**/*.md"
       ],
-      dts: { tsgo: true },
+      dts: true,
       external: ["react"],
       platform: "neutral",
       fixedExtension: false,
+      sourcemap: false,
       target: ["esnext"],
       format: ["esm"],
       tsconfig: relative(process.cwd(), "tsconfig.json"),
@@ -33,5 +34,5 @@ export default defineConfig(
       clean: true,
       outDir: "dist",
       unbundle: true
-    }) satisfies Options
+    }) satisfies UserConfig
 );

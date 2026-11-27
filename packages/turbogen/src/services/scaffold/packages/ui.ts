@@ -15,10 +15,10 @@ export class UIPackageScaffolder {
 
   private get cssTemplate() {
     // prettier-ignore
-    return `@import "tailwindcss/theme.css" layer(theme) source("../src");
-
-@import "tailwindcss/utilities.css" layer(utilities);
-
+    return `@import "tailwindcss/theme.css" layer(theme) prefix(ui);
+@import "tailwindcss/utilities.css" layer(utilities) prefix(ui) source("../src");
+@custom-variant svg (& svg);
+@custom-variant has-svg (&:has(> svg));
 @custom-variant dark (&:where([data-theme=dark], .dark, [data-theme=dark] *));
 
 @theme {
@@ -138,18 +138,6 @@ export class UIPackageScaffolder {
   private get rootTemplate() {
     // prettier-ignore
     return `import "./globals.css";
-
-export { ArrowRight } from "@/icons/arrow-right";
-export { Code } from "@/icons/code";
-export { Github } from "@/icons/github";
-export { Layers } from "@/icons/layers";
-export { Moon } from "@/icons/moon";
-export { Package } from "@/icons/package";
-export { Sun } from "@/icons/sun";
-export { Terminal } from "@/icons/terminal";
-export { Zap } from "@/icons/zap";
-export { Icon } from "@/icons";
-
 export { cn } from "@/lib/utils";
 
 export { Button, buttonVariants } from "@/ui/button";
@@ -168,28 +156,28 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 
 const buttonVariants = cva(
-  \`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all outline-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-primary/40 focus-visible:ring-offset-2 shrink-0 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive [&_svg]:not-[[class*='size-']]:not-[[class^='h-']]:not-[[class^='w-']]:size-4\`,
+  \`ui:inline-flex ui:items-center ui:justify-center ui:gap-2 ui:whitespace-nowrap ui:rounded-md ui:text-sm ui:font-medium ui:ring-offset-background ui:transition-all ui:outline-none ui:focus-visible:outline-none ui:focus-visible:ring-[3px] ui:focus-visible:ring-primary/40 ui:focus-visible:ring-offset-2 ui:shrink-0 ui:disabled:pointer-events-none ui:disabled:opacity-50 ui:svg:pointer-events-none ui:svg:shrink-0 ui:aria-invalid:ring-destructive/20 ui:dark:aria-invalid:ring-destructive/40 ui:aria-invalid:border-destructive ui:svg:not-[[class*='size-']]:not-[[class^='h-']]:not-[[class^='w-']]:size-4\`,
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "ui:bg-primary ui:text-primary-foreground ui:hover:bg-primary/90",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "ui:bg-destructive ui:text-white ui:hover:bg-destructive/90 ui:focus-visible:ring-destructive/20 ui:dark:focus-visible:ring-destructive/40 ui:dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "ui:border ui:bg-background ui:shadow-xs ui:hover:bg-accent ui:hover:text-accent-foreground ui:dark:bg-input/30 ui:dark:border-input ui:dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "ui:bg-secondary ui:text-secondary-foreground ui:hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline"
+          "ui:hover:bg-accent ui:hover:text-accent-foreground ui:dark:hover:bg-accent/50",
+        link: "ui:text-primary ui:underline-offset-4 ui:hover:underline"
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-8",
-        "icon-sm": "size-6",
-        "icon-lg": "size-9"
+        default: "ui:h-9 ui:px-4 ui:py-2 ui:has-svg:px-3",
+        sm: "ui:h-8 ui:rounded-md ui:gap-1.5 ui:px-3 ui:has-svg:px-2.5",
+        lg: "ui:h-10 ui:rounded-md ui:px-6 ui:has-svg:px-4",
+        icon: "ui:size-8",
+        "icon-sm": "ui:size-6",
+        "icon-lg": "ui:size-9"
       }
     },
     defaultVariants: { variant: "default", size: "default" }
@@ -332,285 +320,6 @@ export function cn(...inputs: ClassValue[]) {
 ` as const;
   }
 
-  private get arrowRightIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function ArrowRight({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get codeIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Code({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="m16 18 6-6-6-6" />
-      <path d="m8 6-6 6 6 6" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get githubIconTemplate() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Github({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      viewBox="0 0 96 96"
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      {...svg}>
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get iconRoot() {
-    // prettier-ignore
-    return `"use client";
-
-import type { ComponentPropsWithRef } from "react";
-import { ArrowRight } from "@/icons/arrow-right";
-import { Code } from "@/icons/code";
-import { Github } from "@/icons/github";
-import { Layers } from "@/icons/layers";
-import { Moon } from "@/icons/moon";
-import { Package } from "@/icons/package";
-import { Sun } from "@/icons/sun";
-import { Terminal } from "@/icons/terminal";
-import { Zap } from "@/icons/zap";
-
-const IconComponents = {
-  ArrowRight,
-  Code,
-  Github,
-  Layers,
-  Moon,
-  Package,
-  Sun,
-  Terminal,
-  Zap
-} as const;
-
-export type IconName = keyof typeof IconComponents;
-
-export type BaseSVGProps = Omit<
-  ComponentPropsWithRef<"svg">,
-  | "viewBox"
-  | "xmlns"
-  | "fill"
-  | "role"
-  | "stroke"
-  | "strokeWidth"
-  | "strokeLinecap"
-  | "strokeLinejoin"
->;
-
-export interface IconProps<T extends IconName> extends BaseSVGProps {
-  target?: T;
-}
-
-function IconWithTarget({ target, ...props }: IconProps<IconName>) {
-  if (!target) {
-    return null;
-  }
-
-  const IconComponent = IconComponents[target];
-  return <IconComponent {...props} />;
-}
-
-export const Icon = Object.assign(
-  // allows for target="icon name" -> <Icon target="Sun" />
-  IconWithTarget,
-  // allows for keying into icon name directly -> <Icon.Sun />, etc
-  IconComponents
-);
-
-export { ArrowRight, Code, Github, Layers, Moon, Package, Sun, Terminal, Zap };
-` as const;
-  }
-
-  private get layersIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Layers({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
-      <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
-      <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get moonIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Moon({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      role={role}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get packageIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Package({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      role={role}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
-      <path d="M12 22V12" />
-      <polyline points="3.29 7 12 12 20.71 7" />
-      <path d="m7.5 4.27 9 5.15" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get sunIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Sun({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2" />
-      <path d="M12 20v2" />
-      <path d="m4.93 4.93 1.41 1.41" />
-      <path d="m17.66 17.66 1.41 1.41" />
-      <path d="M2 12h2" />
-      <path d="M20 12h2" />
-      <path d="m6.34 17.66-1.41 1.41" />
-      <path d="m19.07 4.93-1.41 1.41" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get terminalIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Terminal({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="M12 19h8" />
-      <path d="m4 17 6-6-6-6" />
-    </svg>
-  );
-}` as const;
-  }
-
-  private get zapIcon() {
-    // prettier-ignore
-    return `import type { BaseSVGProps } from "@/icons/index";
-
-export function Zap({ role = "img", ...svg }: BaseSVGProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      role={role}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...svg}>
-      <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
-    </svg>
-  );
-}` as const;
-  }
-
   private get turboJson() {
     // prettier-ignore
     return `{
@@ -691,6 +400,8 @@ export default {
       }
     ],
     "types": ["*"],
+    "sourceMap": false,
+    "declarationMap": false,
     "rootDir": ".",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "outDir": "dist"
@@ -703,43 +414,8 @@ export default {
   }
 
   private get tsdownTemplate() {
-    // prettier-ignore
-    return `import { relative } from "node:path";
-import type { UserConfig } from "tsdown";
-import { defineConfig } from "tsdown";
-
-export default defineConfig(
-  options =>
-    ({
-      ...options,
-      entry: [
-        "src/globals.css",
-        "src/index.ts",
-        "src/icons/index.tsx",
-        "src/lib/*.ts",
-        "src/ui/*.tsx",
-        "!src/services/postbuild.ts"
-      ],
-      dts: { tsgo: true },
-      external: ["react"],
-      platform: "neutral",
-      fixedExtension: false,
-      target: ["esnext"],
-      format: ["esm"],
-      tsconfig: relative(process.cwd(), "tsconfig.json"),
-      cwd: process.cwd(),
-      clean: true,
-      outDir: "dist",
-      unbundle: true,
-      css: {
-        fileName: "globals.css",
-        inject: false,
-        minify: false,
-        transformer: "postcss"
-      }
-    }) satisfies UserConfig
-);` as const;
-  }
+  return this.handler.tsdownWorkup("ui");
+}
 
   private get deps() {
     return [
@@ -815,17 +491,7 @@ export default defineConfig(
       rootIndex: this.pkgPath("src/index.ts"),
       uiButton: this.pkgPath("src/ui/button.tsx"),
       postbuildService: this.pkgPath("src/services/postbuild.ts"),
-      libUtils: this.pkgPath("src/lib/utils.ts"),
-      iconArrowRight: this.pkgPath("src/icons/arrow-right.tsx"),
-      iconCode: this.pkgPath("src/icons/code.tsx"),
-      iconGithub: this.pkgPath("src/icons/github.tsx"),
-      iconRoot: this.pkgPath("src/icons/index.tsx"),
-      iconLayers: this.pkgPath("src/icons/layers.tsx"),
-      iconMoon: this.pkgPath("src/icons/moon.tsx"),
-      iconsPackage: this.pkgPath("src/icons/package.tsx"),
-      iconsSun: this.pkgPath("src/icons/sun.tsx"),
-      iconsTerminal: this.pkgPath("src/icons/terminal.tsx"),
-      iconsZap: this.pkgPath("src/icons/zap.tsx")
+      libUtils: this.pkgPath("src/lib/utils.ts")
     };
   }
 
@@ -854,16 +520,6 @@ export default defineConfig(
       this.wt("packages/ui/package.json", JSON.stringify(pkgJson, null, 2)),
       this.wt("packages/ui/postcss.config.mjs", this.postcssConfigMjs),
       this.wt("packages/ui/src/globals.css", this.cssTemplate),
-      this.wt("packages/ui/src/icons/arrow-right.tsx", this.arrowRightIcon),
-      this.wt("packages/ui/src/icons/code.tsx", this.codeIcon),
-      this.wt("packages/ui/src/icons/github.tsx", this.githubIconTemplate),
-      this.wt("packages/ui/src/icons/index.tsx", this.iconRoot),
-      this.wt("packages/ui/src/icons/layers.tsx", this.layersIcon),
-      this.wt("packages/ui/src/icons/moon.tsx", this.moonIcon),
-      this.wt("packages/ui/src/icons/package.tsx", this.packageIcon),
-      this.wt("packages/ui/src/icons/sun.tsx", this.sunIcon),
-      this.wt("packages/ui/src/icons/terminal.tsx", this.terminalIcon),
-      this.wt("packages/ui/src/icons/zap.tsx", this.zapIcon),
       this.wt("packages/ui/src/index.ts", this.rootTemplate),
       this.wt("packages/ui/src/lib/utils.ts", this.libUtils),
       this.wt("packages/ui/src/services/postbuild.ts", this.postBuildService),

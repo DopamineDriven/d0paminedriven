@@ -81,7 +81,6 @@
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
     "@types/unist": "catalog:unist",
-    "@typescript/native-preview": "catalog:tsgo",
     "autoprefixer": "catalog:styles",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",

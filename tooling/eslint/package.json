@@ -73,7 +73,6 @@
   },
   "devDependencies": {
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@typescript/native-preview": "catalog:tsgo",
     "@types/node": "catalog:node",
     "eslint": "catalog:eslint",
     "prettier": "catalog:prettier",

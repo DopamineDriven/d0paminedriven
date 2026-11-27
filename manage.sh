@@ -134,6 +134,7 @@ build_targeted() {
         "@d0paminedriven/prettier-config"
         "@d0paminedriven/vitest-config"
         "@d0paminedriven/chess-icons"
+        "@d0paminedriven/icons"
         "@d0paminedriven/iso-3166-1"
         "@d0paminedriven/metadata"
         "@d0paminedriven/motion"

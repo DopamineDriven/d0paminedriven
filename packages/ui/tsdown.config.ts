@@ -2,6 +2,7 @@ import { relative } from "node:path";
 import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
+
 export default defineConfig(
   options =>
     ({
@@ -17,7 +18,7 @@ export default defineConfig(
         "!src/services/icon-workup.ts",
         "!src/services/postbuild.ts"
       ],
-      dts: { tsgo: true },
+      dts: true,
       external: ["react"],
       platform: "neutral",
       fixedExtension: false,
@@ -27,6 +28,7 @@ export default defineConfig(
       cwd: process.cwd(),
       clean: true,
       outDir: "dist",
+      sourcemap: false,
       unbundle: true,
       css: {
         fileName: "globals.css",

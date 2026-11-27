@@ -99,7 +99,7 @@
     "lodash.throttle": "catalog:lodash",
     "motion": "catalog:motion",
     "motion-dom": "catalog:motion",
-    "motion-plus": "https://api.motion.dev/registry.tgz?package=motion-plus&version=2.12.0",
+    "motion-plus": "npm:@motionplus/core@^5.0.0",
     "motion-plus-dom": "catalog:motion",
     "motion-utils": "catalog:motion"
   },
@@ -115,7 +115,6 @@
     "@types/jsdom": "catalog:jsdom",
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
-    "@typescript/native-preview": "catalog:tsgo",
     "autoprefixer": "catalog:styles",
     "clsx": "catalog:clsx",
     "eslint": "catalog:eslint",

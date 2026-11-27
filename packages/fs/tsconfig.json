@@ -1,13 +1,18 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@d0paminedriven/tsconfig/node-pkg.json",
   "compilerOptions": {
     "paths": {
+      "~/*": ["./"],
       "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
     "types": ["*"],
     "rootDir": ".",
+    "lib": ["ESNext", "ES2024", "ES2025.Iterator", "ESNext.Iterator"],
     "outDir": "dist",
+    "declarationMap": false,
+    "sourceMap": false,
     "emitDeclarationOnly": true
   },
   "include": ["**/*.ts"],

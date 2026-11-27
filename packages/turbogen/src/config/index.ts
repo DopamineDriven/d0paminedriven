@@ -1,12 +1,12 @@
 import type { NpmLatest, ToPascalCase } from "@/types/index.ts";
 import { Fs } from "@d0paminedriven/fs";
+import type { TSDownPlatform, TsdownTarget } from "./types.ts";
 
 export class ConfigHandler extends Fs {
   protected m = new Map<keyof typeof this.CATALOG_REGISTRY, string>();
   constructor(public override cwd: string) {
     super((cwd ??= process.cwd()));
   }
-
   protected safeErrMsg(err: unknown) {
     if (err instanceof Error) {
       return err.message;
@@ -153,7 +153,6 @@ minimumReleaseAge: 0
 trustPolicy: "off"
 trustLockfile: true
 blockExoticSubdeps: false
-ignorePatchFailures: true
 dangerouslyAllowAllBuilds: true
 verifyStoreIntegrity: false
 
@@ -175,7 +174,10 @@ catalogs:
     class-variance-authority: ${this.m.get("class-variance-authority")}
   dd:
     "@d0paminedriven/fs": ${this.m.get("@d0paminedriven/fs")}
+    "@d0paminedriven/icons": ${this.m.get("@d0paminedriven/icons")}
+    "@d0paminedriven/mimedown": ${this.m.get("@d0paminedriven/mimedown")}
     "@d0paminedriven/turbogen": ${this.m.get("@d0paminedriven/turbogen")}
+    "@d0paminedriven/type-utils": ${this.m.get("@d0paminedriven/type-utils")}
   dotenv:
     dotenv: ${this.m.get("dotenv")}
     dotenv-cli: ${this.m.get("dotenv-cli")}
@@ -248,8 +250,6 @@ catalogs:
     "@tsdown/css": ${this.m.get("@tsdown/css")}
   tseslint:
     typescript-eslint: ${this.m.get("typescript-eslint")}
-  tsgo:
-    "@typescript/native-preview": ${this.m.get("@typescript/native-preview")}
   tslib:
     tslib: ${this.m.get("tslib")}
   tsx:
@@ -533,7 +533,10 @@ catalogs:
     "@biomejs/biome": "catalog:biome",
     "@changesets/cli": "catalog:utils",
     "@d0paminedriven/fs": "catalog:dd",
+    "@d0paminedriven/icons": "catalog:dd",
+    "@d0paminedriven/mimedown": "catalog:dd",
     "@d0paminedriven/turbogen": "catalog:dd",
+    "@d0paminedriven/type-utils": "catalog:dd",
     "@eslint/compat": "catalog:eslint",
     "@eslint/config-helpers": "catalog:eslint",
     "@eslint/js": "catalog:eslint",
@@ -549,7 +552,7 @@ catalogs:
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
-    "@typescript/native-preview": "catalog:tsgo",
+
     "@vitejs/plugin-react": "catalog:vite",
     "@vitest/coverage-istanbul": "catalog:vitest",
     "@vitest/ui": "catalog:vitest",
@@ -728,7 +731,6 @@ catalogs:
         "*": {
           "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
           "globals.css": ["dist/globals.d.ts"],
-          icons: ["dist/icons/index.d.ts", "dist/icons/*.d.ts"],
           lib: ["dist/lib/*.d.ts"],
           ui: ["dist/ui/*.d.ts"]
         }
@@ -739,7 +741,6 @@ catalogs:
           "*": {
             "*": ["dist/*.d.ts", "dist/*.d.cts", "dist/*/index.d.ts"],
             "globals.css": ["dist/globals.d.ts"],
-            icons: ["dist/icons/index.d.ts", "dist/icons/*.d.ts"],
             lib: ["dist/lib/*.d.ts"],
             ui: ["dist/ui/*.d.ts"]
           }
@@ -751,8 +752,6 @@ catalogs:
       exports: {
         ".": "./dist/index.js",
         "./globals.css": "./dist/globals.css",
-        "./icons": "./dist/icons/index.js",
-        "./icons/*": "./dist/icons/*.js",
         "./lib/*": "./dist/lib/*.js",
         "./ui/*": "./dist/ui/*.js"
       },
@@ -771,5 +770,147 @@ catalogs:
       devDependencies: Object.fromEntries([...localEntries, ...devDepCatalogs]),
       prettier: `@${workspace}/prettier-config`
     };
+  }
+
+  public tsdownWorkup(
+    target:
+      "eslint" | "typescript" | "prettier" | "vitest" | "ui" | "types" | "web"
+  ) {
+    let x = Array.of<string>();
+    let t = Array.of<TsdownTarget>();
+    let p: TSDownPlatform;
+    if (target === "eslint") {
+      t = ["node26"];
+      p = "node";
+      x = ["index.ts", "react.ts", "next.ts", "base.ts"] as const;
+    } else if (target === "prettier") {
+      t = ["node26"];
+      p = "node";
+      x = ["index.ts"] as const;
+    } else if (target === "vitest") {
+      t = ["node26"];
+      p = "node";
+      x = ["index.ts"] as const;
+    } else if (target === "typescript") {
+      t = ["node26"];
+      p = "node";
+      x = [];
+    } else if (target === "types") {
+      t = ["node26"];
+      p = "node";
+      x = ["src/index.ts", "src/utils.ts"] as const;
+    } else if (target === "ui") {
+      p = "neutral";
+      t.push("esnext");
+
+      x.push(
+        "src/globals.css",
+        "src/index.ts",
+        "src/base/*.tsx",
+        "src/hooks/*.ts",
+        "src/lib/*.ts",
+        "src/ui/*.tsx",
+        "!src/services/icon-workup.ts",
+        "!src/services/postbuild.ts"
+      );
+    } else {
+      t.push("node26");
+      p = "node";
+      x.push(
+        "src/globals.css",
+        "src/index.ts",
+        "src/base/*.tsx",
+        "src/hooks/*.ts",
+        "src/lib/*.ts",
+        "src/ui/*.tsx",
+        "!src/services/icon-workup.ts",
+        "!src/services/postbuild.ts"
+       )
+    }
+    const entry = JSON.stringify(x, null, 2);
+    const tar = JSON.stringify(t, null, 2);
+    if (target === "ui") {
+      return `import { arch, platform } from "node:os";
+import { join, relative, resolve } from "node:path";
+import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
+
+const p = platform();
+const a = arch();
+const executable = p === "win32" ? "tsgo.exe" : "tsgo";
+const dirname = \`native-preview-\${p}-\${a}\`;
+
+const path = resolve(
+  join(
+    process.cwd(),
+    \`../../node_modules/@typescript/\${dirname}/lib/\${executable}\`
+  )
+);
+
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: ${entry},
+      cwd: process.cwd(),
+      fixedExtension: false,
+      target: ${tar},
+      external: ["react"],
+      platform: "${p}",
+      dts: { tsgo: { path } },
+      format: ["esm"],
+      sourcemap: false,
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      clean: true,
+      outDir: "dist",
+      unbundle: true,
+      css: {
+        fileName: "globals.css",
+        inject: false,
+        minify: false,
+        transformer: "postcss"
+      }
+    }) satisfies UserConfig,
+);
+`;
+    } else {
+      // prettier-ignore
+      return `import { arch, platform } from "node:os";
+import { join, relative, resolve } from "node:path";
+import type { UserConfig } from "tsdown";
+import { defineConfig } from "tsdown";
+
+const p = platform();
+const a = arch();
+const executable = p === "win32" ? "tsgo.exe" : "tsgo";
+const dirname = \`native-preview-\${p}-\${a}\`;
+
+const path = resolve(
+  join(
+    process.cwd(),
+    \`../../node_modules/@typescript/\${dirname}/lib/\${executable}\`
+  )
+);
+
+export default defineConfig(
+  options =>
+    ({
+      ...options,
+      entry: ${entry},
+      cwd: process.cwd(),
+      fixedExtension: false,
+      target: ${tar},
+      platform: "${p}",
+      dts: { tsgo: { path } },
+      format: ["esm"],
+      sourcemap: false,
+      tsconfig: relative(process.cwd(), "tsconfig.json"),
+      clean: true,
+      outDir: "dist",
+      unbundle: true
+    }) satisfies UserConfig
+);
+` as const;
+    }
   }
 }

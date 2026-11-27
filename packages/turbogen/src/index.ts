@@ -1,5 +1,6 @@
 export { ConfigHandler } from "@/config/index.ts";
 export type {
+  Arrayable,
   BabelPkgs,
   BiomePkgs,
   BuiPkgs,
@@ -10,6 +11,7 @@ export type {
   DDPkgs,
   DotenvPkgs,
   EslintPkgs,
+  Format,
   GeistPkgs,
   GlobPkgs,
   JitiPkgs,
@@ -30,8 +32,11 @@ export type {
   TsEslintPkgs,
   TsPkgs,
   TsdownPkgs,
+  TsdownInputOption,
+  TSDownPlatform,
   TsgoPkgs,
   TslibPkgs,
+  TsdownTarget,
   TsxPkgs,
   TurboPkgs,
   TwPkgs,

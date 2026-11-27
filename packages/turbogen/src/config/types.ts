@@ -212,3 +212,32 @@ export type UnionOfPkgs =
   | VitestPkgs;
 
 export type PkgsRecord = UTR<UnionOfPkgs, "type">;
+export type Format =
+  "cjs" | "commonjs" | "es" | "esm" | "iife" | "module" | "umd";
+export type Arrayable<T> = T | T[];
+export type TsdownInputOption =
+  | string
+  | (string | Record<string, Arrayable<string>>)[]
+  | Record<string, Arrayable<string>>;
+
+export type TsdownTarget =
+  | "esnext"
+  | "es2025"
+  | "es2024"
+  | "es2023"
+  | "es2022"
+  | "es2021"
+  | "es2020"
+  | "es2019"
+  | "es2018"
+  | "es2017"
+  | "es2016"
+  | "es2015"
+  | "es6"
+  | "es5"
+  | "es3"
+  | "node26"
+  | `node${string}`;
+
+
+  export type TSDownPlatform = "browser" | "neutral" | "node";

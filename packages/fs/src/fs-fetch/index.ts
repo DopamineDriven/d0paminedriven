@@ -1,6 +1,9 @@
 import fsSync from "fs";
+import { open, rename } from "fs/promises";
 import { relative } from "path";
+import type { Piece } from "@d0paminedriven/mimedown";
 import { FsTmp } from "@/fs-tmp/index.ts";
+import { sniffFromRanges } from "@d0paminedriven/mimedown";
 
 export class FsFetch extends FsTmp {
   constructor(public cwd: string) {
@@ -107,19 +110,7 @@ export class FsFetch extends FsTmp {
     if (lastDot === -1 || lastDot === pathname.length - 1) return null;
     return pathname.slice(lastDot + 1).toLowerCase();
   }
-  private deriveExt(format: string | null, inputUrl: string) {
-    return (
-      format && format !== "bin"
-        ? format
-        : this.mimeToExt(
-            this.mimeTypeObj[
-              inputUrl.slice(
-                inputUrl.lastIndexOf(".") + 1
-              ) as keyof typeof this.mimeTypeObj
-            ][0]
-          )
-    ) as keyof typeof this.mimeTypeObj;
-  }
+
   private fuzzyExtEquality(a: string, b: string) {
     const aNorm = a.toLowerCase();
     const bNorm = b.toLowerCase();
@@ -130,6 +121,36 @@ export class FsFetch extends FsTmp {
 
     return normalized <= 0.34;
   }
+  private async sniffFile(path: string) {
+    const file = await open(path, "r");
+    try {
+      const { size } = await file.stat();
+      const pieces = Array.of<Piece>();
+      const take = async (offset: number, length: number) => {
+        const bytes = Buffer.alloc(
+          Math.max(0, Math.min(length, size - offset))
+        );
+        const { bytesRead } = await file.read(
+          bytes,
+          0,
+          bytes.byteLength,
+          offset
+        );
+        pieces.push({ offset, bytes: bytes.subarray(0, bytesRead) });
+      };
+      await take(0, 4096);
+      let found = sniffFromRanges(pieces, size, { retryOnUnknown: true });
+      for (let asked = 0; found.needs !== null && asked < 8; asked++) {
+        const { offset, length, fromEnd } = found.needs;
+        await take(fromEnd ? Math.max(0, size - offset) : offset, length);
+        found = sniffFromRanges(pieces, size, { retryOnUnknown: true });
+      }
+      return { ...found, size } as const;
+    } finally {
+      await file.close();
+    }
+  }
+
   /**
    *
    * @param inputUrl remote url to fetch data from
@@ -150,20 +171,58 @@ export class FsFetch extends FsTmp {
   public async fetchRemoteWriteLocalLargeFiles<
     const I extends string,
     const O extends string
-  >(inputUrl: I, outputPathI: O, useDetectedExtension = true) {
+  >(inputUrl: I, outputPathI: O, useDetectedExtension = true, verbose = false) {
     if (!URL.canParse(inputUrl))
       throw new Error(`invalid URL ${inputUrl} is unable to be parsed`);
     try {
-      const meta = await this.extractRemote(inputUrl, 4096 * 48);
+      const res = await fetch(inputUrl);
+      if (!res.ok || !res.body) {
+        throw new Error(
+          `Failed to fetch asset: ${res.status} ${res.statusText}`
+        );
+      }
 
-      const ext = this.deriveExt(meta.format, inputUrl);
-      const size = meta.byteSize ?? 0;
+      // Onto disk first, under a name that says it is not finished.
+      const partial = `${outputPathI}.part`;
+      this.generateDirIfDNE(this.pathHandler(partial), {
+        recursive: true
+      });
+      const writeStream = fsSync.createWriteStream(relative(this.cwd, partial));
+      const { promise, reject, resolve } = Promise.withResolvers();
+      writeStream.on("finish", () => resolve({}));
+      writeStream.on("error", () => reject({}));
+
+      const reader = res.body.getReader();
+      const pump = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          writeStream.write(value);
+        }
+        writeStream.end();
+      };
+
+      await pump();
+      await promise.then(() => {});
+
+      // The bytes are on disk, time to sniff.
+      const { evidence, ext, mime, parser, retry, topLevel, size } =
+        await this.sniffFile(relative(this.cwd, partial));
 
       const { unit, value } = this.autoFileSizeRaw(size);
-
-      console.log(
-        `fetchRemoteWriteLocalLargeFiles extracting a ${ext} file of size ${value} ${unit}`
-      );
+      if (verbose) {
+        console.log({
+          extension: ext,
+          topLevelMime: topLevel,
+          mime,
+          parser,
+          retry,
+          evidence,
+          size: `${value} ${unit}`
+        });
+      }
       let formattedPath: string;
       if (useDetectedExtension) {
         formattedPath = `${outputPathI}.${ext}`;
@@ -183,40 +242,10 @@ export class FsFetch extends FsTmp {
         }
       }
 
-      this.generateDirIfDNE(this.pathHandler(formattedPath), {
-        recursive: true
-      });
-
-      const writeStream = fsSync.createWriteStream(
+      await rename(
+        relative(this.cwd, partial),
         relative(this.cwd, formattedPath)
       );
-
-      const res = await fetch(inputUrl);
-
-      if (!res.ok || !res.body) {
-        throw new Error(`Failed to fetch asset: ${res.statusText}`);
-      }
-
-      const { promise, reject, resolve } = Promise.withResolvers();
-
-      writeStream.on("finish", () => resolve({}));
-      writeStream.on("error", () => reject({}));
-
-      const reader = res.body.getReader();
-
-      const pump = async () => {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) break;
-          writeStream.write(value);
-        }
-        writeStream.end();
-      };
-
-      await pump();
-
-      await promise.then(() => {});
       return;
     } catch (err) {
       console.error(`[fetchRemoteWriteLocalLargeFiles error]:`, err);

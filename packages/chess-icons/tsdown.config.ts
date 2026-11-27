@@ -2,6 +2,7 @@ import { relative } from "node:path";
 import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
+
 export default defineConfig(
   options =>
     ({
@@ -12,7 +13,7 @@ export default defineConfig(
         "src/types/index.ts",
         "!public/**/*"
       ],
-      dts: { tsgo: true },
+      dts: true,
       external: ["react"],
       platform: "neutral",
       fixedExtension: false,

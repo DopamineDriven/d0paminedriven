@@ -87,30 +87,8 @@ export default defineConfig(
 ` as const;
   }
 
-  private get tsdownScaffold() {
-    // prettier-ignore
-    return `import { relative } from "node:path";
-import type { InlineConfig } from "tsdown";
-import { defineConfig } from "tsdown";
-
-export default defineConfig(
-  options =>
-    ({
-      ...options,
-      entry: ["index.ts"],
-      cwd: process.cwd(),
-      target: ["node26"],
-      fixedExtension: false,
-      dts: { tsgo: true },
-      format: ["esm"],
-      sourcemap: true,
-      tsconfig: relative(process.cwd(), "tsconfig.json"),
-      clean: true,
-      outDir: "dist",
-      unbundle: true
-    }) satisfies InlineConfig
-);
-` as const
+  protected get tsdownScaffold() {
+    return this.configHandler.tsdownWorkup("prettier");
   }
 
   private get turboConfig() {
@@ -169,6 +147,8 @@ export default defineConfig(
   "extends": "@${this.workspace}/tsconfig/node-pkg.json",
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "sourceMap": false,
+    "declarationMap": false,
     "types": ["*"]
   },
   "include": ["**/*.ts"],

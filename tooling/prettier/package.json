@@ -44,7 +44,6 @@
   "devDependencies": {
     "@d0paminedriven/eslint-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
-    "@typescript/native-preview": "catalog:tsgo",
     "@types/node": "catalog:node",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",

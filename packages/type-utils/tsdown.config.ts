@@ -1,21 +1,23 @@
 import { relative } from "node:path";
-import type { UserConfig as Options } from "tsdown";
+import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
+
+
 
 export default defineConfig(
   options =>
     ({
       ...options,
-      entry: ["src/index.ts", "src/utils.ts"],
+      entry: ["src/codes.ts", "src/index.ts", "src/symbols.ts", "src/utils.ts"],
       cwd: process.cwd(),
       target: ["node26"],
       fixedExtension: false,
-      dts: { tsgo: true },
+      dts: true,
       format: ["esm"],
-      sourcemap: true,
+      sourcemap: false,
       tsconfig: relative(process.cwd(), "tsconfig.json"),
       clean: true,
       outDir: "dist",
       unbundle: true
-    }) satisfies Options
+    }) satisfies UserConfig
 );

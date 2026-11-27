@@ -206,7 +206,7 @@ export class RootScaffolder {
     "https://json-schema.org/": true,
     "https://docs.renovatebot.com/": true,
     "https://turborepo.org/schema.json": true
-  }
+  },
   "github.copilot.enable": {
     "*": false,
     "plaintext": false,

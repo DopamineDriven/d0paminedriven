@@ -2,6 +2,7 @@ import { relative } from "node:path";
 import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
+
 export default defineConfig(
   options =>
     ({
@@ -9,9 +10,9 @@ export default defineConfig(
       cwd: process.cwd(),
       target: ["node26"],
       fixedExtension: false,
-      dts: { tsgo: true },
+      dts: true,
       format: ["esm"],
-      sourcemap: true,
+      sourcemap: false,
       tsconfig: relative(process.cwd(), "tsconfig.json"),
       clean: true,
       outDir: "dist",

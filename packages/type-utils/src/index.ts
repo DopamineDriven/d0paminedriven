@@ -1,5 +1,6 @@
 export type {
   ArrFieldReplacer,
+  AtLeastOne,
   BigIntOrNumber,
   BigIntKeys,
   CTR,
@@ -10,15 +11,17 @@ export type {
   Equal,
   Expect,
   Extends,
-  FlexiCase,
-  InferGSPRT,
-  InferGSPRTWorkup,
   Include,
   IsExact,
   IsOptional,
   NormalizeAndInject,
+  NumRange,
+  NumUnion,
   OnlyOptional,
   OnlyRequired,
+  Repeat,
+  RepeatRO,
+  Repeater,
   RequireNested,
   RTC,
   Rm,
@@ -27,30 +30,13 @@ export type {
   TCN,
   UTR,
   Unenumerate,
+  ValidAsciiMap,
+  ValidSymbolMap,
   Without,
   XOR
 } from "@/utils.ts";
-
-declare global {
-  interface JSON {
-    parse<T = unknown>(
-      text: string,
-      reviver?: (this: any, key: string, value: any) => any
-    ): T;
-  }
-  interface Body {
-    json<T = unknown>(): Promise<T>;
-  }
-  interface ObjectConstructor {
-    // PropertyKey -> string and number allowed, symbol disallowed (symbol can't be enumerable)
-    keys<T = object>(
-      o: T
-    ): (keyof T extends infer K
-      ? K extends string
-        ? K
-        : K extends number
-          ? `${K}`
-          : never
-      : never)[];
-  }
-}
+export { asciiEpimer } from "@/utils.ts";
+export type { ValidAsciiUnion } from "@/codes.ts";
+export { asciiToSymbol, isValidAscii, validAscii } from "@/codes.ts";
+export type { ValidSymbolUnion } from "@/symbols.ts";
+export { isValidSymbol, symbolToAscii, validSymbol } from "@/symbols.ts";

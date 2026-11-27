@@ -188,57 +188,11 @@ export default defineConfig(
 
   private get tsdownScaffold() {
     // prettier-ignore
-    return `import { relative } from "node:path";
-import type { InlineConfig } from "tsdown";
-import { defineConfig } from "tsdown";
-
-export default defineConfig(
-  options =>
-    ({
-      ...options,
-      entry: ["index.ts"],
-      cwd: process.cwd(),
-      target: ["node26"],
-      fixedExtension: false,
-      dts: { tsgo: true },
-      format: ["esm"],
-      sourcemap: true,
-      tsconfig: relative(process.cwd(), "tsconfig.json"),
-      clean: true,
-      outDir: "dist",
-      unbundle: true
-    }) satisfies InlineConfig
-);
-` as const
+    return this.configHandler.tsdownWorkup("vitest");
   }
 
   private get tsdownDevScaffold() {
-    // prettier-ignore
-    return `import { relative } from "node:path";
-import type { InlineConfig } from "tsdown";
-import { defineConfig } from "tsdown";
-
-export default defineConfig(
-  options =>
-    ({
-      ...options,
-      entry: [
-        "index.ts"
-      ],
-      cwd: process.cwd(),
-      target: ["node26"],
-      fixedExtension: false,
-      dts: { tsgo: true },
-      watch: true,
-      format: ["esm"],
-      sourcemap: true,
-      tsconfig: relative(process.cwd(), "tsconfig.json"),
-      clean: true,
-      outDir: "dist",
-      unbundle: true
-    }) satisfies InlineConfig
-);
-` as const;
+    return this.configHandler.tsdownWorkup("vitest");
   }
 
   private get turboConfig() {
@@ -305,7 +259,9 @@ export default defineConfig(
   "extends": "@${this.workspace}/tsconfig/node-pkg.json",
   "compilerOptions": {
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "types": ["*"]
+    "types": ["*"],
+    "sourceMap": false,
+    "declarationMap": false
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

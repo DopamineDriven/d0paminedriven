@@ -28,7 +28,7 @@ export class FsAtomic extends FsBase {
     return fsSync.mkdirSync(relative(this.cwd, path), options);
   }
 
-  public mkdirSyncAbs<const T extends string>(
+  public mkdirSyncAbs<const T extends readonly string[] = readonly string[]>(
     path: T,
     options: MkDirSyncOptions = { mode: 0o777, recursive: true }
   ) {
