@@ -67,7 +67,6 @@
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "catalog:node",
-    "@typescript/native-preview": "catalog:tsgo",
     "dotenv": "catalog:dotenv",
     "dotenv-cli": "catalog:dotenv",
     "dotenv-expand": "catalog:dotenv",

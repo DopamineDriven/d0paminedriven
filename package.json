@@ -46,7 +46,7 @@
     "@changesets/cli": "catalog:utils",
     "@d0paminedriven/prettier-config": "workspace:*",
     "@types/node": "catalog:node",
-    "@typescript/native-preview": "catalog:tsgo",
+
     "dotenv": "catalog:dotenv",
     "eslint": "catalog:eslint",
     "husky": "catalog:utils",

@@ -131,7 +131,6 @@
     "@inquirer/type": "catalog:inquirer",
     "@types/gradient-string": "catalog:gradient",
     "@types/node": "catalog:node",
-    "@typescript/native-preview": "catalog:tsgo",
     "dotenv-cli": "catalog:dotenv",
     "dotenv-expand": "catalog:dotenv",
     "eslint": "catalog:eslint",

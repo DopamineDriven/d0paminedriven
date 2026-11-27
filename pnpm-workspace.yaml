@@ -32,8 +32,8 @@ catalogs:
   cva:
     class-variance-authority: ^0.7.1
   dd:
-    "@d0paminedriven/fs": ^12.6.0
-    "@d0paminedriven/mimedown": ^0.8.0
+    "@d0paminedriven/fs": ^12.7.0
+    "@d0paminedriven/mimedown": ^0.9.0
     "@d0paminedriven/pdfdown": ^0.20.0
   dotenv:
     dotenv: ^18.0.10
@@ -97,7 +97,7 @@ catalogs:
     next-themes: ^0.4.6
     "@next/eslint-plugin-next": ^16.4.6
   node:
-    "@types/node": ^26.6.10
+    "@types/node": ^26.6.11
     node-html-parser: ^9.0.7
     nodemon: ^3.1.14
   nyc:
@@ -132,11 +132,11 @@ catalogs:
     "@radix-ui/react-tooltip": ^1.4.1
   react:
     "@testing-library/react": ^16.3.3
-    "@types/react": ^19.3.0
+    "@types/react": ^19.3.3
     "@types/react-dom": ^19.3.0
     react: ^19.3.1
     react-dom: ^19.3.1
-    react-resizable-panels: ^4.24.1
+    react-resizable-panels: ^4.24.3
     vaul: ^1.1.2
   redis:
     redis: ^6.4.0
@@ -153,7 +153,7 @@ catalogs:
     remark-parse: ^11.0.0
     remark-rehype: ^11.1.2
   rolldown:
-    rolldown: ^1.3.3
+    rolldown: ^1.3.4
     rolldown-plugin-dts: ^0.30.2
     rolldown-plugin-wasm: ^0.3.2
   sharp:
@@ -173,14 +173,12 @@ catalogs:
   test:
     "@playwright/test": ^1.65.1
   ts:
-    typescript: ^6.0.3
+    typescript: ^7.1.0-beta
   tsdown:
     tsdown: ^0.23.7
     "@tsdown/css": ^0.23.7
   tseslint:
     typescript-eslint: ^8.74.0
-  tsgo:
-    "@typescript/native-preview": ^7.0.0-dev.20260707.2
   tslib:
     tslib: ^2.9.1
   tsx:
@@ -209,16 +207,16 @@ catalogs:
     wait-on: ^9.5.1
   vercel:
     "@vercel/analytics": ^2.0.1
-    "@vercel/functions": ^3.11.3
+    "@vercel/functions": ^3.11.4
   vfile:
     vfile: ^6.0.3
   vite:
     "@vitejs/plugin-react": ^6.3.0
-    vite: ^8.3.8
+    vite: ^8.4.0
   vitest:
-    "@vitest/coverage-istanbul": ^5.1.1
-    "@vitest/ui": ^5.1.1
-    vitest: ^5.1.1
+    "@vitest/coverage-istanbul": ^5.1.2
+    "@vitest/ui": ^5.1.2
+    vitest: ^5.1.2
   yaml:
     yaml: ^2.9.1
 permissions:

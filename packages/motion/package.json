@@ -115,7 +115,6 @@
     "@types/jsdom": "catalog:jsdom",
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
-    "@typescript/native-preview": "catalog:tsgo",
     "autoprefixer": "catalog:styles",
     "clsx": "catalog:clsx",
     "eslint": "catalog:eslint",

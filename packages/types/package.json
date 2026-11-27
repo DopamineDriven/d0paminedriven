@@ -131,7 +131,6 @@
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "catalog:node",
-    "@typescript/native-preview": "catalog:tsgo",
     "dotenv-expand": "catalog:dotenv",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",

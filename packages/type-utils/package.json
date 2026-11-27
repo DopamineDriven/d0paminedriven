@@ -65,7 +65,6 @@
     "@d0paminedriven/prettier-config": "workspace:*",
     "@d0paminedriven/tsconfig": "workspace:*",
     "@types/node": "catalog:node",
-    "@typescript/native-preview": "catalog:tsgo",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",
     "prettier": "catalog:prettier",

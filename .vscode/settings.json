@@ -88,8 +88,6 @@
   "js/ts.locale": "en",
   "js/ts.referencesCodeLens.showOnAllFunctions": true,
   // "typescript.native-preview.trace.server": "messages",
-  "js/ts.experimental.useTsgo": true,
-  "js/ts.tsdk.path": "node_modules/@typescript/native-preview",
   "js/ts.suggest.autoImports": true,
   "js/ts.suggest.enabled": true,
 
@@ -114,16 +112,7 @@
   "workbench.editor.autoLockGroups": {
     "default": false
   },
-  "github.copilot.enable": {
-    "*": false,
-    "plaintext": false,
-    "markdown": false,
-    "scminput": false
-  },
   "python.analysis.enableColorPicker": false,
-  "[sql]": {
-    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
-  },
   "js/ts.implicitProjectConfig.target": "ESNext",
   "js/ts.referencesCodeLens.enabled": true,
   "terminal.integrated.defaultLocation": "view",

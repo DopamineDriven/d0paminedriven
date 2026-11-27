@@ -1,19 +1,7 @@
-import { arch, platform } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { relative } from "node:path";
 import type { UserConfig } from "tsdown";
 import { defineConfig } from "tsdown";
 
-const p = platform();
-const a = arch();
-const executable = p === "win32" ? "tsgo.exe" : "tsgo";
-const dirname = `native-preview-${p}-${a}`;
-
-const path = resolve(
-  join(
-    process.cwd(),
-    `../../node_modules/@typescript/${dirname}/lib/${executable}`
-  )
-);
 
 export default defineConfig(
   options =>
@@ -21,10 +9,10 @@ export default defineConfig(
       ...options,
       entry: ["index.ts"],
       cwd: process.cwd(),
-      target: ["node25"],
+      target: ["node26"],
       fixedExtension: false,
-      dts: { tsgo: { path } },
       watch: true,
+      dts: true,
       format: ["esm"],
       sourcemap: false,
       tsconfig: relative(process.cwd(), "tsconfig.json"),

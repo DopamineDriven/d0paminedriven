@@ -147,7 +147,6 @@
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
-    "@typescript/native-preview": "catalog:tsgo",
     "autoprefixer": "catalog:styles",
     "eslint": "catalog:eslint",
     "jiti": "catalog:jiti",

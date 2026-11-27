@@ -68,7 +68,6 @@
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
-    "@typescript/native-preview": "catalog:tsgo",
     "@vercel/functions": "catalog:vercel",
     "autoprefixer": "catalog:styles",
     "babel-plugin-react-compiler": "catalog:babel",

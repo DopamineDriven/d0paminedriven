@@ -250,8 +250,6 @@ catalogs:
     "@tsdown/css": ${this.m.get("@tsdown/css")}
   tseslint:
     typescript-eslint: ${this.m.get("typescript-eslint")}
-  tsgo:
-    "@typescript/native-preview": ${this.m.get("@typescript/native-preview")}
   tslib:
     tslib: ${this.m.get("tslib")}
   tsx:
@@ -554,7 +552,7 @@ catalogs:
     "@types/node": "catalog:node",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
-    "@typescript/native-preview": "catalog:tsgo",
+
     "@vitejs/plugin-react": "catalog:vite",
     "@vitest/coverage-istanbul": "catalog:vitest",
     "@vitest/ui": "catalog:vitest",
